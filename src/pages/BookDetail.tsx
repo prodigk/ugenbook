@@ -210,7 +210,31 @@ const BookDetail = () => {
             <h1 className="font-serif text-2xl font-bold text-foreground sm:text-3xl">
               {book.title}
             </h1>
-            <p className="mt-1 text-lg text-muted-foreground">{book.author}</p>
+            {user && user.id === book.userId && editingAuthor ? (
+              <div className="mt-1 flex items-center gap-2">
+                <Input
+                  value={authorValue}
+                  onChange={(e) => setAuthorValue(e.target.value)}
+                  placeholder="작가명을 입력하세요"
+                  className="h-8 w-48 text-base"
+                />
+                <Button size="sm" onClick={handleSaveAuthor} disabled={savingAuthor}>
+                  <Check className="h-4 w-4" />
+                </Button>
+                <Button size="sm" variant="ghost" onClick={() => setEditingAuthor(false)}>
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            ) : (
+              <div className="mt-1 flex items-center gap-2">
+                <p className="text-lg text-muted-foreground">{book.author}</p>
+                {user && user.id === book.userId && (
+                  <Button size="sm" variant="ghost" onClick={startEditingAuthor} className="h-6 w-6 p-0">
+                    <Pencil className="h-3 w-3" />
+                  </Button>
+                )}
+              </div>
+            )}
 
             <div className="mt-4 flex flex-wrap gap-2">
               <Badge>{book.category}</Badge>
