@@ -164,15 +164,34 @@ function PaginatedBookList({
                     </Link>
                     <p className="text-xs text-muted-foreground">{book.author}</p>
                   </div>
-                  <Badge variant="secondary" className="shrink-0 text-xs">
-                    {book.category}
-                  </Badge>
-                  <Badge
-                    variant={book.status === "완료" ? "default" : "outline"}
-                    className="shrink-0 text-xs"
-                  >
-                    {book.status}
-                  </Badge>
+                  <BookTagEditor
+                    type="category"
+                    value={book.category}
+                    onUpdate={async (val) => {
+                      try {
+                        await updateBookFields(book.id, { category: val });
+                        onUpdateBooks((prev) =>
+                          prev.map((b) => b.id === book.id ? { ...b, category: val as Book["category"] } : b)
+                        );
+                      } catch (err) {
+                        toast({ title: "카테고리 변경 실패", description: String(err), variant: "destructive" });
+                      }
+                    }}
+                  />
+                  <BookTagEditor
+                    type="status"
+                    value={book.status}
+                    onUpdate={async (val) => {
+                      try {
+                        await updateBookFields(book.id, { status: val });
+                        onUpdateBooks((prev) =>
+                          prev.map((b) => b.id === book.id ? { ...b, status: val as Book["status"] } : b)
+                        );
+                      } catch (err) {
+                        toast({ title: "상태 변경 실패", description: String(err), variant: "destructive" });
+                      }
+                    }}
+                  />
                 </div>
                 <div className="flex items-center gap-1 shrink-0">
                   <Button
