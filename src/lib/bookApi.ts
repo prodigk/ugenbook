@@ -118,6 +118,20 @@ export async function updateBookcover(id: string, bookcover: string): Promise<vo
   if (error) throw error;
 }
 
+export async function checkDuplicateFileNames(
+  userId: string,
+  fileNames: string[]
+): Promise<string[]> {
+  const { data, error } = await supabase
+    .from("books")
+    .select("file_name")
+    .eq("user_id", userId)
+    .in("file_name", fileNames);
+
+  if (error) throw error;
+  return (data || []).map((r) => r.file_name);
+}
+
 export async function updateBookFields(
   id: string,
   fields: { category?: string; status?: string }
