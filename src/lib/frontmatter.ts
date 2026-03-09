@@ -57,16 +57,17 @@ export function parseFrontmatter(raw: string): FrontmatterResult {
   return { data, content };
 }
 
-function inferCategory(tags: string[]): BookCategory {
-  const tagStr = tags.join(" ").toLowerCase();
-  if (tagStr.includes("경제") || tagStr.includes("금융") || tagStr.includes("투자") || tagStr.includes("부")) return "경제";
-  if (tagStr.includes("인문")) return "인문";
-  if (tagStr.includes("사회") || tagStr.includes("정치")) return "사회과학";
-  if (tagStr.includes("커리어") || tagStr.includes("직장") || tagStr.includes("일")) return "커리어";
-  if (tagStr.includes("철학")) return "철학";
-  if (tagStr.includes("자기계발") || tagStr.includes("성장")) return "자기계발";
-  if (tagStr.includes("문학") || tagStr.includes("소설")) return "문학";
-  if (tagStr.includes("과학")) return "과학";
+function inferCategory(title: string, tags: string[], content: string): BookCategory {
+  const combined = [title, ...tags, content.slice(0, 500)].join(" ").toLowerCase();
+  if (combined.includes("경제") || combined.includes("금융") || combined.includes("투자") || combined.includes("돈") || combined.includes("부자") || combined.includes("재테크")) return "경제";
+  if (combined.includes("인문")) return "인문";
+  if (combined.includes("사회") || combined.includes("정치")) return "사회과학";
+  if (combined.includes("커리어") || combined.includes("직장") || combined.includes("취업") || combined.includes("이직")) return "커리어";
+  if (combined.includes("철학")) return "철학";
+  if (combined.includes("자기계발") || combined.includes("성장") || combined.includes("습관") || combined.includes("심리")) return "자기계발";
+  if (combined.includes("문학") || combined.includes("소설") || combined.includes("시집") || combined.includes("에세이")) return "문학";
+  if (combined.includes("과학") || combined.includes("물리") || combined.includes("생물")) return "과학";
+  if (combined.includes("마케팅") || combined.includes("판매") || combined.includes("창업") || combined.includes("사업")) return "커리어";
   return "기타";
 }
 
@@ -83,21 +84,24 @@ export function mdToBook(fileName: string, raw: string): Book {
     (data.title as string) ||
     (data.bookname as string) ||
     fileName
-      .replace(/^@_/, "")
+      .replace(/^@_?/, "")
       .replace(/\.md$/, "")
       .replace(/_/g, " ")
       .trim();
 
+  // Strip leading '@' from title if present
+  const cleanTitle = title.replace(/^@\s*/, "").trim();
+
   const author = (data.author as string) || (data.Author as string) || (data.bookauthor as string) || "미상";
   const bookcover = (data.bookcover as string) || "";
   const status = (data.status as string) === "완료" ? "완료" : "작성중";
-  const category = (data.category as BookCategory) || inferCategory(tags);
+  const category = (data.category as BookCategory) || inferCategory(cleanTitle, tags, content);
 
   const now = new Date().toISOString();
 
   return {
     id: crypto.randomUUID(),
-    title,
+    title: cleanTitle,
     author,
     bookcover,
     tags,
