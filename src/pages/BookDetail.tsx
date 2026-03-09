@@ -1,15 +1,16 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { ArrowLeft, ImageIcon, Check, X, Pencil, Sparkles, Loader2, Heart } from "lucide-react";
+import { ArrowLeft, ImageIcon, Check, X, Pencil, Sparkles, Loader2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { Header } from "@/components/Header";
 import { MarkdownRenderer } from "@/components/MarkdownRenderer";
 import { BlogExportButtons } from "@/components/BlogExportButtons";
+import { BookAdminActions } from "@/components/BookAdminActions";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { fetchBookById, updateBookcover, updateBookFields } from "@/lib/bookApi";
-import { fetchUserLikes, toggleLike } from "@/lib/likesApi";
+import { fetchUserLikes } from "@/lib/likesApi";
 import { useAuth } from "@/contexts/AuthContext";
 import { isAdminEmail } from "@/lib/adminAuth";
 import { toast } from "@/hooks/use-toast";
