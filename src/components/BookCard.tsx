@@ -95,4 +95,4 @@ export const BookCard = memo(function BookCard({ book, index, liked = false, onT
       </div>
     </Link>
   );
-}
+});
