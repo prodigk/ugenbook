@@ -36,7 +36,7 @@ const Admin = () => {
   const [showDuplicateDialog, setShowDuplicateDialog] = useState(false);
 
   useEffect(() => {
-    if (!authLoading && !user) {
+    if (!authLoading && (!user || !isAdminEmail(user.email))) {
       navigate("/login");
     }
   }, [user, authLoading, navigate]);
