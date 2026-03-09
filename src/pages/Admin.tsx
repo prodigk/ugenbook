@@ -1,28 +1,45 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { Trash2, ExternalLink } from "lucide-react";
 import { Header } from "@/components/Header";
 import { FileUpload } from "@/components/FileUpload";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
-import { getBooks, addOrUpdateBook, deleteBook } from "@/lib/bookStore";
-import { mdToBook } from "@/lib/frontmatter";
+import { useAuth } from "@/contexts/AuthContext";
+import { fetchBooks, upsertBookFromMd, deleteBookById } from "@/lib/bookApi";
 import type { Book } from "@/types/book";
 
 const Admin = () => {
-  const [books, setBooks] = useState<Book[]>(() => getBooks());
+  const { user, loading: authLoading } = useAuth();
+  const navigate = useNavigate();
+  const [books, setBooks] = useState<Book[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!authLoading && !user) {
+      navigate("/login");
+    }
+  }, [user, authLoading, navigate]);
+
+  useEffect(() => {
+    fetchBooks()
+      .then(setBooks)
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }, []);
 
   const handleFilesSelected = async (files: File[]) => {
+    if (!user) return;
     setIsProcessing(true);
-    let updatedBooks = getBooks();
 
+    let successCount = 0;
     for (const file of files) {
       try {
         const raw = await file.text();
-        const book = mdToBook(file.name, raw);
-        updatedBooks = addOrUpdateBook(book);
+        await upsertBookFromMd(user.id, file.name, raw);
+        successCount++;
       } catch (err) {
         toast({
           title: `${file.name} 처리 실패`,
@@ -32,19 +49,38 @@ const Admin = () => {
       }
     }
 
-    setBooks(updatedBooks);
+    // Refresh list
+    const updated = await fetchBooks();
+    setBooks(updated);
     setIsProcessing(false);
-    toast({
-      title: `${files.length}개 파일 처리 완료`,
-      description: "도서 목록이 업데이트되었습니다.",
-    });
+    if (successCount > 0) {
+      toast({
+        title: `${successCount}개 파일 처리 완료`,
+        description: "도서 목록이 업데이트되었습니다.",
+      });
+    }
   };
 
-  const handleDelete = (id: string) => {
-    const updated = deleteBook(id);
-    setBooks(updated);
-    toast({ title: "도서가 삭제되었습니다" });
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteBookById(id);
+      setBooks((prev) => prev.filter((b) => b.id !== id));
+      toast({ title: "도서가 삭제되었습니다" });
+    } catch (err) {
+      toast({ title: "삭제 실패", description: String(err), variant: "destructive" });
+    }
   };
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <div className="container py-20 text-center text-muted-foreground">로딩 중...</div>
+      </div>
+    );
+  }
+
+  if (!user) return null;
 
   return (
     <div className="min-h-screen bg-background">
@@ -54,7 +90,6 @@ const Admin = () => {
           도서 관리
         </h1>
 
-        {/* Upload */}
         <section className="mb-8">
           <h2 className="mb-3 font-serif text-lg font-semibold text-foreground">
             마크다운 파일 업로드
@@ -62,12 +97,13 @@ const Admin = () => {
           <FileUpload onFilesSelected={handleFilesSelected} isProcessing={isProcessing} />
         </section>
 
-        {/* Book list */}
         <section>
           <h2 className="mb-3 font-serif text-lg font-semibold text-foreground">
             등록된 도서 ({books.length}권)
           </h2>
-          {books.length === 0 ? (
+          {loading ? (
+            <p className="text-sm text-muted-foreground">불러오는 중...</p>
+          ) : books.length === 0 ? (
             <p className="text-sm text-muted-foreground">등록된 도서가 없습니다.</p>
           ) : (
             <div className="space-y-2">

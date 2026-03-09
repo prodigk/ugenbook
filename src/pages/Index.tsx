@@ -1,21 +1,28 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Header } from "@/components/Header";
 import { BookCard } from "@/components/BookCard";
 import { SearchFilter } from "@/components/SearchFilter";
-import { getBooks } from "@/lib/bookStore";
-import type { BookCategory, BookStatus, SortOption } from "@/types/book";
+import { fetchBooks } from "@/lib/bookApi";
+import type { Book, BookCategory, BookStatus, SortOption } from "@/types/book";
 
 const Index = () => {
-  const [books] = useState(() => getBooks());
+  const [books, setBooks] = useState<Book[]>([]);
+  const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<BookCategory | null>(null);
   const [selectedStatus, setSelectedStatus] = useState<BookStatus | null>(null);
   const [sortOption, setSortOption] = useState<SortOption>("newest");
 
+  useEffect(() => {
+    fetchBooks()
+      .then(setBooks)
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }, []);
+
   const filteredBooks = useMemo(() => {
     let result = books;
 
-    // Search
     if (query.trim()) {
       const q = query.toLowerCase();
       result = result.filter(
@@ -26,17 +33,14 @@ const Index = () => {
       );
     }
 
-    // Category
     if (selectedCategory) {
       result = result.filter((b) => b.category === selectedCategory);
     }
 
-    // Status
     if (selectedStatus) {
       result = result.filter((b) => b.status === selectedStatus);
     }
 
-    // Sort
     result = [...result].sort((a, b) => {
       switch (sortOption) {
         case "newest":
@@ -57,7 +61,6 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       <Header />
       <main className="container py-8">
-        {/* Hero */}
         <div className="mb-8">
           <h1 className="font-serif text-3xl font-bold text-foreground sm:text-4xl">
             서평 아카이브
@@ -67,7 +70,6 @@ const Index = () => {
           </p>
         </div>
 
-        {/* Search & Filter */}
         <SearchFilter
           query={query}
           onQueryChange={setQuery}
@@ -80,8 +82,9 @@ const Index = () => {
           totalCount={filteredBooks.length}
         />
 
-        {/* Book Grid */}
-        {filteredBooks.length > 0 ? (
+        {loading ? (
+          <div className="mt-16 text-center text-muted-foreground">불러오는 중...</div>
+        ) : filteredBooks.length > 0 ? (
           <div className="mt-8 grid grid-cols-2 gap-6 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
             {filteredBooks.map((book, idx) => (
               <BookCard key={book.id} book={book} index={idx} />
