@@ -218,25 +218,23 @@ const BookDetail = () => {
           </div>
 
           <div className="flex-1">
-            <div className="flex items-start gap-3">
-              <h1 className="font-serif text-2xl font-bold text-foreground sm:text-3xl">
-                {book.title}
-              </h1>
-              {isAdminEmail(user?.email) && (
-                <button
-                  onClick={handleToggleLike}
-                  disabled={togglingLike}
-                  className="mt-1 shrink-0 rounded-full p-1.5 transition-colors hover:bg-muted"
-                  aria-label={liked ? "좋아요 취소" : "좋아요"}
-                >
-                  <Heart
-                    className={`h-5 w-5 transition-colors ${
-                      liked ? "fill-destructive text-destructive" : "text-muted-foreground"
-                    }`}
-                  />
-                </button>
-              )}
-            </div>
+            <h1 className="font-serif text-2xl font-bold text-foreground sm:text-3xl">
+              {book.title}
+            </h1>
+            {book.isHidden && (
+              <Badge variant="outline" className="mt-1 text-muted-foreground">숨김</Badge>
+            )}
+            {isAdminEmail(user?.email) && (
+              <div className="mt-2">
+                <BookAdminActions
+                  book={book}
+                  userId={user!.id}
+                  liked={liked}
+                  onLikeChange={setLiked}
+                  onBookChange={setBook}
+                />
+              </div>
+            )}
             {isAdminEmail(user?.email) && editingAuthor ? (
               <div className="mt-1 flex items-center gap-2">
                 <Input
