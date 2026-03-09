@@ -22,6 +22,7 @@ export type Database = {
           created_at: string
           file_name: string
           id: string
+          is_hidden: boolean
           markdown: string
           status: string
           tags: string[] | null
@@ -36,6 +37,7 @@ export type Database = {
           created_at?: string
           file_name: string
           id?: string
+          is_hidden?: boolean
           markdown?: string
           status?: string
           tags?: string[] | null
@@ -50,6 +52,7 @@ export type Database = {
           created_at?: string
           file_name?: string
           id?: string
+          is_hidden?: boolean
           markdown?: string
           status?: string
           tags?: string[] | null
