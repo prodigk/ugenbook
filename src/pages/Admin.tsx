@@ -112,6 +112,7 @@ const Admin = () => {
     } finally {
       if (!duplicateFiles.length) {
         setIsProcessing(false);
+        setUploadProgress({ current: 0, total: 0 });
       }
     }
   };
