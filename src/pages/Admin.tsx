@@ -80,6 +80,8 @@ const Admin = () => {
     if (!user) return;
     setIsProcessing(true);
 
+    let hasDuplicates = false;
+    
     try {
       // Check for duplicates
       const fileNames = files.map((f) => f.name);
@@ -104,13 +106,14 @@ const Admin = () => {
 
       // If there are duplicates, show confirmation dialog
       if (dupes.length > 0) {
+        hasDuplicates = true;
         setDuplicateFiles(dupes);
         setShowDuplicateDialog(true);
       }
     } catch (err) {
       toast({ title: "파일 처리 중 오류", description: String(err), variant: "destructive" });
     } finally {
-      if (!duplicateFiles.length) {
+      if (!hasDuplicates) {
         setIsProcessing(false);
         setUploadProgress({ current: 0, total: 0 });
       }
