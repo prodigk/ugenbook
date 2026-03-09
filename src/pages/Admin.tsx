@@ -47,10 +47,17 @@ const Admin = () => {
       .finally(() => setLoading(false));
   }, []);
 
-  const uploadFiles = async (files: File[]) => {
+  const uploadFiles = async (files: File[], updateProgress = true) => {
     if (!user) return 0;
     let successCount = 0;
-    for (const file of files) {
+    const total = files.length;
+    
+    if (updateProgress) {
+      setUploadProgress({ current: 0, total });
+    }
+
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
       try {
         const raw = await file.text();
         await upsertBookFromMd(user.id, file.name, raw);
@@ -61,6 +68,9 @@ const Admin = () => {
           description: String(err),
           variant: "destructive",
         });
+      }
+      if (updateProgress) {
+        setUploadProgress({ current: i + 1, total });
       }
     }
     return successCount;
