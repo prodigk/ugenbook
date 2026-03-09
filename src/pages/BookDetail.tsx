@@ -71,6 +71,7 @@ async function streamSummary(
 }
 
 const BookDetail = () => {
+  const { user } = useAuth();
   const { id } = useParams<{ id: string }>();
   const [book, setBook] = useState<Book | null>(null);
   const [loading, setLoading] = useState(true);
