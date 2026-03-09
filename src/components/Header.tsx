@@ -20,6 +20,18 @@ export function Header() {
         <div className="flex items-center gap-1">
           {user ? (
             <>
+              {isAdmin && (
+                <Button
+                  variant={location.pathname === "/likes" ? "secondary" : "ghost"}
+                  size="sm"
+                  asChild
+                >
+                  <Link to="/likes">
+                    <Heart className="mr-1.5 h-4 w-4" />
+                    좋아요
+                  </Link>
+                </Button>
+              )}
               <Button
                 variant={location.pathname === "/admin" ? "secondary" : "ghost"}
                 size="sm"

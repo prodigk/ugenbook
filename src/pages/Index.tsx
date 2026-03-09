@@ -3,10 +3,15 @@ import { Header } from "@/components/Header";
 import { BookCard } from "@/components/BookCard";
 import { SearchFilter } from "@/components/SearchFilter";
 import { fetchBooks } from "@/lib/bookApi";
+import { fetchUserLikes } from "@/lib/likesApi";
+import { useAuth } from "@/contexts/AuthContext";
+import { isAdminEmail } from "@/lib/adminAuth";
 import type { Book, BookCategory, BookStatus, SortOption } from "@/types/book";
 
 const Index = () => {
+  const { user } = useAuth();
   const [books, setBooks] = useState<Book[]>([]);
+  const [likedIds, setLikedIds] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<BookCategory | null>(null);
@@ -14,11 +19,31 @@ const Index = () => {
   const [sortOption, setSortOption] = useState<SortOption>("newest");
 
   useEffect(() => {
-    fetchBooks()
-      .then(setBooks)
-      .catch(console.error)
-      .finally(() => setLoading(false));
-  }, []);
+    const load = async () => {
+      try {
+        const allBooks = await fetchBooks();
+        setBooks(allBooks);
+        if (user && isAdminEmail(user.email)) {
+          const ids = await fetchUserLikes(user.id);
+          setLikedIds(new Set(ids));
+        }
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, [user]);
+
+  const handleToggleLike = (bookId: string, newLiked: boolean) => {
+    setLikedIds((prev) => {
+      const next = new Set(prev);
+      if (newLiked) next.add(bookId);
+      else next.delete(bookId);
+      return next;
+    });
+  };
 
   const filteredBooks = useMemo(() => {
     let result = books;
@@ -87,7 +112,13 @@ const Index = () => {
         ) : filteredBooks.length > 0 ? (
           <div className="mt-8 grid grid-cols-2 gap-6 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
             {filteredBooks.map((book, idx) => (
-              <BookCard key={book.id} book={book} index={idx} />
+              <BookCard
+                key={book.id}
+                book={book}
+                index={idx}
+                liked={likedIds.has(book.id)}
+                onToggleLike={handleToggleLike}
+              />
             ))}
           </div>
         ) : (
