@@ -109,6 +109,14 @@ export async function upsertBookFromMd(
   }
 }
 
+export async function updateBookcover(id: string, bookcover: string): Promise<void> {
+  const { error } = await supabase
+    .from("books")
+    .update({ bookcover })
+    .eq("id", id);
+  if (error) throw error;
+}
+
 export async function deleteBookById(id: string): Promise<void> {
   const { error } = await supabase.from("books").delete().eq("id", id);
   if (error) throw error;
