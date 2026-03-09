@@ -83,6 +83,11 @@ const BookDetail = () => {
   const [summary, setSummary] = useState("");
   const [summarizing, setSummarizing] = useState(false);
 
+  // Author editing state
+  const [editingAuthor, setEditingAuthor] = useState(false);
+  const [authorValue, setAuthorValue] = useState("");
+  const [savingAuthor, setSavingAuthor] = useState(false);
+
   useEffect(() => {
     if (!id) return;
     fetchBookById(id)
