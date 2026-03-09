@@ -82,7 +82,11 @@ export function mdToBook(fileName: string, raw: string): Book {
   const title =
     (data.title as string) ||
     (data.bookname as string) ||
-    fileName.replace(/^@_/, "").replace(/\.md$/, "").replace(/_/g, " ");
+    fileName
+      .replace(/^@_/, "")
+      .replace(/\.md$/, "")
+      .replace(/_/g, " ")
+      .trim();
 
   const author = (data.author as string) || (data.Author as string) || (data.bookauthor as string) || "미상";
   const bookcover = (data.bookcover as string) || "";
