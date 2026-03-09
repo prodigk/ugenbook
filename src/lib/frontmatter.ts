@@ -101,7 +101,7 @@ export function mdToBook(fileName: string, raw: string): Book {
 
   return {
     id: crypto.randomUUID(),
-    title,
+    title: cleanTitle,
     author,
     bookcover,
     tags,
