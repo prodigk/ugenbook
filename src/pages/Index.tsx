@@ -1,12 +1,107 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { useState, useMemo } from "react";
+import { Header } from "@/components/Header";
+import { BookCard } from "@/components/BookCard";
+import { SearchFilter } from "@/components/SearchFilter";
+import { getBooks } from "@/lib/bookStore";
+import type { BookCategory, BookStatus, SortOption } from "@/types/book";
 
 const Index = () => {
+  const [books] = useState(() => getBooks());
+  const [query, setQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<BookCategory | null>(null);
+  const [selectedStatus, setSelectedStatus] = useState<BookStatus | null>(null);
+  const [sortOption, setSortOption] = useState<SortOption>("newest");
+
+  const filteredBooks = useMemo(() => {
+    let result = books;
+
+    // Search
+    if (query.trim()) {
+      const q = query.toLowerCase();
+      result = result.filter(
+        (b) =>
+          b.title.toLowerCase().includes(q) ||
+          b.author.toLowerCase().includes(q) ||
+          b.tags.some((t) => t.toLowerCase().includes(q))
+      );
+    }
+
+    // Category
+    if (selectedCategory) {
+      result = result.filter((b) => b.category === selectedCategory);
+    }
+
+    // Status
+    if (selectedStatus) {
+      result = result.filter((b) => b.status === selectedStatus);
+    }
+
+    // Sort
+    result = [...result].sort((a, b) => {
+      switch (sortOption) {
+        case "newest":
+          return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+        case "title":
+          return a.title.localeCompare(b.title, "ko");
+        case "author":
+          return a.author.localeCompare(b.author, "ko");
+        default:
+          return 0;
+      }
+    });
+
+    return result;
+  }, [books, query, selectedCategory, selectedStatus, sortOption]);
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="mb-4 text-4xl font-bold">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
-      </div>
+    <div className="min-h-screen bg-background">
+      <Header />
+      <main className="container py-8">
+        {/* Hero */}
+        <div className="mb-8">
+          <h1 className="font-serif text-3xl font-bold text-foreground sm:text-4xl">
+            서평 아카이브
+          </h1>
+          <p className="mt-2 text-muted-foreground">
+            읽고, 기록하고, 나누는 독서의 여정
+          </p>
+        </div>
+
+        {/* Search & Filter */}
+        <SearchFilter
+          query={query}
+          onQueryChange={setQuery}
+          selectedCategory={selectedCategory}
+          onCategoryChange={setSelectedCategory}
+          selectedStatus={selectedStatus}
+          onStatusChange={setSelectedStatus}
+          sortOption={sortOption}
+          onSortChange={setSortOption}
+          totalCount={filteredBooks.length}
+        />
+
+        {/* Book Grid */}
+        {filteredBooks.length > 0 ? (
+          <div className="mt-8 grid grid-cols-2 gap-6 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+            {filteredBooks.map((book, idx) => (
+              <BookCard key={book.id} book={book} index={idx} />
+            ))}
+          </div>
+        ) : (
+          <div className="mt-16 flex flex-col items-center justify-center text-center">
+            <p className="font-serif text-xl text-muted-foreground">
+              {books.length === 0
+                ? "아직 등록된 도서가 없습니다"
+                : "검색 결과가 없습니다"}
+            </p>
+            {books.length === 0 && (
+              <p className="mt-2 text-sm text-muted-foreground">
+                관리 페이지에서 마크다운 파일을 업로드하여 시작하세요
+              </p>
+            )}
+          </div>
+        )}
+      </main>
     </div>
   );
 };
