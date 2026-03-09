@@ -13,15 +13,35 @@ export function parseFrontmatter(raw: string): FrontmatterResult {
   const content = match[2];
   const data: Record<string, unknown> = {};
 
-  for (const line of yamlBlock.split("\n")) {
+  const lines = yamlBlock.split("\n");
+  let currentKey = "";
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+
+    // Array item (  - value)
+    const arrayMatch = line.match(/^\s+-\s+(.+)$/);
+    if (arrayMatch && currentKey) {
+      if (!Array.isArray(data[currentKey])) {
+        data[currentKey] = [];
+      }
+      (data[currentKey] as string[]).push(arrayMatch[1].trim().replace(/^["']|["']$/g, ""));
+      continue;
+    }
+
     const colonIdx = line.indexOf(":");
     if (colonIdx === -1) continue;
     const key = line.slice(0, colonIdx).trim();
     let value: unknown = line.slice(colonIdx + 1).trim();
 
-    // Handle arrays like [tag1, tag2]
-    if (typeof value === "string" && value.startsWith("[") && value.endsWith("]")) {
-      value = value
+    currentKey = key;
+
+    // Empty value means next lines might be array items
+    if (value === "") continue;
+
+    // Handle inline arrays like [tag1, tag2]
+    if (typeof value === "string" && (value as string).startsWith("[") && (value as string).endsWith("]")) {
+      value = (value as string)
         .slice(1, -1)
         .split(",")
         .map((s) => s.trim().replace(/^["']|["']$/g, ""));
@@ -62,9 +82,13 @@ export function mdToBook(fileName: string, raw: string): Book {
   const title =
     (data.title as string) ||
     (data.bookname as string) ||
-    fileName.replace(/^@_/, "").replace(/\.md$/, "").replace(/_/g, " ");
+    fileName
+      .replace(/^@_/, "")
+      .replace(/\.md$/, "")
+      .replace(/_/g, " ")
+      .trim();
 
-  const author = (data.author as string) || (data.bookauthor as string) || "미상";
+  const author = (data.author as string) || (data.Author as string) || (data.bookauthor as string) || "미상";
   const bookcover = (data.bookcover as string) || "";
   const status = (data.status as string) === "완료" ? "완료" : "작성중";
   const category = (data.category as BookCategory) || inferCategory(tags);
