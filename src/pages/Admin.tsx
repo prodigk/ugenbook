@@ -1,13 +1,21 @@
 import { useState, useEffect, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Trash2, ChevronLeft, ChevronRight } from "lucide-react";
+import { Trash2, ChevronLeft, ChevronRight, AlertTriangle } from "lucide-react";
 import { Header } from "@/components/Header";
 import { FileUpload } from "@/components/FileUpload";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
-import { fetchBooks, upsertBookFromMd, deleteBookById, updateBookFields } from "@/lib/bookApi";
+import { fetchBooks, upsertBookFromMd, deleteBookById, updateBookFields, checkDuplicateFileNames } from "@/lib/bookApi";
 import { BookTagEditor } from "@/components/BookTagEditor";
 import type { Book } from "@/types/book";
 
@@ -17,6 +25,10 @@ const Admin = () => {
   const [books, setBooks] = useState<Book[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [loading, setLoading] = useState(true);
+
+  // Duplicate confirmation state
+  const [duplicateFiles, setDuplicateFiles] = useState<File[]>([]);
+  const [showDuplicateDialog, setShowDuplicateDialog] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -31,10 +43,8 @@ const Admin = () => {
       .finally(() => setLoading(false));
   }, []);
 
-  const handleFilesSelected = async (files: File[]) => {
-    if (!user) return;
-    setIsProcessing(true);
-
+  const uploadFiles = async (files: File[]) => {
+    if (!user) return 0;
     let successCount = 0;
     for (const file of files) {
       try {
@@ -49,17 +59,68 @@ const Admin = () => {
         });
       }
     }
+    return successCount;
+  };
 
-    // Refresh list
+  const handleFilesSelected = async (files: File[]) => {
+    if (!user) return;
+    setIsProcessing(true);
+
+    try {
+      // Check for duplicates
+      const fileNames = files.map((f) => f.name);
+      const existingNames = await checkDuplicateFileNames(user.id, fileNames);
+
+      const newFiles = files.filter((f) => !existingNames.includes(f.name));
+      const dupes = files.filter((f) => existingNames.includes(f.name));
+
+      // Upload new files first
+      let successCount = 0;
+      if (newFiles.length > 0) {
+        successCount = await uploadFiles(newFiles);
+        const updated = await fetchBooks();
+        setBooks(updated);
+        if (successCount > 0) {
+          toast({
+            title: `${successCount}개 신규 파일 업로드 완료`,
+            description: "도서 목록이 업데이트되었습니다.",
+          });
+        }
+      }
+
+      // If there are duplicates, show confirmation dialog
+      if (dupes.length > 0) {
+        setDuplicateFiles(dupes);
+        setShowDuplicateDialog(true);
+      }
+    } catch (err) {
+      toast({ title: "파일 처리 중 오류", description: String(err), variant: "destructive" });
+    } finally {
+      if (!duplicateFiles.length) {
+        setIsProcessing(false);
+      }
+    }
+  };
+
+  const handleConfirmDuplicates = async () => {
+    setShowDuplicateDialog(false);
+    const count = await uploadFiles(duplicateFiles);
     const updated = await fetchBooks();
     setBooks(updated);
+    setDuplicateFiles([]);
     setIsProcessing(false);
-    if (successCount > 0) {
+    if (count > 0) {
       toast({
-        title: `${successCount}개 파일 처리 완료`,
-        description: "도서 목록이 업데이트되었습니다.",
+        title: `${count}개 중복 파일 업데이트 완료`,
+        description: "기존 도서가 최신 내용으로 업데이트되었습니다.",
       });
     }
+  };
+
+  const handleCancelDuplicates = () => {
+    setShowDuplicateDialog(false);
+    setDuplicateFiles([]);
+    setIsProcessing(false);
   };
 
   const handleDelete = async (id: string) => {
