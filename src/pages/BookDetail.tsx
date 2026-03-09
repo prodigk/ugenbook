@@ -252,7 +252,7 @@ const BookDetail = () => {
             </div>
 
             {/* Bookcover URL display & edit - only visible to owner */}
-            {user && user.id === book.userId && (
+            {isAdminEmail(user?.email) && (
               <div className="mt-4 rounded-md border bg-muted/50 p-3">
                 <div className="flex items-center gap-2 text-sm font-medium text-foreground">
                   <ImageIcon className="h-4 w-4" />
