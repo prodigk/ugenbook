@@ -15,6 +15,7 @@ type DbBook = {
   file_name: string;
   created_at: string;
   updated_at: string;
+  is_hidden: boolean;
 };
 
 function dbToBook(row: DbBook): Book {
@@ -31,6 +32,7 @@ function dbToBook(row: DbBook): Book {
     fileName: row.file_name,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
+    isHidden: row.is_hidden,
   };
 }
 
@@ -134,7 +136,7 @@ export async function checkDuplicateFileNames(
 
 export async function updateBookFields(
   id: string,
-  fields: { category?: string; status?: string; author?: string }
+  fields: { category?: string; status?: string; author?: string; is_hidden?: boolean }
 ): Promise<void> {
   const { error } = await supabase
     .from("books")
