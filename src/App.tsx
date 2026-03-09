@@ -9,6 +9,7 @@ import Index from "./pages/Index";
 import BookDetail from "./pages/BookDetail";
 import Admin from "./pages/Admin";
 import Login from "./pages/Login";
+import Likes from "./pages/Likes";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
