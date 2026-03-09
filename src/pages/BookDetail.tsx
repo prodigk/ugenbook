@@ -102,6 +102,24 @@ const BookDetail = () => {
       .finally(() => setLoading(false));
   }, [id]);
 
+  useEffect(() => {
+    if (!id || !user || !isAdminEmail(user.email)) return;
+    fetchUserLikes(user.id).then((ids) => setLiked(ids.includes(id)));
+  }, [id, user]);
+
+  const handleToggleLike = async () => {
+    if (!book || !user || togglingLike) return;
+    setTogglingLike(true);
+    try {
+      await toggleLike(user.id, book.id, liked);
+      setLiked(!liked);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setTogglingLike(false);
+    }
+  };
+
   const handleSaveCover = async () => {
     if (!book) return;
     setSaving(true);
