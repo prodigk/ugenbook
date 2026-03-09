@@ -32,6 +32,7 @@ function dbToBook(row: DbBook): Book {
     fileName: row.file_name,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
+    isHidden: row.is_hidden,
   };
 }
 
