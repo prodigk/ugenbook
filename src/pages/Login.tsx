@@ -28,9 +28,10 @@ const Login = () => {
 
     if (error) {
       toast({ title: "오류", description: error.message, variant: "destructive" });
-    } else if (isSignUp) {
-      toast({ title: "가입 완료", description: "이메일을 확인해주세요." });
     } else {
+      if (isSignUp) {
+        toast({ title: "가입 완료", description: "로그인되었습니다." });
+      }
       navigate("/admin");
     }
   };
