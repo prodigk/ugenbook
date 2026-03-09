@@ -231,9 +231,25 @@ const BookDetail = () => {
           </div>
 
           <div className="flex-1">
-            <h1 className="font-serif text-2xl font-bold text-foreground sm:text-3xl">
-              {book.title}
-            </h1>
+            <div className="flex items-start gap-3">
+              <h1 className="font-serif text-2xl font-bold text-foreground sm:text-3xl">
+                {book.title}
+              </h1>
+              {isAdminEmail(user?.email) && (
+                <button
+                  onClick={handleToggleLike}
+                  disabled={togglingLike}
+                  className="mt-1 shrink-0 rounded-full p-1.5 transition-colors hover:bg-muted"
+                  aria-label={liked ? "좋아요 취소" : "좋아요"}
+                >
+                  <Heart
+                    className={`h-5 w-5 transition-colors ${
+                      liked ? "fill-destructive text-destructive" : "text-muted-foreground"
+                    }`}
+                  />
+                </button>
+              )}
+            </div>
             {isAdminEmail(user?.email) && editingAuthor ? (
               <div className="mt-1 flex items-center gap-2">
                 <Input
