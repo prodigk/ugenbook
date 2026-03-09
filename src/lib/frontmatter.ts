@@ -84,15 +84,18 @@ export function mdToBook(fileName: string, raw: string): Book {
     (data.title as string) ||
     (data.bookname as string) ||
     fileName
-      .replace(/^@_/, "")
+      .replace(/^@_?/, "")
       .replace(/\.md$/, "")
       .replace(/_/g, " ")
       .trim();
 
+  // Strip leading '@' from title if present
+  const cleanTitle = title.replace(/^@\s*/, "").trim();
+
   const author = (data.author as string) || (data.Author as string) || (data.bookauthor as string) || "미상";
   const bookcover = (data.bookcover as string) || "";
   const status = (data.status as string) === "완료" ? "완료" : "작성중";
-  const category = (data.category as BookCategory) || inferCategory(tags);
+  const category = (data.category as BookCategory) || inferCategory(cleanTitle, tags, content);
 
   const now = new Date().toISOString();
 
