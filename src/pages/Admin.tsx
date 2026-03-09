@@ -110,10 +110,12 @@ function PaginatedBookList({
   books,
   loading,
   onDelete,
+  onUpdateBooks,
 }: {
   books: Book[];
   loading: boolean;
   onDelete: (id: string) => void;
+  onUpdateBooks: React.Dispatch<React.SetStateAction<Book[]>>;
 }) {
   const [page, setPage] = useState(1);
   const totalPages = Math.max(1, Math.ceil(books.length / ITEMS_PER_PAGE));
