@@ -20,6 +20,7 @@ type DbBook = {
 function dbToBook(row: DbBook): Book {
   return {
     id: row.id,
+    userId: row.user_id,
     title: row.title,
     author: row.author,
     bookcover: row.bookcover || "",
