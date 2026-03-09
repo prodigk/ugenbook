@@ -116,6 +116,26 @@ const BookDetail = () => {
     setEditingCover(true);
   };
 
+  const startEditingAuthor = () => {
+    setAuthorValue(book?.author || "");
+    setEditingAuthor(true);
+  };
+
+  const handleSaveAuthor = async () => {
+    if (!book) return;
+    setSavingAuthor(true);
+    try {
+      await updateBookFields(book.id, { author: authorValue });
+      setBook({ ...book, author: authorValue });
+      setEditingAuthor(false);
+      toast({ title: "작가 정보가 업데이트되었습니다." });
+    } catch (e) {
+      toast({ title: "업데이트 실패", description: String(e), variant: "destructive" });
+    } finally {
+      setSavingAuthor(false);
+    }
+  };
+
   const handleSummarize = async () => {
     if (!book || summarizing) return;
     setSummarizing(true);
