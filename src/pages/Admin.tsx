@@ -171,6 +171,22 @@ const Admin = () => {
             마크다운 파일 업로드
           </h2>
           <FileUpload onFilesSelected={handleFilesSelected} isProcessing={isProcessing} />
+          
+          {/* Upload progress bar */}
+          {isProcessing && uploadProgress.total > 0 && (
+            <div className="mt-4 space-y-2">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">업로드 진행 중...</span>
+                <span className="font-medium text-foreground">
+                  {uploadProgress.current} / {uploadProgress.total}
+                </span>
+              </div>
+              <Progress 
+                value={(uploadProgress.current / uploadProgress.total) * 100} 
+                className="h-2"
+              />
+            </div>
+          )}
         </section>
 
         <PaginatedBookList books={books} loading={loading} onDelete={handleDelete} onUpdateBooks={setBooks} />
