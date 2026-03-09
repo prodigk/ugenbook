@@ -90,6 +90,10 @@ const BookDetail = () => {
   const [authorValue, setAuthorValue] = useState("");
   const [savingAuthor, setSavingAuthor] = useState(false);
 
+  // Like state
+  const [liked, setLiked] = useState(false);
+  const [togglingLike, setTogglingLike] = useState(false);
+
   useEffect(() => {
     if (!id) return;
     fetchBookById(id)
