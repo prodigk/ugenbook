@@ -64,7 +64,7 @@ export function mdToBook(fileName: string, raw: string): Book {
     (data.bookname as string) ||
     fileName.replace(/^@_/, "").replace(/\.md$/, "").replace(/_/g, " ");
 
-  const author = (data.author as string) || (data.bookauthor as string) || "미상";
+  const author = (data.author as string) || (data.Author as string) || (data.bookauthor as string) || "미상";
   const bookcover = (data.bookcover as string) || "";
   const status = (data.status as string) === "완료" ? "완료" : "작성중";
   const category = (data.category as BookCategory) || inferCategory(tags);
