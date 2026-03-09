@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { fetchBookById, updateBookcover, updateBookFields } from "@/lib/bookApi";
 import { useAuth } from "@/contexts/AuthContext";
+import { isAdminEmail } from "@/lib/adminAuth";
 import { toast } from "@/hooks/use-toast";
 import type { Book } from "@/types/book";
 
@@ -210,7 +211,7 @@ const BookDetail = () => {
             <h1 className="font-serif text-2xl font-bold text-foreground sm:text-3xl">
               {book.title}
             </h1>
-            {user && user.id === book.userId && editingAuthor ? (
+            {isAdminEmail(user?.email) && editingAuthor ? (
               <div className="mt-1 flex items-center gap-2">
                 <Input
                   value={authorValue}
@@ -228,7 +229,7 @@ const BookDetail = () => {
             ) : (
               <div className="mt-1 flex items-center gap-2">
                 <p className="text-lg text-muted-foreground">{book.author}</p>
-                {user && user.id === book.userId && (
+                {isAdminEmail(user?.email) && (
                   <Button size="sm" variant="ghost" onClick={startEditingAuthor} className="h-6 w-6 p-0">
                     <Pencil className="h-3 w-3" />
                   </Button>
@@ -251,7 +252,7 @@ const BookDetail = () => {
             </div>
 
             {/* Bookcover URL display & edit - only visible to owner */}
-            {user && user.id === book.userId && (
+            {isAdminEmail(user?.email) && (
               <div className="mt-4 rounded-md border bg-muted/50 p-3">
                 <div className="flex items-center gap-2 text-sm font-medium text-foreground">
                   <ImageIcon className="h-4 w-4" />
