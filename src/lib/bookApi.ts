@@ -118,6 +118,17 @@ export async function updateBookcover(id: string, bookcover: string): Promise<vo
   if (error) throw error;
 }
 
+export async function updateBookFields(
+  id: string,
+  fields: { category?: string; status?: string }
+): Promise<void> {
+  const { error } = await supabase
+    .from("books")
+    .update(fields)
+    .eq("id", id);
+  if (error) throw error;
+}
+
 export async function deleteBookById(id: string): Promise<void> {
   const { error } = await supabase.from("books").delete().eq("id", id);
   if (error) throw error;
