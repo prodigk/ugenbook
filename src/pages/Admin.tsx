@@ -97,68 +97,124 @@ const Admin = () => {
           <FileUpload onFilesSelected={handleFilesSelected} isProcessing={isProcessing} />
         </section>
 
-        <section>
-          <h2 className="mb-3 font-serif text-lg font-semibold text-foreground">
-            등록된 도서 ({books.length}권)
-          </h2>
-          {loading ? (
-            <p className="text-sm text-muted-foreground">불러오는 중...</p>
-          ) : books.length === 0 ? (
-            <p className="text-sm text-muted-foreground">등록된 도서가 없습니다.</p>
-          ) : (
-            <div className="space-y-2">
-              {books.map((book) => (
-                <div
-                  key={book.id}
-                  className="flex items-center justify-between rounded-lg border bg-card p-3"
-                >
-                  <div className="flex items-center gap-3 min-w-0">
-                    {book.bookcover && (
-                      <img
-                        src={book.bookcover}
-                        alt=""
-                        className="h-12 w-8 rounded object-cover shrink-0"
-                      />
-                    )}
-                    <div className="min-w-0">
-                      <p className="truncate text-sm font-medium text-foreground">
-                        {book.title}
-                      </p>
-                      <p className="text-xs text-muted-foreground">{book.author}</p>
-                    </div>
-                    <Badge variant="secondary" className="shrink-0 text-xs">
-                      {book.category}
-                    </Badge>
-                    <Badge
-                      variant={book.status === "완료" ? "default" : "outline"}
-                      className="shrink-0 text-xs"
-                    >
-                      {book.status}
-                    </Badge>
-                  </div>
-                  <div className="flex items-center gap-1 shrink-0">
-                    <Button variant="ghost" size="icon" asChild>
-                      <Link to={`/book/${book.id}`}>
-                        <ExternalLink className="h-4 w-4" />
-                      </Link>
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handleDelete(book.id)}
-                      className="text-destructive hover:text-destructive"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </section>
+        <PaginatedBookList books={books} loading={loading} onDelete={handleDelete} />
       </main>
     </div>
   );
 };
+
+const ITEMS_PER_PAGE = 20;
+
+function PaginatedBookList({
+  books,
+  loading,
+  onDelete,
+}: {
+  books: Book[];
+  loading: boolean;
+  onDelete: (id: string) => void;
+}) {
+  const [page, setPage] = useState(1);
+  const totalPages = Math.max(1, Math.ceil(books.length / ITEMS_PER_PAGE));
+
+  // Reset to page 1 if books change and current page is out of range
+  useEffect(() => {
+    if (page > totalPages) setPage(1);
+  }, [books.length, totalPages, page]);
+
+  const paginatedBooks = useMemo(
+    () => books.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE),
+    [books, page]
+  );
+
+  return (
+    <section>
+      <h2 className="mb-3 font-serif text-lg font-semibold text-foreground">
+        등록된 도서 ({books.length}권)
+      </h2>
+      {loading ? (
+        <p className="text-sm text-muted-foreground">불러오는 중...</p>
+      ) : books.length === 0 ? (
+        <p className="text-sm text-muted-foreground">등록된 도서가 없습니다.</p>
+      ) : (
+        <>
+          <div className="space-y-2">
+            {paginatedBooks.map((book) => (
+              <div
+                key={book.id}
+                className="flex items-center justify-between rounded-lg border bg-card p-3"
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  {book.bookcover && (
+                    <img
+                      src={book.bookcover}
+                      alt=""
+                      className="h-12 w-8 rounded object-cover shrink-0"
+                    />
+                  )}
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-medium text-foreground">
+                      {book.title}
+                    </p>
+                    <p className="text-xs text-muted-foreground">{book.author}</p>
+                  </div>
+                  <Badge variant="secondary" className="shrink-0 text-xs">
+                    {book.category}
+                  </Badge>
+                  <Badge
+                    variant={book.status === "완료" ? "default" : "outline"}
+                    className="shrink-0 text-xs"
+                  >
+                    {book.status}
+                  </Badge>
+                </div>
+                <div className="flex items-center gap-1 shrink-0">
+                  <Button variant="ghost" size="icon" asChild>
+                    <Link to={`/book/${book.id}`}>
+                      <ExternalLink className="h-4 w-4" />
+                    </Link>
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => onDelete(book.id)}
+                    className="text-destructive hover:text-destructive"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="mt-4 flex items-center justify-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={page === 1}
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <span className="text-sm text-muted-foreground">
+                {page} / {totalPages}
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                disabled={page === totalPages}
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+          )}
+        </>
+      )}
+    </section>
+  );
+}
 
 export default Admin;
