@@ -7,7 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
-import { fetchBooks, upsertBookFromMd, deleteBookById } from "@/lib/bookApi";
+import { fetchBooks, upsertBookFromMd, deleteBookById, updateBookFields } from "@/lib/bookApi";
+import { BookTagEditor } from "@/components/BookTagEditor";
 import type { Book } from "@/types/book";
 
 const Admin = () => {
