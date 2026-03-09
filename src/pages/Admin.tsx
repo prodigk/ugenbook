@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Trash2, ExternalLink, ChevronLeft, ChevronRight } from "lucide-react";
+import { Trash2, ChevronLeft, ChevronRight } from "lucide-react";
 import { Header } from "@/components/Header";
 import { FileUpload } from "@/components/FileUpload";
 import { Badge } from "@/components/ui/badge";
@@ -153,9 +153,12 @@ function PaginatedBookList({
                     />
                   )}
                   <div className="min-w-0">
-                    <p className="truncate text-sm font-medium text-foreground">
+                    <Link
+                      to={`/book/${book.id}`}
+                      className="truncate text-sm font-medium text-foreground hover:text-primary hover:underline"
+                    >
                       {book.title}
-                    </p>
+                    </Link>
                     <p className="text-xs text-muted-foreground">{book.author}</p>
                   </div>
                   <Badge variant="secondary" className="shrink-0 text-xs">
@@ -169,11 +172,6 @@ function PaginatedBookList({
                   </Badge>
                 </div>
                 <div className="flex items-center gap-1 shrink-0">
-                  <Button variant="ghost" size="icon" asChild>
-                    <Link to={`/book/${book.id}`}>
-                      <ExternalLink className="h-4 w-4" />
-                    </Link>
-                  </Button>
                   <Button
                     variant="ghost"
                     size="icon"
@@ -189,31 +187,84 @@ function PaginatedBookList({
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <div className="mt-4 flex items-center justify-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
-                disabled={page === 1}
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </Button>
-              <span className="text-sm text-muted-foreground">
-                {page} / {totalPages}
-              </span>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                disabled={page === totalPages}
-              >
-                <ChevronRight className="h-4 w-4" />
-              </Button>
-            </div>
+            <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
           )}
         </>
       )}
     </section>
+  );
+}
+
+const PAGES_VISIBLE = 10;
+
+function Pagination({
+  page,
+  totalPages,
+  onPageChange,
+}: {
+  page: number;
+  totalPages: number;
+  onPageChange: (p: number) => void;
+}) {
+  // Calculate visible page range (up to 10 pages)
+  const startPage = Math.max(1, Math.min(page - Math.floor(PAGES_VISIBLE / 2), totalPages - PAGES_VISIBLE + 1));
+  const endPage = Math.min(totalPages, startPage + PAGES_VISIBLE - 1);
+  const pages = Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i);
+
+  return (
+    <div className="mt-4 flex items-center justify-center gap-1">
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={() => onPageChange(Math.max(1, page - 1))}
+        disabled={page === 1}
+        className="text-xs"
+      >
+        <ChevronLeft className="h-4 w-4 mr-1" />
+        이전
+      </Button>
+
+      {startPage > 1 && (
+        <>
+          <Button variant="ghost" size="sm" onClick={() => onPageChange(1)} className="h-8 w-8 p-0 text-xs">
+            1
+          </Button>
+          {startPage > 2 && <span className="px-1 text-muted-foreground text-xs">…</span>}
+        </>
+      )}
+
+      {pages.map((p) => (
+        <Button
+          key={p}
+          variant={p === page ? "default" : "ghost"}
+          size="sm"
+          onClick={() => onPageChange(p)}
+          className="h-8 w-8 p-0 text-xs"
+        >
+          {p}
+        </Button>
+      ))}
+
+      {endPage < totalPages && (
+        <>
+          {endPage < totalPages - 1 && <span className="px-1 text-muted-foreground text-xs">…</span>}
+          <Button variant="ghost" size="sm" onClick={() => onPageChange(totalPages)} className="h-8 w-8 p-0 text-xs">
+            {totalPages}
+          </Button>
+        </>
+      )}
+
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={() => onPageChange(Math.min(totalPages, page + 1))}
+        disabled={page === totalPages}
+        className="text-xs"
+      >
+        다음
+        <ChevronRight className="h-4 w-4 ml-1" />
+      </Button>
+    </div>
   );
 }
 
