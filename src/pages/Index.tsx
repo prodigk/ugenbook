@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { Header } from "@/components/Header";
 import { BookCard } from "@/components/BookCard";
 import { SearchFilter } from "@/components/SearchFilter";
@@ -36,14 +36,14 @@ const Index = () => {
     load();
   }, [user]);
 
-  const handleToggleLike = (bookId: string, newLiked: boolean) => {
+  const handleToggleLike = useCallback((bookId: string, newLiked: boolean) => {
     setLikedIds((prev) => {
       const next = new Set(prev);
       if (newLiked) next.add(bookId);
       else next.delete(bookId);
       return next;
     });
-  };
+  }, []);
 
   const filteredBooks = useMemo(() => {
     let result = books;

@@ -1,3 +1,4 @@
+import { memo, useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Heart } from "lucide-react";
 import type { Book } from "@/types/book";
@@ -5,7 +6,6 @@ import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
 import { isAdminEmail } from "@/lib/adminAuth";
 import { toggleLike } from "@/lib/likesApi";
-import { useState } from "react";
 
 interface BookCardProps {
   book: Book;
@@ -14,11 +14,14 @@ interface BookCardProps {
   onToggleLike?: (bookId: string, newLiked: boolean) => void;
 }
 
-export function BookCard({ book, index, liked = false, onToggleLike }: BookCardProps) {
+export const BookCard = memo(function BookCard({ book, index, liked = false, onToggleLike }: BookCardProps) {
   const { user } = useAuth();
   const isAdmin = isAdminEmail(user?.email);
   const [isLiked, setIsLiked] = useState(liked);
   const [toggling, setToggling] = useState(false);
+
+  // Sync with parent prop
+  useEffect(() => { setIsLiked(liked); }, [liked]);
 
   const handleLike = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -92,4 +95,4 @@ export function BookCard({ book, index, liked = false, onToggleLike }: BookCardP
       </div>
     </Link>
   );
-}
+});
