@@ -98,7 +98,7 @@ const Admin = () => {
           <FileUpload onFilesSelected={handleFilesSelected} isProcessing={isProcessing} />
         </section>
 
-        <PaginatedBookList books={books} loading={loading} onDelete={handleDelete} />
+        <PaginatedBookList books={books} loading={loading} onDelete={handleDelete} onUpdateBooks={setBooks} />
       </main>
     </div>
   );
