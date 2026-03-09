@@ -1,8 +1,9 @@
 import { Link, useLocation } from "react-router-dom";
-import { BookOpen, Settings, LogIn, LogOut } from "lucide-react";
+import { BookOpen, Settings, Heart, LogIn, LogOut } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
+import { isAdminEmail } from "@/lib/adminAuth";
 
 export function Header() {
   const location = useLocation();
