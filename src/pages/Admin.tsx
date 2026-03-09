@@ -153,9 +153,12 @@ function PaginatedBookList({
                     />
                   )}
                   <div className="min-w-0">
-                    <p className="truncate text-sm font-medium text-foreground">
+                    <Link
+                      to={`/book/${book.id}`}
+                      className="truncate text-sm font-medium text-foreground hover:text-primary hover:underline"
+                    >
                       {book.title}
-                    </p>
+                    </Link>
                     <p className="text-xs text-muted-foreground">{book.author}</p>
                   </div>
                   <Badge variant="secondary" className="shrink-0 text-xs">
@@ -169,11 +172,6 @@ function PaginatedBookList({
                   </Badge>
                 </div>
                 <div className="flex items-center gap-1 shrink-0">
-                  <Button variant="ghost" size="icon" asChild>
-                    <Link to={`/book/${book.id}`}>
-                      <ExternalLink className="h-4 w-4" />
-                    </Link>
-                  </Button>
                   <Button
                     variant="ghost"
                     size="icon"
@@ -189,27 +187,7 @@ function PaginatedBookList({
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <div className="mt-4 flex items-center justify-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
-                disabled={page === 1}
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </Button>
-              <span className="text-sm text-muted-foreground">
-                {page} / {totalPages}
-              </span>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                disabled={page === totalPages}
-              >
-                <ChevronRight className="h-4 w-4" />
-              </Button>
-            </div>
+            <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
           )}
         </>
       )}
