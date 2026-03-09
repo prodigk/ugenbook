@@ -8,6 +8,7 @@ import { isAdminEmail } from "@/lib/adminAuth";
 export function Header() {
   const location = useLocation();
   const { user, signOut } = useAuth();
+  const isAdmin = isAdminEmail(user?.email);
 
   return (
     <header className="sticky top-0 z-50 border-b bg-background/80 backdrop-blur-md">
