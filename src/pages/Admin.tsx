@@ -137,6 +137,7 @@ const Admin = () => {
     setShowDuplicateDialog(false);
     setDuplicateFiles([]);
     setIsProcessing(false);
+    setUploadProgress({ current: 0, total: 0 });
   };
 
   const handleDelete = async (id: string) => {
