@@ -211,7 +211,7 @@ const BookDetail = () => {
             <h1 className="font-serif text-2xl font-bold text-foreground sm:text-3xl">
               {book.title}
             </h1>
-            {user && user.id === book.userId && editingAuthor ? (
+            {isAdminEmail(user?.email) && editingAuthor ? (
               <div className="mt-1 flex items-center gap-2">
                 <Input
                   value={authorValue}
