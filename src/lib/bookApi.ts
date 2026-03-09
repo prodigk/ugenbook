@@ -15,6 +15,7 @@ type DbBook = {
   file_name: string;
   created_at: string;
   updated_at: string;
+  is_hidden: boolean;
 };
 
 function dbToBook(row: DbBook): Book {
