@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { ArrowLeft, ImageIcon, Check, X, Pencil } from "lucide-react";
+import { ArrowLeft, ImageIcon, Check, X, Pencil, Sparkles, Loader2 } from "lucide-react";
+import ReactMarkdown from "react-markdown";
 import { Header } from "@/components/Header";
 import { MarkdownRenderer } from "@/components/MarkdownRenderer";
 import { BlogExportButtons } from "@/components/BlogExportButtons";
@@ -11,6 +12,63 @@ import { fetchBookById, updateBookcover } from "@/lib/bookApi";
 import { toast } from "@/hooks/use-toast";
 import type { Book } from "@/types/book";
 
+const SUMMARIZE_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/summarize-book`;
+
+async function streamSummary(
+  book: Book,
+  onDelta: (text: string) => void,
+  onDone: () => void
+) {
+  const resp = await fetch(SUMMARIZE_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+    },
+    body: JSON.stringify({
+      title: book.title,
+      author: book.author,
+      markdown: book.markdown,
+    }),
+  });
+
+  if (!resp.ok || !resp.body) {
+    const err = await resp.json().catch(() => ({ error: "요약 생성 실패" }));
+    throw new Error(err.error || "요약 생성 실패");
+  }
+
+  const reader = resp.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = "";
+  let streamDone = false;
+
+  while (!streamDone) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+
+    let newlineIndex: number;
+    while ((newlineIndex = buffer.indexOf("\n")) !== -1) {
+      let line = buffer.slice(0, newlineIndex);
+      buffer = buffer.slice(newlineIndex + 1);
+      if (line.endsWith("\r")) line = line.slice(0, -1);
+      if (line.startsWith(":") || line.trim() === "") continue;
+      if (!line.startsWith("data: ")) continue;
+      const jsonStr = line.slice(6).trim();
+      if (jsonStr === "[DONE]") { streamDone = true; break; }
+      try {
+        const parsed = JSON.parse(jsonStr);
+        const content = parsed.choices?.[0]?.delta?.content;
+        if (content) onDelta(content);
+      } catch {
+        buffer = line + "\n" + buffer;
+        break;
+      }
+    }
+  }
+  onDone();
+}
+
 const BookDetail = () => {
   const { id } = useParams<{ id: string }>();
   const [book, setBook] = useState<Book | null>(null);
@@ -18,6 +76,10 @@ const BookDetail = () => {
   const [editingCover, setEditingCover] = useState(false);
   const [coverUrl, setCoverUrl] = useState("");
   const [saving, setSaving] = useState(false);
+
+  // AI Summary state
+  const [summary, setSummary] = useState("");
+  const [summarizing, setSummarizing] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -45,6 +107,26 @@ const BookDetail = () => {
   const startEditing = () => {
     setCoverUrl(book?.bookcover || "");
     setEditingCover(true);
+  };
+
+  const handleSummarize = async () => {
+    if (!book || summarizing) return;
+    setSummarizing(true);
+    setSummary("");
+    let accumulated = "";
+    try {
+      await streamSummary(
+        book,
+        (chunk) => {
+          accumulated += chunk;
+          setSummary(accumulated);
+        },
+        () => setSummarizing(false)
+      );
+    } catch (e) {
+      toast({ title: "요약 실패", description: String(e), variant: "destructive" });
+      setSummarizing(false);
+    }
   };
 
   if (loading) {
@@ -153,11 +235,38 @@ const BookDetail = () => {
               )}
             </div>
 
-            <div className="mt-4">
+            <div className="mt-4 flex flex-wrap gap-2">
               <BlogExportButtons book={book} />
+              <Button
+                onClick={handleSummarize}
+                disabled={summarizing}
+                variant="outline"
+                size="sm"
+              >
+                {summarizing ? (
+                  <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
+                ) : (
+                  <Sparkles className="mr-1.5 h-4 w-4" />
+                )}
+                AI 요약
+              </Button>
             </div>
           </div>
         </div>
+
+        {/* AI Summary section */}
+        {(summary || summarizing) && (
+          <div className="mb-8 rounded-lg border border-primary/20 bg-primary/5 p-6">
+            <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-primary">
+              <Sparkles className="h-4 w-4" />
+              AI 요약
+              {summarizing && <Loader2 className="h-3 w-3 animate-spin" />}
+            </div>
+            <div className="prose prose-sm max-w-none text-foreground">
+              <ReactMarkdown>{summary}</ReactMarkdown>
+            </div>
+          </div>
+        )}
 
         <div className="rounded-lg border bg-card p-6 sm:p-8">
           <MarkdownRenderer content={book.markdown} />
