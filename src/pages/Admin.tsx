@@ -161,6 +161,34 @@ const Admin = () => {
 
         <PaginatedBookList books={books} loading={loading} onDelete={handleDelete} onUpdateBooks={setBooks} />
       </main>
+
+      {/* Duplicate confirmation dialog */}
+      <Dialog open={showDuplicateDialog} onOpenChange={(open) => { if (!open) handleCancelDuplicates(); }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-amber-500" />
+              중복 파일 발견
+            </DialogTitle>
+            <DialogDescription>
+              다음 {duplicateFiles.length}개 파일이 이미 등록되어 있습니다. 최신 내용으로 업데이트하시겠습니까?
+            </DialogDescription>
+          </DialogHeader>
+          <div className="max-h-48 overflow-y-auto space-y-1 rounded-md border bg-muted p-3">
+            {duplicateFiles.map((f) => (
+              <p key={f.name} className="text-sm text-foreground">📄 {f.name}</p>
+            ))}
+          </div>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button variant="outline" onClick={handleCancelDuplicates}>
+              건너뛰기
+            </Button>
+            <Button onClick={handleConfirmDuplicates}>
+              업데이트
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
