@@ -8,7 +8,7 @@ import { BlogExportButtons } from "@/components/BlogExportButtons";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { fetchBookById, updateBookcover } from "@/lib/bookApi";
+import { fetchBookById, updateBookcover, updateBookFields } from "@/lib/bookApi";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/hooks/use-toast";
 import type { Book } from "@/types/book";
@@ -83,6 +83,11 @@ const BookDetail = () => {
   const [summary, setSummary] = useState("");
   const [summarizing, setSummarizing] = useState(false);
 
+  // Author editing state
+  const [editingAuthor, setEditingAuthor] = useState(false);
+  const [authorValue, setAuthorValue] = useState("");
+  const [savingAuthor, setSavingAuthor] = useState(false);
+
   useEffect(() => {
     if (!id) return;
     fetchBookById(id)
@@ -109,6 +114,26 @@ const BookDetail = () => {
   const startEditing = () => {
     setCoverUrl(book?.bookcover || "");
     setEditingCover(true);
+  };
+
+  const startEditingAuthor = () => {
+    setAuthorValue(book?.author || "");
+    setEditingAuthor(true);
+  };
+
+  const handleSaveAuthor = async () => {
+    if (!book) return;
+    setSavingAuthor(true);
+    try {
+      await updateBookFields(book.id, { author: authorValue });
+      setBook({ ...book, author: authorValue });
+      setEditingAuthor(false);
+      toast({ title: "작가 정보가 업데이트되었습니다." });
+    } catch (e) {
+      toast({ title: "업데이트 실패", description: String(e), variant: "destructive" });
+    } finally {
+      setSavingAuthor(false);
+    }
   };
 
   const handleSummarize = async () => {
@@ -185,7 +210,31 @@ const BookDetail = () => {
             <h1 className="font-serif text-2xl font-bold text-foreground sm:text-3xl">
               {book.title}
             </h1>
-            <p className="mt-1 text-lg text-muted-foreground">{book.author}</p>
+            {user && user.id === book.userId && editingAuthor ? (
+              <div className="mt-1 flex items-center gap-2">
+                <Input
+                  value={authorValue}
+                  onChange={(e) => setAuthorValue(e.target.value)}
+                  placeholder="작가명을 입력하세요"
+                  className="h-8 w-48 text-base"
+                />
+                <Button size="sm" onClick={handleSaveAuthor} disabled={savingAuthor}>
+                  <Check className="h-4 w-4" />
+                </Button>
+                <Button size="sm" variant="ghost" onClick={() => setEditingAuthor(false)}>
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            ) : (
+              <div className="mt-1 flex items-center gap-2">
+                <p className="text-lg text-muted-foreground">{book.author}</p>
+                {user && user.id === book.userId && (
+                  <Button size="sm" variant="ghost" onClick={startEditingAuthor} className="h-6 w-6 p-0">
+                    <Pencil className="h-3 w-3" />
+                  </Button>
+                )}
+              </div>
+            )}
 
             <div className="mt-4 flex flex-wrap gap-2">
               <Badge>{book.category}</Badge>
