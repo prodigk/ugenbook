@@ -46,7 +46,8 @@ const Index = () => {
   }, []);
 
   const filteredBooks = useMemo(() => {
-    let result = books;
+    const isAdmin = user && isAdminEmail(user.email);
+    let result = isAdmin ? books : books.filter((b) => !b.isHidden);
 
     if (query.trim()) {
       const q = query.toLowerCase();
