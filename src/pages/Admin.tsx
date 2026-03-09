@@ -195,4 +195,77 @@ function PaginatedBookList({
   );
 }
 
+const PAGES_VISIBLE = 10;
+
+function Pagination({
+  page,
+  totalPages,
+  onPageChange,
+}: {
+  page: number;
+  totalPages: number;
+  onPageChange: (p: number) => void;
+}) {
+  // Calculate visible page range (up to 10 pages)
+  const startPage = Math.max(1, Math.min(page - Math.floor(PAGES_VISIBLE / 2), totalPages - PAGES_VISIBLE + 1));
+  const endPage = Math.min(totalPages, startPage + PAGES_VISIBLE - 1);
+  const pages = Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i);
+
+  return (
+    <div className="mt-4 flex items-center justify-center gap-1">
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={() => onPageChange(Math.max(1, page - 1))}
+        disabled={page === 1}
+        className="text-xs"
+      >
+        <ChevronLeft className="h-4 w-4 mr-1" />
+        이전
+      </Button>
+
+      {startPage > 1 && (
+        <>
+          <Button variant="ghost" size="sm" onClick={() => onPageChange(1)} className="h-8 w-8 p-0 text-xs">
+            1
+          </Button>
+          {startPage > 2 && <span className="px-1 text-muted-foreground text-xs">…</span>}
+        </>
+      )}
+
+      {pages.map((p) => (
+        <Button
+          key={p}
+          variant={p === page ? "default" : "ghost"}
+          size="sm"
+          onClick={() => onPageChange(p)}
+          className="h-8 w-8 p-0 text-xs"
+        >
+          {p}
+        </Button>
+      ))}
+
+      {endPage < totalPages && (
+        <>
+          {endPage < totalPages - 1 && <span className="px-1 text-muted-foreground text-xs">…</span>}
+          <Button variant="ghost" size="sm" onClick={() => onPageChange(totalPages)} className="h-8 w-8 p-0 text-xs">
+            {totalPages}
+          </Button>
+        </>
+      )}
+
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={() => onPageChange(Math.min(totalPages, page + 1))}
+        disabled={page === totalPages}
+        className="text-xs"
+      >
+        다음
+        <ChevronRight className="h-4 w-4 ml-1" />
+      </Button>
+    </div>
+  );
+}
+
 export default Admin;
