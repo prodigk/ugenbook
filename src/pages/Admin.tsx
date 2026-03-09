@@ -7,7 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
-import { fetchBooks, upsertBookFromMd, deleteBookById } from "@/lib/bookApi";
+import { fetchBooks, upsertBookFromMd, deleteBookById, updateBookFields } from "@/lib/bookApi";
+import { BookTagEditor } from "@/components/BookTagEditor";
 import type { Book } from "@/types/book";
 
 const Admin = () => {
@@ -97,7 +98,7 @@ const Admin = () => {
           <FileUpload onFilesSelected={handleFilesSelected} isProcessing={isProcessing} />
         </section>
 
-        <PaginatedBookList books={books} loading={loading} onDelete={handleDelete} />
+        <PaginatedBookList books={books} loading={loading} onDelete={handleDelete} onUpdateBooks={setBooks} />
       </main>
     </div>
   );
@@ -109,10 +110,12 @@ function PaginatedBookList({
   books,
   loading,
   onDelete,
+  onUpdateBooks,
 }: {
   books: Book[];
   loading: boolean;
   onDelete: (id: string) => void;
+  onUpdateBooks: React.Dispatch<React.SetStateAction<Book[]>>;
 }) {
   const [page, setPage] = useState(1);
   const totalPages = Math.max(1, Math.ceil(books.length / ITEMS_PER_PAGE));
@@ -161,15 +164,34 @@ function PaginatedBookList({
                     </Link>
                     <p className="text-xs text-muted-foreground">{book.author}</p>
                   </div>
-                  <Badge variant="secondary" className="shrink-0 text-xs">
-                    {book.category}
-                  </Badge>
-                  <Badge
-                    variant={book.status === "완료" ? "default" : "outline"}
-                    className="shrink-0 text-xs"
-                  >
-                    {book.status}
-                  </Badge>
+                  <BookTagEditor
+                    type="category"
+                    value={book.category}
+                    onUpdate={async (val) => {
+                      try {
+                        await updateBookFields(book.id, { category: val });
+                        onUpdateBooks((prev) =>
+                          prev.map((b) => b.id === book.id ? { ...b, category: val as Book["category"] } : b)
+                        );
+                      } catch (err) {
+                        toast({ title: "카테고리 변경 실패", description: String(err), variant: "destructive" });
+                      }
+                    }}
+                  />
+                  <BookTagEditor
+                    type="status"
+                    value={book.status}
+                    onUpdate={async (val) => {
+                      try {
+                        await updateBookFields(book.id, { status: val });
+                        onUpdateBooks((prev) =>
+                          prev.map((b) => b.id === book.id ? { ...b, status: val as Book["status"] } : b)
+                        );
+                      } catch (err) {
+                        toast({ title: "상태 변경 실패", description: String(err), variant: "destructive" });
+                      }
+                    }}
+                  />
                 </div>
                 <div className="flex items-center gap-1 shrink-0">
                   <Button
