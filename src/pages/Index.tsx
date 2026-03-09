@@ -63,7 +63,7 @@ const Index = () => {
       <main className="container py-8">
         <div className="mb-8">
           <h1 className="font-serif text-3xl font-bold text-foreground sm:text-4xl">
-            서평 아카이브
+            UGEN 책장
           </h1>
           <p className="mt-2 text-muted-foreground">
             읽고, 기록하고, 나누는 독서의 여정

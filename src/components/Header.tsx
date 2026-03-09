@@ -13,7 +13,7 @@ export function Header() {
       <div className="container flex h-14 items-center justify-between">
         <Link to="/" className="flex items-center gap-2">
           <BookOpen className="h-5 w-5 text-primary" />
-          <span className="font-serif text-lg font-semibold text-foreground">서평 아카이브</span>
+          <span className="font-serif text-lg font-semibold text-foreground">UGEN 책장</span>
         </Link>
         <div className="flex items-center gap-1">
           {user ? (
