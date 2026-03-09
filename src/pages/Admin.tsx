@@ -124,6 +124,7 @@ const Admin = () => {
     setBooks(updated);
     setDuplicateFiles([]);
     setIsProcessing(false);
+    setUploadProgress({ current: 0, total: 0 });
     if (count > 0) {
       toast({
         title: `${count}개 중복 파일 업데이트 완료`,
