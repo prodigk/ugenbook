@@ -4,6 +4,7 @@ import { Trash2, ChevronLeft, ChevronRight, AlertTriangle } from "lucide-react";
 import { Header } from "@/components/Header";
 import { FileUpload } from "@/components/FileUpload";
 import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -26,6 +27,9 @@ const Admin = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [loading, setLoading] = useState(true);
 
+  // Progress tracking
+  const [uploadProgress, setUploadProgress] = useState({ current: 0, total: 0 });
+
   // Duplicate confirmation state
   const [duplicateFiles, setDuplicateFiles] = useState<File[]>([]);
   const [showDuplicateDialog, setShowDuplicateDialog] = useState(false);
@@ -43,10 +47,17 @@ const Admin = () => {
       .finally(() => setLoading(false));
   }, []);
 
-  const uploadFiles = async (files: File[]) => {
+  const uploadFiles = async (files: File[], updateProgress = true) => {
     if (!user) return 0;
     let successCount = 0;
-    for (const file of files) {
+    const total = files.length;
+    
+    if (updateProgress) {
+      setUploadProgress({ current: 0, total });
+    }
+
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
       try {
         const raw = await file.text();
         await upsertBookFromMd(user.id, file.name, raw);
@@ -58,6 +69,9 @@ const Admin = () => {
           variant: "destructive",
         });
       }
+      if (updateProgress) {
+        setUploadProgress({ current: i + 1, total });
+      }
     }
     return successCount;
   };
@@ -66,6 +80,8 @@ const Admin = () => {
     if (!user) return;
     setIsProcessing(true);
 
+    let hasDuplicates = false;
+    
     try {
       // Check for duplicates
       const fileNames = files.map((f) => f.name);
@@ -90,14 +106,16 @@ const Admin = () => {
 
       // If there are duplicates, show confirmation dialog
       if (dupes.length > 0) {
+        hasDuplicates = true;
         setDuplicateFiles(dupes);
         setShowDuplicateDialog(true);
       }
     } catch (err) {
       toast({ title: "파일 처리 중 오류", description: String(err), variant: "destructive" });
     } finally {
-      if (!duplicateFiles.length) {
+      if (!hasDuplicates) {
         setIsProcessing(false);
+        setUploadProgress({ current: 0, total: 0 });
       }
     }
   };
@@ -109,6 +127,7 @@ const Admin = () => {
     setBooks(updated);
     setDuplicateFiles([]);
     setIsProcessing(false);
+    setUploadProgress({ current: 0, total: 0 });
     if (count > 0) {
       toast({
         title: `${count}개 중복 파일 업데이트 완료`,
@@ -121,6 +140,7 @@ const Admin = () => {
     setShowDuplicateDialog(false);
     setDuplicateFiles([]);
     setIsProcessing(false);
+    setUploadProgress({ current: 0, total: 0 });
   };
 
   const handleDelete = async (id: string) => {
@@ -157,6 +177,22 @@ const Admin = () => {
             마크다운 파일 업로드
           </h2>
           <FileUpload onFilesSelected={handleFilesSelected} isProcessing={isProcessing} />
+          
+          {/* Upload progress bar */}
+          {isProcessing && uploadProgress.total > 0 && (
+            <div className="mt-4 space-y-2">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">업로드 진행 중...</span>
+                <span className="font-medium text-foreground">
+                  {uploadProgress.current} / {uploadProgress.total}
+                </span>
+              </div>
+              <Progress 
+                value={(uploadProgress.current / uploadProgress.total) * 100} 
+                className="h-2"
+              />
+            </div>
+          )}
         </section>
 
         <PaginatedBookList books={books} loading={loading} onDelete={handleDelete} onUpdateBooks={setBooks} />
@@ -167,7 +203,7 @@ const Admin = () => {
         <DialogContent>
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-amber-500" />
+              <AlertTriangle className="h-5 w-5 text-destructive" />
               중복 파일 발견
             </DialogTitle>
             <DialogDescription>
