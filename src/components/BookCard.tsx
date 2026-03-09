@@ -1,13 +1,42 @@
 import { Link } from "react-router-dom";
+import { Heart } from "lucide-react";
 import type { Book } from "@/types/book";
 import { Badge } from "@/components/ui/badge";
+import { useAuth } from "@/contexts/AuthContext";
+import { isAdminEmail } from "@/lib/adminAuth";
+import { toggleLike } from "@/lib/likesApi";
+import { useState } from "react";
 
 interface BookCardProps {
   book: Book;
   index: number;
+  liked?: boolean;
+  onToggleLike?: (bookId: string, newLiked: boolean) => void;
 }
 
-export function BookCard({ book, index }: BookCardProps) {
+export function BookCard({ book, index, liked = false, onToggleLike }: BookCardProps) {
+  const { user } = useAuth();
+  const isAdmin = isAdminEmail(user?.email);
+  const [isLiked, setIsLiked] = useState(liked);
+  const [toggling, setToggling] = useState(false);
+
+  const handleLike = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!user || toggling) return;
+    setToggling(true);
+    try {
+      await toggleLike(user.id, book.id, isLiked);
+      const newLiked = !isLiked;
+      setIsLiked(newLiked);
+      onToggleLike?.(book.id, newLiked);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setToggling(false);
+    }
+  };
+
   return (
     <Link
       to={`/book/${book.id}`}
@@ -15,7 +44,7 @@ export function BookCard({ book, index }: BookCardProps) {
       style={{ animationDelay: `${index * 60}ms` }}
     >
       <div className="animate-fade-in opacity-0">
-        <div className="aspect-[2/3] overflow-hidden rounded-lg bg-muted mb-3">
+        <div className="relative aspect-[2/3] overflow-hidden rounded-lg bg-muted mb-3">
           {book.bookcover ? (
             <img
               src={book.bookcover}
@@ -29,6 +58,21 @@ export function BookCard({ book, index }: BookCardProps) {
                 {book.title}
               </span>
             </div>
+          )}
+          {isAdmin && (
+            <button
+              onClick={handleLike}
+              className="absolute top-2 right-2 z-10 rounded-full bg-background/80 p-1.5 backdrop-blur-sm transition-colors hover:bg-background"
+              aria-label={isLiked ? "좋아요 취소" : "좋아요"}
+            >
+              <Heart
+                className={`h-4 w-4 transition-colors ${
+                  isLiked
+                    ? "fill-destructive text-destructive"
+                    : "text-muted-foreground"
+                }`}
+              />
+            </button>
           )}
         </div>
         <h3 className="font-serif text-base font-semibold leading-tight text-foreground line-clamp-2">

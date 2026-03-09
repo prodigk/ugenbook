@@ -1,12 +1,14 @@
 import { Link, useLocation } from "react-router-dom";
-import { BookOpen, Settings, LogIn, LogOut } from "lucide-react";
+import { BookOpen, Settings, Heart, LogIn, LogOut } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
+import { isAdminEmail } from "@/lib/adminAuth";
 
 export function Header() {
   const location = useLocation();
   const { user, signOut } = useAuth();
+  const isAdmin = isAdminEmail(user?.email);
 
   return (
     <header className="sticky top-0 z-50 border-b bg-background/80 backdrop-blur-md">
@@ -18,6 +20,18 @@ export function Header() {
         <div className="flex items-center gap-1">
           {user ? (
             <>
+              {isAdmin && (
+                <Button
+                  variant={location.pathname === "/likes" ? "secondary" : "ghost"}
+                  size="sm"
+                  asChild
+                >
+                  <Link to="/likes">
+                    <Heart className="mr-1.5 h-4 w-4" />
+                    좋아요
+                  </Link>
+                </Button>
+              )}
               <Button
                 variant={location.pathname === "/admin" ? "secondary" : "ghost"}
                 size="sm"
