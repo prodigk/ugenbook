@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { fetchBookById, updateBookcover, updateBookFields } from "@/lib/bookApi";
+import { fetchUserLikes, toggleLike } from "@/lib/likesApi";
 import { useAuth } from "@/contexts/AuthContext";
 import { isAdminEmail } from "@/lib/adminAuth";
 import { toast } from "@/hooks/use-toast";
