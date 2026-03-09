@@ -29,13 +29,20 @@ export function BookTagEditor({ type, value, onUpdate }: BookTagEditorProps) {
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Badge
-          variant={type === "status" && value === "완료" ? "default" : value === "작성중" ? "outline" : "secondary"}
-          className="cursor-pointer shrink-0 text-xs gap-1"
+        <button
+          type="button"
+          className={cn(
+            "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors cursor-pointer shrink-0 gap-1",
+            type === "status" && value === "완료"
+              ? "border-transparent bg-primary text-primary-foreground"
+              : value === "작성중"
+                ? "text-foreground border-border"
+                : "border-transparent bg-secondary text-secondary-foreground"
+          )}
         >
           {value}
           <ChevronDown className="h-3 w-3 opacity-60" />
-        </Badge>
+        </button>
       </PopoverTrigger>
       <PopoverContent className="w-36 p-1" align="start">
         <div className="flex flex-col">
