@@ -229,7 +229,7 @@ const BookDetail = () => {
             ) : (
               <div className="mt-1 flex items-center gap-2">
                 <p className="text-lg text-muted-foreground">{book.author}</p>
-                {user && user.id === book.userId && (
+                {isAdminEmail(user?.email) && (
                   <Button size="sm" variant="ghost" onClick={startEditingAuthor} className="h-6 w-6 p-0">
                     <Pencil className="h-3 w-3" />
                   </Button>
