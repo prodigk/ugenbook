@@ -93,7 +93,6 @@ const BookDetail = () => {
 
   // Like state
   const [liked, setLiked] = useState(false);
-  const [togglingLike, setTogglingLike] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -107,19 +106,6 @@ const BookDetail = () => {
     if (!id || !user || !isAdminEmail(user.email)) return;
     fetchUserLikes(user.id).then((ids) => setLiked(ids.includes(id)));
   }, [id, user]);
-
-  const handleToggleLike = async () => {
-    if (!book || !user || togglingLike) return;
-    setTogglingLike(true);
-    try {
-      await toggleLike(user.id, book.id, liked);
-      setLiked(!liked);
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setTogglingLike(false);
-    }
-  };
 
   const handleSaveCover = async () => {
     if (!book) return;
