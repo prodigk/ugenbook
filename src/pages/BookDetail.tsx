@@ -8,7 +8,7 @@ import { BlogExportButtons } from "@/components/BlogExportButtons";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { fetchBookById, updateBookcover } from "@/lib/bookApi";
+import { fetchBookById, updateBookcover, updateBookFields } from "@/lib/bookApi";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/hooks/use-toast";
 import type { Book } from "@/types/book";
