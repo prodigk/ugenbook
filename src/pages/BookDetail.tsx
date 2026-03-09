@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { fetchBookById, updateBookcover } from "@/lib/bookApi";
+import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/hooks/use-toast";
 import type { Book } from "@/types/book";
 
@@ -70,6 +71,7 @@ async function streamSummary(
 }
 
 const BookDetail = () => {
+  const { user } = useAuth();
   const { id } = useParams<{ id: string }>();
   const [book, setBook] = useState<Book | null>(null);
   const [loading, setLoading] = useState(true);
@@ -199,41 +201,43 @@ const BookDetail = () => {
               최종 수정: {new Date(book.updatedAt).toLocaleDateString("ko-KR")}
             </div>
 
-            {/* Bookcover URL display & edit */}
-            <div className="mt-4 rounded-md border bg-muted/50 p-3">
-              <div className="flex items-center gap-2 text-sm font-medium text-foreground">
-                <ImageIcon className="h-4 w-4" />
-                표지 이미지
+            {/* Bookcover URL display & edit - only visible to owner */}
+            {user && user.id === book.userId && (
+              <div className="mt-4 rounded-md border bg-muted/50 p-3">
+                <div className="flex items-center gap-2 text-sm font-medium text-foreground">
+                  <ImageIcon className="h-4 w-4" />
+                  표지 이미지
+                </div>
+                {editingCover ? (
+                  <div className="mt-2 flex gap-2">
+                    <Input
+                      value={coverUrl}
+                      onChange={(e) => setCoverUrl(e.target.value)}
+                      placeholder="이미지 URL을 입력하세요"
+                      className="flex-1 text-sm"
+                    />
+                    <Button size="sm" onClick={handleSaveCover} disabled={saving}>
+                      <Check className="h-4 w-4" />
+                    </Button>
+                    <Button size="sm" variant="ghost" onClick={() => setEditingCover(false)}>
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="mt-1.5 flex items-center gap-2">
+                    {book.bookcover ? (
+                      <p className="flex-1 truncate text-xs text-muted-foreground">{book.bookcover}</p>
+                    ) : (
+                      <p className="flex-1 text-xs text-destructive">표지이미지 업데이트 필요</p>
+                    )}
+                    <Button size="sm" variant="outline" onClick={startEditing} className="shrink-0">
+                      <Pencil className="mr-1 h-3 w-3" />
+                      {book.bookcover ? "수정" : "추가"}
+                    </Button>
+                  </div>
+                )}
               </div>
-              {editingCover ? (
-                <div className="mt-2 flex gap-2">
-                  <Input
-                    value={coverUrl}
-                    onChange={(e) => setCoverUrl(e.target.value)}
-                    placeholder="이미지 URL을 입력하세요"
-                    className="flex-1 text-sm"
-                  />
-                  <Button size="sm" onClick={handleSaveCover} disabled={saving}>
-                    <Check className="h-4 w-4" />
-                  </Button>
-                  <Button size="sm" variant="ghost" onClick={() => setEditingCover(false)}>
-                    <X className="h-4 w-4" />
-                  </Button>
-                </div>
-              ) : (
-                <div className="mt-1.5 flex items-center gap-2">
-                  {book.bookcover ? (
-                    <p className="flex-1 truncate text-xs text-muted-foreground">{book.bookcover}</p>
-                  ) : (
-                    <p className="flex-1 text-xs text-destructive">표지이미지 업데이트 필요</p>
-                  )}
-                  <Button size="sm" variant="outline" onClick={startEditing} className="shrink-0">
-                    <Pencil className="mr-1 h-3 w-3" />
-                    {book.bookcover ? "수정" : "추가"}
-                  </Button>
-                </div>
-              )}
-            </div>
+            )}
 
             <div className="mt-4 flex flex-wrap gap-2">
               <BlogExportButtons book={book} />
