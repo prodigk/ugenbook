@@ -45,14 +45,14 @@ export function FileUpload({ onFilesSelected, isProcessing }: FileUploadProps) {
 
   return (
     <div className="space-y-4">
-      <div
+      <label
         onDragOver={(e) => {
           e.preventDefault();
           setDragOver(true);
         }}
         onDragLeave={() => setDragOver(false)}
         onDrop={handleDrop}
-        className={`flex flex-col items-center justify-center rounded-lg border-2 border-dashed p-8 transition-colors ${
+        className={`relative flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed p-8 transition-colors ${
           dragOver
             ? "border-primary bg-primary/5"
             : "border-border hover:border-primary/50"
@@ -69,9 +69,8 @@ export function FileUpload({ onFilesSelected, isProcessing }: FileUploadProps) {
           multiple
           onChange={handleFileInput}
           className="absolute inset-0 cursor-pointer opacity-0"
-          style={{ position: "relative" }}
         />
-      </div>
+      </label>
 
       {selectedFiles.length > 0 && (
         <div className="space-y-2">
