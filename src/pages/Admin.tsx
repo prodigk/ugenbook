@@ -27,6 +27,9 @@ const Admin = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [loading, setLoading] = useState(true);
 
+  // Progress tracking
+  const [uploadProgress, setUploadProgress] = useState({ current: 0, total: 0 });
+
   // Duplicate confirmation state
   const [duplicateFiles, setDuplicateFiles] = useState<File[]>([]);
   const [showDuplicateDialog, setShowDuplicateDialog] = useState(false);
