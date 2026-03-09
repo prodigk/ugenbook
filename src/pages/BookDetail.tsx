@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { ArrowLeft, ImageIcon, Check, X, Pencil, Sparkles, Loader2 } from "lucide-react";
+import { ArrowLeft, ImageIcon, Check, X, Pencil, Sparkles, Loader2, Heart } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { Header } from "@/components/Header";
 import { MarkdownRenderer } from "@/components/MarkdownRenderer";
@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { fetchBookById, updateBookcover, updateBookFields } from "@/lib/bookApi";
+import { fetchUserLikes, toggleLike } from "@/lib/likesApi";
 import { useAuth } from "@/contexts/AuthContext";
 import { isAdminEmail } from "@/lib/adminAuth";
 import { toast } from "@/hooks/use-toast";
@@ -89,6 +90,10 @@ const BookDetail = () => {
   const [authorValue, setAuthorValue] = useState("");
   const [savingAuthor, setSavingAuthor] = useState(false);
 
+  // Like state
+  const [liked, setLiked] = useState(false);
+  const [togglingLike, setTogglingLike] = useState(false);
+
   useEffect(() => {
     if (!id) return;
     fetchBookById(id)
@@ -96,6 +101,24 @@ const BookDetail = () => {
       .catch(console.error)
       .finally(() => setLoading(false));
   }, [id]);
+
+  useEffect(() => {
+    if (!id || !user || !isAdminEmail(user.email)) return;
+    fetchUserLikes(user.id).then((ids) => setLiked(ids.includes(id)));
+  }, [id, user]);
+
+  const handleToggleLike = async () => {
+    if (!book || !user || togglingLike) return;
+    setTogglingLike(true);
+    try {
+      await toggleLike(user.id, book.id, liked);
+      setLiked(!liked);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setTogglingLike(false);
+    }
+  };
 
   const handleSaveCover = async () => {
     if (!book) return;
@@ -208,9 +231,25 @@ const BookDetail = () => {
           </div>
 
           <div className="flex-1">
-            <h1 className="font-serif text-2xl font-bold text-foreground sm:text-3xl">
-              {book.title}
-            </h1>
+            <div className="flex items-start gap-3">
+              <h1 className="font-serif text-2xl font-bold text-foreground sm:text-3xl">
+                {book.title}
+              </h1>
+              {isAdminEmail(user?.email) && (
+                <button
+                  onClick={handleToggleLike}
+                  disabled={togglingLike}
+                  className="mt-1 shrink-0 rounded-full p-1.5 transition-colors hover:bg-muted"
+                  aria-label={liked ? "좋아요 취소" : "좋아요"}
+                >
+                  <Heart
+                    className={`h-5 w-5 transition-colors ${
+                      liked ? "fill-destructive text-destructive" : "text-muted-foreground"
+                    }`}
+                  />
+                </button>
+              )}
+            </div>
             {isAdminEmail(user?.email) && editingAuthor ? (
               <div className="mt-1 flex items-center gap-2">
                 <Input
