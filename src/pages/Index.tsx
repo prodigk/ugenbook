@@ -81,7 +81,7 @@ const Index = () => {
     });
 
     return result;
-  }, [books, query, selectedCategory, selectedStatus, sortOption]);
+  }, [books, query, selectedCategory, selectedStatus, sortOption, user]);
 
   return (
     <div className="min-h-screen bg-background">
