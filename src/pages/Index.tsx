@@ -50,12 +50,12 @@ const Index = () => {
     let result = isAdmin ? books : books.filter((b) => !b.isHidden);
 
     if (query.trim()) {
-      const q = query.toLowerCase();
+      const q = query.normalize("NFC").toLowerCase();
       result = result.filter(
         (b) =>
-          b.title.toLowerCase().includes(q) ||
-          b.author.toLowerCase().includes(q) ||
-          b.tags.some((t) => t.toLowerCase().includes(q))
+          b.title.normalize("NFC").toLowerCase().includes(q) ||
+          b.author.normalize("NFC").toLowerCase().includes(q) ||
+          b.tags.some((t) => t.normalize("NFC").toLowerCase().includes(q))
       );
     }
 
