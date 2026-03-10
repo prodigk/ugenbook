@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Trash2, ChevronLeft, ChevronRight, AlertTriangle } from "lucide-react";
+import { Trash2, ChevronLeft, ChevronRight, AlertTriangle, Search } from "lucide-react";
+import { Input } from "@/components/ui/input";
 import { Header } from "@/components/Header";
 import { FileUpload } from "@/components/FileUpload";
 import { Badge } from "@/components/ui/badge";
@@ -244,23 +245,47 @@ function PaginatedBookList({
   onUpdateBooks: React.Dispatch<React.SetStateAction<Book[]>>;
 }) {
   const [page, setPage] = useState(1);
-  const totalPages = Math.max(1, Math.ceil(books.length / ITEMS_PER_PAGE));
+  const [searchQuery, setSearchQuery] = useState("");
 
-  // Reset to page 1 if books change and current page is out of range
+  const filteredBooks = useMemo(() => {
+    if (!searchQuery.trim()) return books;
+    const q = searchQuery.normalize("NFC").toLowerCase();
+    return books.filter(
+      (b) =>
+        b.title.normalize("NFC").toLowerCase().includes(q) ||
+        b.author.normalize("NFC").toLowerCase().includes(q) ||
+        b.tags.some((t) => t.normalize("NFC").toLowerCase().includes(q))
+    );
+  }, [books, searchQuery]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredBooks.length / ITEMS_PER_PAGE));
+
+  // Reset to page 1 if filtered list changes and current page is out of range
   useEffect(() => {
     if (page > totalPages) setPage(1);
-  }, [books.length, totalPages, page]);
+  }, [filteredBooks.length, totalPages, page]);
 
   const paginatedBooks = useMemo(
-    () => books.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE),
-    [books, page]
+    () => filteredBooks.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE),
+    [filteredBooks, page]
   );
 
   return (
     <section>
       <h2 className="mb-3 font-serif text-lg font-semibold text-foreground">
-        등록된 도서 ({books.length}권)
+        등록된 도서 ({filteredBooks.length}권{searchQuery.trim() ? ` / 전체 ${books.length}권` : ""})
       </h2>
+
+      {/* Search */}
+      <div className="relative mb-4">
+        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+        <Input
+          placeholder="도서명, 작가명, 태그로 검색..."
+          value={searchQuery}
+          onChange={(e) => { setSearchQuery(e.target.value); setPage(1); }}
+          className="pl-10"
+        />
+      </div>
       {loading ? (
         <p className="text-sm text-muted-foreground">불러오는 중...</p>
       ) : books.length === 0 ? (
