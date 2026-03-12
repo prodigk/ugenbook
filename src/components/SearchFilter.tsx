@@ -92,6 +92,13 @@ export function SearchFilter({
         >
           작성중 {statusCounts["작성중"] || 0}
         </Badge>
+        <Badge
+          variant={selectedStatus === "대기" ? "default" : "outline"}
+          className="cursor-pointer"
+          onClick={() => onStatusChange(selectedStatus === "대기" ? null : "대기")}
+        >
+          대기 {statusCounts["대기"] || 0}
+        </Badge>
       </div>
 
       {/* Sort & count */}
