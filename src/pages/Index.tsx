@@ -122,6 +122,8 @@ const Index = () => {
           sortOption={sortOption}
           onSortChange={setSortOption}
           totalCount={filteredBooks.length}
+          categoryCounts={categoryCounts}
+          statusCounts={statusCounts}
         />
 
         {loading ? (
