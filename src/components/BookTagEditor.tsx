@@ -14,7 +14,7 @@ const CATEGORIES: BookCategory[] = [
   "경제", "인문", "사회과학", "커리어", "철학", "자기계발", "문학", "과학", "기타",
 ];
 
-const STATUSES: BookStatus[] = ["작성중", "완료"];
+const STATUSES: BookStatus[] = ["작성중", "완료", "대기"];
 
 interface BookTagEditorProps {
   type: "category" | "status";

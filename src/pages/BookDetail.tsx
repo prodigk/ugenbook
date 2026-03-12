@@ -264,9 +264,25 @@ const BookDetail = () => {
 
             <div className="mt-4 flex flex-wrap gap-2">
               <Badge>{book.category}</Badge>
-              <Badge variant={book.status === "완료" ? "default" : "outline"}>
-                {book.status}
-              </Badge>
+              {isAdminEmail(user?.email) ? (
+                <BookTagEditor
+                  type="status"
+                  value={book.status}
+                  onUpdate={async (newStatus) => {
+                    try {
+                      await updateBookFields(book.id, { status: newStatus });
+                      setBook({ ...book, status: newStatus as Book["status"] });
+                      toast({ title: `상태가 "${newStatus}"로 변경되었습니다.` });
+                    } catch (e) {
+                      toast({ title: "상태 변경 실패", description: String(e), variant: "destructive" });
+                    }
+                  }}
+                />
+              ) : (
+                <Badge variant={book.status === "완료" ? "default" : "outline"}>
+                  {book.status}
+                </Badge>
+              )}
               {book.tags.map((tag) => (
                 <Badge key={tag} variant="secondary">{tag}</Badge>
               ))}

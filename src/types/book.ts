@@ -1,4 +1,4 @@
-export type BookStatus = "작성중" | "완료";
+export type BookStatus = "작성중" | "완료" | "대기";
 
 export type BookCategory = 
   | "경제" 
