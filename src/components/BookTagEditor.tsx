@@ -35,9 +35,11 @@ export function BookTagEditor({ type, value, onUpdate }: BookTagEditorProps) {
             "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors cursor-pointer shrink-0 gap-1",
             type === "status" && value === "완료"
               ? "border-transparent bg-primary text-primary-foreground"
-              : value === "작성중"
-                ? "text-foreground border-border"
-                : "border-transparent bg-secondary text-secondary-foreground"
+              : type === "status" && value === "작성중"
+                ? "border-primary text-primary"
+                : type === "status" && value === "대기"
+                  ? "border-muted-foreground/50 text-muted-foreground"
+                  : "border-transparent bg-secondary text-secondary-foreground"
           )}
         >
           {value}
