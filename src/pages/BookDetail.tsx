@@ -5,6 +5,7 @@ import ReactMarkdown from "react-markdown";
 import { Header } from "@/components/Header";
 import { MarkdownRenderer } from "@/components/MarkdownRenderer";
 import { BlogExportButtons } from "@/components/BlogExportButtons";
+import { BookTagEditor } from "@/components/BookTagEditor";
 import { BookAdminActions } from "@/components/BookAdminActions";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
