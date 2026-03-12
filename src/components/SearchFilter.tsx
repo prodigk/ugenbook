@@ -24,6 +24,8 @@ interface SearchFilterProps {
   sortOption: SortOption;
   onSortChange: (s: SortOption) => void;
   totalCount: number;
+  categoryCounts: Record<string, number>;
+  statusCounts: Record<string, number>;
 }
 
 export function SearchFilter({
@@ -36,6 +38,8 @@ export function SearchFilter({
   sortOption,
   onSortChange,
   totalCount,
+  categoryCounts,
+  statusCounts,
 }: SearchFilterProps) {
   return (
     <div className="space-y-4">
@@ -58,7 +62,7 @@ export function SearchFilter({
           className="cursor-pointer"
           onClick={() => onCategoryChange(null)}
         >
-          전체
+          전체 {totalCount}
         </Badge>
         {CATEGORIES.map((cat) => (
           <Badge
@@ -67,7 +71,7 @@ export function SearchFilter({
             className="cursor-pointer"
             onClick={() => onCategoryChange(selectedCategory === cat ? null : cat)}
           >
-            {cat}
+            {cat} {categoryCounts[cat] || 0}
           </Badge>
         ))}
 
@@ -79,14 +83,14 @@ export function SearchFilter({
           className="cursor-pointer"
           onClick={() => onStatusChange(selectedStatus === "완료" ? null : "완료")}
         >
-          완료
+          완료 {statusCounts["완료"] || 0}
         </Badge>
         <Badge
           variant={selectedStatus === "작성중" ? "default" : "outline"}
           className="cursor-pointer"
           onClick={() => onStatusChange(selectedStatus === "작성중" ? null : "작성중")}
         >
-          작성중
+          작성중 {statusCounts["작성중"] || 0}
         </Badge>
       </div>
 
