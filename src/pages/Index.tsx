@@ -45,9 +45,25 @@ const Index = () => {
     });
   }, []);
 
-  const filteredBooks = useMemo(() => {
+  const visibleBooks = useMemo(() => {
     const isAdmin = user && isAdminEmail(user.email);
-    let result = isAdmin ? books : books.filter((b) => !b.isHidden);
+    return isAdmin ? books : books.filter((b) => !b.isHidden);
+  }, [books, user]);
+
+  const categoryCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    visibleBooks.forEach((b) => { counts[b.category] = (counts[b.category] || 0) + 1; });
+    return counts;
+  }, [visibleBooks]);
+
+  const statusCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    visibleBooks.forEach((b) => { counts[b.status] = (counts[b.status] || 0) + 1; });
+    return counts;
+  }, [visibleBooks]);
+
+  const filteredBooks = useMemo(() => {
+    let result = visibleBooks;
 
     if (query.trim()) {
       const q = query.normalize("NFC").toLowerCase();
@@ -81,7 +97,7 @@ const Index = () => {
     });
 
     return result;
-  }, [books, query, selectedCategory, selectedStatus, sortOption, user]);
+  }, [visibleBooks, query, selectedCategory, selectedStatus, sortOption]);
 
   return (
     <div className="min-h-screen bg-background">
