@@ -62,7 +62,7 @@ export function SearchFilter({
           className="cursor-pointer"
           onClick={() => onCategoryChange(null)}
         >
-          전체
+          전체 {totalCount}
         </Badge>
         {CATEGORIES.map((cat) => (
           <Badge
@@ -71,7 +71,7 @@ export function SearchFilter({
             className="cursor-pointer"
             onClick={() => onCategoryChange(selectedCategory === cat ? null : cat)}
           >
-            {cat}
+            {cat} {categoryCounts[cat] || 0}
           </Badge>
         ))}
 
