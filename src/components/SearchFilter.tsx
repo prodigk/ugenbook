@@ -38,6 +38,8 @@ export function SearchFilter({
   sortOption,
   onSortChange,
   totalCount,
+  categoryCounts,
+  statusCounts,
 }: SearchFilterProps) {
   return (
     <div className="space-y-4">
