@@ -24,6 +24,8 @@ interface SearchFilterProps {
   sortOption: SortOption;
   onSortChange: (s: SortOption) => void;
   totalCount: number;
+  categoryCounts: Record<string, number>;
+  statusCounts: Record<string, number>;
 }
 
 export function SearchFilter({
