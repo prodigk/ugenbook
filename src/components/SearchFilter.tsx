@@ -83,14 +83,14 @@ export function SearchFilter({
           className="cursor-pointer"
           onClick={() => onStatusChange(selectedStatus === "완료" ? null : "완료")}
         >
-          완료
+          완료 {statusCounts["완료"] || 0}
         </Badge>
         <Badge
           variant={selectedStatus === "작성중" ? "default" : "outline"}
           className="cursor-pointer"
           onClick={() => onStatusChange(selectedStatus === "작성중" ? null : "작성중")}
         >
-          작성중
+          작성중 {statusCounts["작성중"] || 0}
         </Badge>
       </div>
 
