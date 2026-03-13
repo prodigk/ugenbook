@@ -68,12 +68,12 @@ export function SearchFilter({
         >
           전체 {totalCount}
         </Badge>
-        {CATEGORIES.map((cat) => (
+        {categories.map((cat) => (
           <Badge
             key={cat}
             variant={selectedCategory === cat ? "default" : "outline"}
             className="cursor-pointer"
-            onClick={() => onCategoryChange(selectedCategory === cat ? null : cat)}
+            onClick={() => onCategoryChange(selectedCategory === cat ? null : cat as BookCategory)}
           >
             {cat} {categoryCounts[cat] || 0}
           </Badge>
