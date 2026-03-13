@@ -109,14 +109,14 @@ export function CategoryManager() {
       ) : categories.length === 0 ? (
         <p className="text-sm text-muted-foreground">등록된 카테고리가 없습니다.</p>
       ) : (
-        <div className="space-y-1">
+        <div className="grid grid-cols-2 gap-1.5">
           {categories.map((cat) => (
             <div
               key={cat.id}
-              className="flex items-center justify-between rounded-lg border bg-card p-2.5 gap-2"
+              className="flex items-center justify-between rounded-lg border bg-card p-2 gap-1.5"
             >
-              <div className="flex items-center gap-2 min-w-0 flex-1">
-                <GripVertical className="h-4 w-4 text-muted-foreground/40 shrink-0" />
+              <div className="flex items-center gap-1.5 min-w-0 flex-1">
+                <GripVertical className="h-3.5 w-3.5 text-muted-foreground/40 shrink-0" />
                 {editingId === cat.id ? (
                   <Input
                     value={editingName}
@@ -125,7 +125,7 @@ export function CategoryManager() {
                       if (e.key === "Enter") handleUpdate(cat.id);
                       if (e.key === "Escape") setEditingId(null);
                     }}
-                    className="h-8 text-sm"
+                    className="h-7 text-sm"
                     autoFocus
                   />
                 ) : (
@@ -134,28 +134,28 @@ export function CategoryManager() {
                   </span>
                 )}
               </div>
-              <div className="flex items-center gap-1 shrink-0">
+              <div className="flex items-center gap-0.5 shrink-0">
                 {editingId === cat.id ? (
                   <>
-                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleUpdate(cat.id)}>
-                      <Check className="h-3.5 w-3.5 text-primary" />
+                    <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleUpdate(cat.id)}>
+                      <Check className="h-3 w-3 text-primary" />
                     </Button>
-                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setEditingId(null)}>
-                      <X className="h-3.5 w-3.5" />
+                    <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setEditingId(null)}>
+                      <X className="h-3 w-3" />
                     </Button>
                   </>
                 ) : (
                   <>
-                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => startEdit(cat)}>
-                      <Pencil className="h-3.5 w-3.5" />
+                    <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => startEdit(cat)}>
+                      <Pencil className="h-3 w-3" />
                     </Button>
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-7 w-7 text-destructive hover:text-destructive"
+                      className="h-6 w-6 text-destructive hover:text-destructive"
                       onClick={() => handleDelete(cat)}
                     >
-                      <Trash2 className="h-3.5 w-3.5" />
+                      <Trash2 className="h-3 w-3" />
                     </Button>
                   </>
                 )}
