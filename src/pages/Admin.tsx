@@ -20,6 +20,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { isAdminEmail } from "@/lib/adminAuth";
 import { fetchBooks, upsertBookFromMd, deleteBookById, updateBookFields, checkDuplicateFileNames } from "@/lib/bookApi";
 import { BookTagEditor } from "@/components/BookTagEditor";
+import { CategoryManager } from "@/components/CategoryManager";
 import type { Book } from "@/types/book";
 
 const Admin = () => {
@@ -196,6 +197,8 @@ const Admin = () => {
             </div>
           )}
         </section>
+
+        <CategoryManager />
 
         <PaginatedBookList books={books} loading={loading} onDelete={handleDelete} onUpdateBooks={setBooks} />
       </main>

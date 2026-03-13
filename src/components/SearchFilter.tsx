@@ -1,12 +1,10 @@
+import { useEffect, useState } from "react";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { fetchCategories } from "@/lib/categoryApi";
 import type { BookCategory, BookStatus, SortOption } from "@/types/book";
-
-const CATEGORIES: BookCategory[] = [
-  "경제", "인문", "사회과학", "커리어", "철학", "자기계발", "문학", "과학", "기타",
-];
 
 const SORT_OPTIONS: { value: SortOption; label: string }[] = [
   { value: "newest", label: "최신순" },
@@ -41,6 +39,12 @@ export function SearchFilter({
   categoryCounts,
   statusCounts,
 }: SearchFilterProps) {
+  const [categories, setCategories] = useState<string[]>([]);
+
+  useEffect(() => {
+    fetchCategories().then((cats) => setCategories(cats.map((c) => c.name)));
+  }, []);
+
   return (
     <div className="space-y-4">
       {/* Search */}
@@ -64,12 +68,12 @@ export function SearchFilter({
         >
           전체 {totalCount}
         </Badge>
-        {CATEGORIES.map((cat) => (
+        {categories.map((cat) => (
           <Badge
             key={cat}
             variant={selectedCategory === cat ? "default" : "outline"}
             className="cursor-pointer"
-            onClick={() => onCategoryChange(selectedCategory === cat ? null : cat)}
+            onClick={() => onCategoryChange(selectedCategory === cat ? null : cat as BookCategory)}
           >
             {cat} {categoryCounts[cat] || 0}
           </Badge>
