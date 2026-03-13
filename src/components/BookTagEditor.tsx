@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Check, ChevronDown } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -8,11 +8,8 @@ import {
 } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { fetchCategories } from "@/lib/categoryApi";
 import type { BookCategory, BookStatus } from "@/types/book";
-
-const CATEGORIES: BookCategory[] = [
-  "경제", "인문", "사회과학", "커리어", "철학", "자기계발", "문학", "과학", "기타",
-];
 
 const STATUSES: BookStatus[] = ["작성중", "완료", "대기"];
 
