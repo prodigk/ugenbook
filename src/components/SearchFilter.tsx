@@ -39,6 +39,12 @@ export function SearchFilter({
   categoryCounts,
   statusCounts,
 }: SearchFilterProps) {
+  const [categories, setCategories] = useState<string[]>([]);
+
+  useEffect(() => {
+    fetchCategories().then((cats) => setCategories(cats.map((c) => c.name)));
+  }, []);
+
   return (
     <div className="space-y-4">
       {/* Search */}
