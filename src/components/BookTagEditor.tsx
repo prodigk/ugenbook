@@ -21,7 +21,15 @@ interface BookTagEditorProps {
 
 export function BookTagEditor({ type, value, onUpdate }: BookTagEditorProps) {
   const [open, setOpen] = useState(false);
-  const options = type === "category" ? CATEGORIES : STATUSES;
+  const [categories, setCategories] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (type === "category") {
+      fetchCategories().then((cats) => setCategories(cats.map((c) => c.name)));
+    }
+  }, [type]);
+
+  const options = type === "category" ? categories : STATUSES;
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
