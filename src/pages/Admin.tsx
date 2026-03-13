@@ -198,6 +198,8 @@ const Admin = () => {
           )}
         </section>
 
+        <CategoryManager />
+
         <PaginatedBookList books={books} loading={loading} onDelete={handleDelete} onUpdateBooks={setBooks} />
       </main>
 
