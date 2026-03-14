@@ -47,7 +47,9 @@ export const BookCard = memo(function BookCard({ book, index, liked = false, onT
       style={{ animationDelay: `${index * 60}ms` }}
     >
       <div className="animate-fade-in opacity-0">
-        <div className="relative aspect-[2/3] overflow-hidden rounded-lg bg-muted mb-3">
+        <div className={`relative aspect-[2/3] overflow-hidden rounded-lg bg-muted mb-3 ${
+          book.status === "완료" ? "ring-1 ring-primary/30 shadow-sm shadow-primary/10" : ""
+        }`}>
           {book.bookcover ? (
             <img
               src={book.bookcover}
