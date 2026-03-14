@@ -4,6 +4,23 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
 import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  rectSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import {
   fetchCategories,
   addCategory,
   updateCategory,
@@ -11,12 +28,99 @@ import {
   type Category,
 } from "@/lib/categoryApi";
 
+function SortableCategoryItem({
+  cat,
+  editingId,
+  editingName,
+  setEditingName,
+  onStartEdit,
+  onUpdate,
+  onCancelEdit,
+  onDelete,
+}: {
+  cat: Category;
+  editingId: string | null;
+  editingName: string;
+  setEditingName: (v: string) => void;
+  onStartEdit: (cat: Category) => void;
+  onUpdate: (id: string) => void;
+  onCancelEdit: () => void;
+  onDelete: (cat: Category) => void;
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: cat.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className="flex items-center justify-between rounded-lg border bg-card p-2 gap-1.5"
+    >
+      <div className="flex items-center gap-1.5 min-w-0 flex-1">
+        <button {...attributes} {...listeners} className="cursor-grab active:cursor-grabbing touch-none shrink-0">
+          <GripVertical className="h-3.5 w-3.5 text-muted-foreground/40" />
+        </button>
+        {editingId === cat.id ? (
+          <Input
+            value={editingName}
+            onChange={(e) => setEditingName(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") onUpdate(cat.id);
+              if (e.key === "Escape") onCancelEdit();
+            }}
+            className="h-7 text-sm"
+            autoFocus
+          />
+        ) : (
+          <span className="text-sm font-medium text-foreground truncate">{cat.name}</span>
+        )}
+      </div>
+      <div className="flex items-center gap-0.5 shrink-0">
+        {editingId === cat.id ? (
+          <>
+            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => onUpdate(cat.id)}>
+              <Check className="h-3 w-3 text-primary" />
+            </Button>
+            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={onCancelEdit}>
+              <X className="h-3 w-3" />
+            </Button>
+          </>
+        ) : (
+          <>
+            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => onStartEdit(cat)}>
+              <Pencil className="h-3 w-3" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-6 w-6 text-destructive hover:text-destructive"
+              onClick={() => onDelete(cat)}
+            >
+              <Trash2 className="h-3 w-3" />
+            </Button>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export function CategoryManager() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [newName, setNewName] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState("");
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
 
   const load = async () => {
     try {
@@ -77,6 +181,28 @@ export function CategoryManager() {
     }
   };
 
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    const oldIndex = categories.findIndex((c) => c.id === active.id);
+    const newIndex = categories.findIndex((c) => c.id === over.id);
+    const reordered = arrayMove(categories, oldIndex, newIndex);
+
+    // Optimistic update
+    setCategories(reordered);
+
+    // Persist new sort_order values
+    try {
+      await Promise.all(
+        reordered.map((cat, i) => updateCategory(cat.id, { sort_order: i }))
+      );
+    } catch (err) {
+      toast({ title: "순서 변경 실패", description: String(err), variant: "destructive" });
+      await load();
+    }
+  };
+
   const startEdit = (cat: Category) => {
     setEditingId(cat.id);
     setEditingName(cat.name);
@@ -88,7 +214,6 @@ export function CategoryManager() {
         카테고리 관리
       </h2>
 
-      {/* Add new category */}
       <div className="flex gap-2 mb-4">
         <Input
           placeholder="새 카테고리 이름"
@@ -103,66 +228,30 @@ export function CategoryManager() {
         </Button>
       </div>
 
-      {/* Category list */}
       {loading ? (
         <p className="text-sm text-muted-foreground">불러오는 중...</p>
       ) : categories.length === 0 ? (
         <p className="text-sm text-muted-foreground">등록된 카테고리가 없습니다.</p>
       ) : (
-        <div className="grid grid-cols-2 gap-1.5">
-          {categories.map((cat) => (
-            <div
-              key={cat.id}
-              className="flex items-center justify-between rounded-lg border bg-card p-2 gap-1.5"
-            >
-              <div className="flex items-center gap-1.5 min-w-0 flex-1">
-                <GripVertical className="h-3.5 w-3.5 text-muted-foreground/40 shrink-0" />
-                {editingId === cat.id ? (
-                  <Input
-                    value={editingName}
-                    onChange={(e) => setEditingName(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") handleUpdate(cat.id);
-                      if (e.key === "Escape") setEditingId(null);
-                    }}
-                    className="h-7 text-sm"
-                    autoFocus
-                  />
-                ) : (
-                  <span className="text-sm font-medium text-foreground truncate">
-                    {cat.name}
-                  </span>
-                )}
-              </div>
-              <div className="flex items-center gap-0.5 shrink-0">
-                {editingId === cat.id ? (
-                  <>
-                    <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleUpdate(cat.id)}>
-                      <Check className="h-3 w-3 text-primary" />
-                    </Button>
-                    <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setEditingId(null)}>
-                      <X className="h-3 w-3" />
-                    </Button>
-                  </>
-                ) : (
-                  <>
-                    <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => startEdit(cat)}>
-                      <Pencil className="h-3 w-3" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-6 w-6 text-destructive hover:text-destructive"
-                      onClick={() => handleDelete(cat)}
-                    >
-                      <Trash2 className="h-3 w-3" />
-                    </Button>
-                  </>
-                )}
-              </div>
+        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+          <SortableContext items={categories.map((c) => c.id)} strategy={rectSortingStrategy}>
+            <div className="grid grid-cols-2 gap-1.5">
+              {categories.map((cat) => (
+                <SortableCategoryItem
+                  key={cat.id}
+                  cat={cat}
+                  editingId={editingId}
+                  editingName={editingName}
+                  setEditingName={setEditingName}
+                  onStartEdit={startEdit}
+                  onUpdate={handleUpdate}
+                  onCancelEdit={() => setEditingId(null)}
+                  onDelete={handleDelete}
+                />
+              ))}
             </div>
-          ))}
-        </div>
+          </SortableContext>
+        </DndContext>
       )}
     </section>
   );
