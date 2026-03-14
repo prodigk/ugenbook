@@ -46,9 +46,10 @@ export const BookCard = memo(function BookCard({ book, index, liked = false, onT
       className="group block book-card-hover"
       style={{ animationDelay: `${index * 60}ms` }}
     >
-      <div className={`animate-fade-in opacity-0 ${
-        book.status === "작성중" ? "[&]:!opacity-60" : book.status === "대기" ? "[&]:!opacity-50" : ""
-      }`}>
+      <div className="animate-fade-in opacity-0">
+        <div className={`${
+          book.status === "작성중" ? "opacity-65" : book.status === "대기" ? "opacity-50" : ""
+        }`}>
         <div className={`relative aspect-[2/3] overflow-hidden rounded-lg bg-muted mb-3 ${
           book.status === "완료"
             ? "ring-1 ring-primary/30 shadow-sm shadow-primary/10"
