@@ -172,9 +172,32 @@ const Admin = () => {
     <div className="min-h-screen bg-background">
       <Header />
       <main className="container max-w-3xl py-8">
-        <h1 className="mb-6 font-serif text-2xl font-bold text-foreground">
-          도서 관리
-        </h1>
+        <div className="mb-6 flex items-center justify-between">
+          <h1 className="font-serif text-2xl font-bold text-foreground">
+            도서 관리
+          </h1>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={async () => {
+              if (books.length === 0) {
+                toast({ title: "다운로드할 도서가 없습니다", variant: "destructive" });
+                return;
+              }
+              toast({ title: "마크다운 파일 생성 중..." });
+              try {
+                await downloadBooksAsZip(books);
+                toast({ title: `${books.length}개 도서 다운로드 완료` });
+              } catch (err) {
+                toast({ title: "다운로드 실패", description: String(err), variant: "destructive" });
+              }
+            }}
+            disabled={books.length === 0}
+          >
+            <Download className="h-4 w-4 mr-1.5" />
+            전체 다운로드
+          </Button>
+        </div>
 
         <section className="mb-8">
           <h2 className="mb-3 font-serif text-lg font-semibold text-foreground">
