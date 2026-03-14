@@ -48,7 +48,13 @@ export const BookCard = memo(function BookCard({ book, index, liked = false, onT
     >
       <div className="animate-fade-in opacity-0">
         <div className={`relative aspect-[2/3] overflow-hidden rounded-lg bg-muted mb-3 ${
-          book.status === "완료" ? "ring-1 ring-primary/30 shadow-sm shadow-primary/10" : ""
+          book.status === "완료"
+            ? "ring-1 ring-primary/30 shadow-sm shadow-primary/10"
+            : book.status === "작성중"
+              ? "ring-1 ring-amber-400/40 shadow-sm shadow-amber-400/10"
+              : book.status === "대기"
+                ? "ring-1 ring-muted-foreground/20"
+                : ""
         }`}>
           {book.bookcover ? (
             <img
