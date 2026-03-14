@@ -21,6 +21,7 @@ import { isAdminEmail } from "@/lib/adminAuth";
 import { fetchBooks, upsertBookFromMd, deleteBookById, updateBookFields, checkDuplicateFileNames } from "@/lib/bookApi";
 import { BookTagEditor } from "@/components/BookTagEditor";
 import { CategoryManager } from "@/components/CategoryManager";
+import { downloadBooksAsZip } from "@/lib/bookExport";
 import type { Book } from "@/types/book";
 
 const Admin = () => {
