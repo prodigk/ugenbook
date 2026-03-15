@@ -13,8 +13,8 @@ import {
   DialogDescription,
   DialogFooter,
   DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+  DialogTitle } from
+"@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { isAdminEmail } from "@/lib/adminAuth";
@@ -45,17 +45,17 @@ const Admin = () => {
   }, [user, authLoading, navigate]);
 
   useEffect(() => {
-    fetchBooks()
-      .then(setBooks)
-      .catch(console.error)
-      .finally(() => setLoading(false));
+    fetchBooks().
+    then(setBooks).
+    catch(console.error).
+    finally(() => setLoading(false));
   }, []);
 
   const uploadFiles = async (files: File[], updateProgress = true) => {
     if (!user) return 0;
     let successCount = 0;
     const total = files.length;
-    
+
     if (updateProgress) {
       setUploadProgress({ current: 0, total });
     }
@@ -70,7 +70,7 @@ const Admin = () => {
         toast({
           title: `${file.name} 처리 실패`,
           description: String(err),
-          variant: "destructive",
+          variant: "destructive"
         });
       }
       if (updateProgress) {
@@ -85,7 +85,7 @@ const Admin = () => {
     setIsProcessing(true);
 
     let hasDuplicates = false;
-    
+
     try {
       // Check for duplicates
       const fileNames = files.map((f) => f.name);
@@ -103,7 +103,7 @@ const Admin = () => {
         if (successCount > 0) {
           toast({
             title: `${successCount}개 신규 파일 업로드 완료`,
-            description: "도서 목록이 업데이트되었습니다.",
+            description: "도서 목록이 업데이트되었습니다."
           });
         }
       }
@@ -135,7 +135,7 @@ const Admin = () => {
     if (count > 0) {
       toast({
         title: `${count}개 중복 파일 업데이트 완료`,
-        description: "기존 도서가 최신 내용으로 업데이트되었습니다.",
+        description: "기존 도서가 최신 내용으로 업데이트되었습니다."
       });
     }
   };
@@ -162,8 +162,8 @@ const Admin = () => {
       <div className="min-h-screen bg-background">
         <Header />
         <div className="container py-20 text-center text-muted-foreground">로딩 중...</div>
-      </div>
-    );
+      </div>);
+
   }
 
   if (!user) return null;
@@ -173,7 +173,7 @@ const Admin = () => {
       <Header />
       <main className="container max-w-3xl py-8">
         <div className="mb-6 flex items-center justify-between">
-          <h1 className="font-serif text-2xl font-bold text-foreground">
+          <h1 className="font-serif text-foreground font-extrabold text-3xl">
             도서 관리
           </h1>
           <Button
@@ -192,8 +192,8 @@ const Admin = () => {
                 toast({ title: "다운로드 실패", description: String(err), variant: "destructive" });
               }
             }}
-            disabled={books.length === 0}
-          >
+            disabled={books.length === 0}>
+            
             <Download className="h-4 w-4 mr-1.5" />
             전체 다운로드
           </Button>
@@ -206,20 +206,20 @@ const Admin = () => {
           <FileUpload onFilesSelected={handleFilesSelected} isProcessing={isProcessing} />
           
           {/* Upload progress bar */}
-          {isProcessing && uploadProgress.total > 0 && (
-            <div className="mt-4 space-y-2">
+          {isProcessing && uploadProgress.total > 0 &&
+          <div className="mt-4 space-y-2">
               <div className="flex items-center justify-between text-sm">
                 <span className="text-muted-foreground">업로드 진행 중...</span>
                 <span className="font-medium text-foreground">
                   {uploadProgress.current} / {uploadProgress.total}
                 </span>
               </div>
-              <Progress 
-                value={(uploadProgress.current / uploadProgress.total) * 100} 
-                className="h-2"
-              />
+              <Progress
+              value={uploadProgress.current / uploadProgress.total * 100}
+              className="h-2" />
+            
             </div>
-          )}
+          }
         </section>
 
         <CategoryManager />
@@ -228,7 +228,7 @@ const Admin = () => {
       </main>
 
       {/* Duplicate confirmation dialog */}
-      <Dialog open={showDuplicateDialog} onOpenChange={(open) => { if (!open) handleCancelDuplicates(); }}>
+      <Dialog open={showDuplicateDialog} onOpenChange={(open) => {if (!open) handleCancelDuplicates();}}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
@@ -240,9 +240,9 @@ const Admin = () => {
             </DialogDescription>
           </DialogHeader>
           <div className="max-h-48 overflow-y-auto space-y-1 rounded-md border bg-muted p-3">
-            {duplicateFiles.map((f) => (
-              <p key={f.name} className="text-sm text-foreground">📄 {f.name}</p>
-            ))}
+            {duplicateFiles.map((f) =>
+            <p key={f.name} className="text-sm text-foreground">📄 {f.name}</p>
+            )}
           </div>
           <DialogFooter className="gap-2 sm:gap-0">
             <Button variant="outline" onClick={handleCancelDuplicates}>
@@ -254,8 +254,8 @@ const Admin = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
-  );
+    </div>);
+
 };
 
 const ITEMS_PER_PAGE = 15;
@@ -264,13 +264,13 @@ function PaginatedBookList({
   books,
   loading,
   onDelete,
-  onUpdateBooks,
-}: {
-  books: Book[];
-  loading: boolean;
-  onDelete: (id: string) => void;
-  onUpdateBooks: React.Dispatch<React.SetStateAction<Book[]>>;
-}) {
+  onUpdateBooks
+
+
+
+
+
+}: {books: Book[];loading: boolean;onDelete: (id: string) => void;onUpdateBooks: React.Dispatch<React.SetStateAction<Book[]>>;}) {
   const [page, setPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -279,9 +279,9 @@ function PaginatedBookList({
     const q = searchQuery.normalize("NFC").toLowerCase();
     return books.filter(
       (b) =>
-        b.title.normalize("NFC").toLowerCase().includes(q) ||
-        b.author.normalize("NFC").toLowerCase().includes(q) ||
-        b.tags.some((t) => t.normalize("NFC").toLowerCase().includes(q))
+      b.title.normalize("NFC").toLowerCase().includes(q) ||
+      b.author.normalize("NFC").toLowerCase().includes(q) ||
+      b.tags.some((t) => t.normalize("NFC").toLowerCase().includes(q))
     );
   }, [books, searchQuery]);
 
@@ -309,90 +309,90 @@ function PaginatedBookList({
         <Input
           placeholder="도서명, 작가명, 태그로 검색..."
           value={searchQuery}
-          onChange={(e) => { setSearchQuery(e.target.value); setPage(1); }}
-          className="pl-10"
-        />
+          onChange={(e) => {setSearchQuery(e.target.value);setPage(1);}}
+          className="pl-10" />
+        
       </div>
-      {loading ? (
-        <p className="text-sm text-muted-foreground">불러오는 중...</p>
-      ) : books.length === 0 ? (
-        <p className="text-sm text-muted-foreground">등록된 도서가 없습니다.</p>
-      ) : (
-        <>
+      {loading ?
+      <p className="text-sm text-muted-foreground">불러오는 중...</p> :
+      books.length === 0 ?
+      <p className="text-sm text-muted-foreground">등록된 도서가 없습니다.</p> :
+
+      <>
           <div className="space-y-2">
-            {paginatedBooks.map((book) => (
-              <div
-                key={book.id}
-                className="flex items-center justify-between rounded-lg border bg-card p-3"
-              >
+            {paginatedBooks.map((book) =>
+          <div
+            key={book.id}
+            className="flex items-center justify-between rounded-lg border bg-card p-3">
+            
                 <div className="flex items-center gap-3 min-w-0">
-                  {book.bookcover && (
-                    <img
-                      src={book.bookcover}
-                      alt=""
-                      className="h-12 w-8 rounded object-cover shrink-0"
-                    />
-                  )}
+                  {book.bookcover &&
+              <img
+                src={book.bookcover}
+                alt=""
+                className="h-12 w-8 rounded object-cover shrink-0" />
+
+              }
                   <div className="min-w-0">
                     <Link
-                      to={`/book/${book.id}`}
-                      className="truncate text-sm font-medium text-foreground hover:text-primary hover:underline"
-                    >
+                  to={`/book/${book.id}`}
+                  className="truncate text-sm font-medium text-foreground hover:text-primary hover:underline">
+                  
                       {book.title}
                     </Link>
                     <p className="text-xs text-muted-foreground">{book.author}</p>
                   </div>
                   <BookTagEditor
-                    type="category"
-                    value={book.category}
-                    onUpdate={async (val) => {
-                      try {
-                        await updateBookFields(book.id, { category: val });
-                        onUpdateBooks((prev) =>
-                          prev.map((b) => b.id === book.id ? { ...b, category: val as Book["category"] } : b)
-                        );
-                      } catch (err) {
-                        toast({ title: "카테고리 변경 실패", description: String(err), variant: "destructive" });
-                      }
-                    }}
-                  />
+                type="category"
+                value={book.category}
+                onUpdate={async (val) => {
+                  try {
+                    await updateBookFields(book.id, { category: val });
+                    onUpdateBooks((prev) =>
+                    prev.map((b) => b.id === book.id ? { ...b, category: val as Book["category"] } : b)
+                    );
+                  } catch (err) {
+                    toast({ title: "카테고리 변경 실패", description: String(err), variant: "destructive" });
+                  }
+                }} />
+              
                   <BookTagEditor
-                    type="status"
-                    value={book.status}
-                    onUpdate={async (val) => {
-                      try {
-                        await updateBookFields(book.id, { status: val });
-                        onUpdateBooks((prev) =>
-                          prev.map((b) => b.id === book.id ? { ...b, status: val as Book["status"] } : b)
-                        );
-                      } catch (err) {
-                        toast({ title: "상태 변경 실패", description: String(err), variant: "destructive" });
-                      }
-                    }}
-                  />
+                type="status"
+                value={book.status}
+                onUpdate={async (val) => {
+                  try {
+                    await updateBookFields(book.id, { status: val });
+                    onUpdateBooks((prev) =>
+                    prev.map((b) => b.id === book.id ? { ...b, status: val as Book["status"] } : b)
+                    );
+                  } catch (err) {
+                    toast({ title: "상태 변경 실패", description: String(err), variant: "destructive" });
+                  }
+                }} />
+              
                 </div>
                 <div className="flex items-center gap-1 shrink-0">
                   <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => onDelete(book.id)}
-                    className="text-destructive hover:text-destructive"
-                  >
+                variant="ghost"
+                size="icon"
+                onClick={() => onDelete(book.id)}
+                className="text-destructive hover:text-destructive">
+                
                     <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>
               </div>
-            ))}
+          )}
           </div>
 
           {/* Pagination */}
-          {totalPages > 1 && (
-            <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
-          )}
+          {totalPages > 1 &&
+        <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+        }
         </>
-      )}
-    </section>
-  );
+      }
+    </section>);
+
 }
 
 const PAGES_VISIBLE = 10;
@@ -400,12 +400,12 @@ const PAGES_VISIBLE = 10;
 function Pagination({
   page,
   totalPages,
-  onPageChange,
-}: {
-  page: number;
-  totalPages: number;
-  onPageChange: (p: number) => void;
-}) {
+  onPageChange
+
+
+
+
+}: {page: number;totalPages: number;onPageChange: (p: number) => void;}) {
   // Calculate visible page range (up to 10 pages)
   const startPage = Math.max(1, Math.min(page - Math.floor(PAGES_VISIBLE / 2), totalPages - PAGES_VISIBLE + 1));
   const endPage = Math.min(totalPages, startPage + PAGES_VISIBLE - 1);
@@ -418,54 +418,54 @@ function Pagination({
         size="sm"
         onClick={() => onPageChange(Math.max(1, page - 1))}
         disabled={page === 1}
-        className="text-xs"
-      >
+        className="text-xs">
+        
         <ChevronLeft className="h-4 w-4 mr-1" />
         이전
       </Button>
 
-      {startPage > 1 && (
-        <>
+      {startPage > 1 &&
+      <>
           <Button variant="ghost" size="sm" onClick={() => onPageChange(1)} className="h-8 w-8 p-0 text-xs">
             1
           </Button>
           {startPage > 2 && <span className="px-1 text-muted-foreground text-xs">…</span>}
         </>
-      )}
+      }
 
-      {pages.map((p) => (
-        <Button
-          key={p}
-          variant={p === page ? "default" : "ghost"}
-          size="sm"
-          onClick={() => onPageChange(p)}
-          className="h-8 w-8 p-0 text-xs"
-        >
+      {pages.map((p) =>
+      <Button
+        key={p}
+        variant={p === page ? "default" : "ghost"}
+        size="sm"
+        onClick={() => onPageChange(p)}
+        className="h-8 w-8 p-0 text-xs">
+        
           {p}
         </Button>
-      ))}
+      )}
 
-      {endPage < totalPages && (
-        <>
+      {endPage < totalPages &&
+      <>
           {endPage < totalPages - 1 && <span className="px-1 text-muted-foreground text-xs">…</span>}
           <Button variant="ghost" size="sm" onClick={() => onPageChange(totalPages)} className="h-8 w-8 p-0 text-xs">
             {totalPages}
           </Button>
         </>
-      )}
+      }
 
       <Button
         variant="ghost"
         size="sm"
         onClick={() => onPageChange(Math.min(totalPages, page + 1))}
         disabled={page === totalPages}
-        className="text-xs"
-      >
+        className="text-xs">
+        
         다음
         <ChevronRight className="h-4 w-4 ml-1" />
       </Button>
-    </div>
-  );
+    </div>);
+
 }
 
 export default Admin;
