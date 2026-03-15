@@ -83,7 +83,12 @@ const Index = () => {
       result = result.filter((b) => b.status === selectedStatus);
     }
 
+    const statusPriority = (s: string) => s === "완료" ? 0 : s === "작성중" ? 1 : 2;
+
     result = [...result].sort((a, b) => {
+      const sp = statusPriority(a.status) - statusPriority(b.status);
+      if (sp !== 0) return sp;
+
       switch (sortOption) {
         case "newest":
           return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
