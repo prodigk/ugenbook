@@ -258,7 +258,7 @@ const Admin = () => {
   );
 };
 
-const ITEMS_PER_PAGE = 10;
+const ITEMS_PER_PAGE = 15;
 
 function PaginatedBookList({
   books,
