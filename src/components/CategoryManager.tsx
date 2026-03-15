@@ -113,7 +113,7 @@ function SortableCategoryItem({
   );
 }
 
-export function CategoryManager() {
+export function CategoryManager({ books = [] }: { books?: Book[] }) {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [newName, setNewName] = useState("");
