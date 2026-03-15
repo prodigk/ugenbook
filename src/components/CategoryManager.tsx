@@ -27,6 +27,7 @@ import {
   deleteCategory,
   type Category,
 } from "@/lib/categoryApi";
+import type { Book } from "@/types/book";
 
 function SortableCategoryItem({
   cat,
@@ -37,6 +38,7 @@ function SortableCategoryItem({
   onUpdate,
   onCancelEdit,
   onDelete,
+  bookCount,
 }: {
   cat: Category;
   editingId: string | null;
@@ -46,6 +48,7 @@ function SortableCategoryItem({
   onUpdate: (id: string) => void;
   onCancelEdit: () => void;
   onDelete: (cat: Category) => void;
+  bookCount: number;
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: cat.id });
 
@@ -77,7 +80,10 @@ function SortableCategoryItem({
             autoFocus
           />
         ) : (
-          <span className="text-sm font-medium text-foreground truncate">{cat.name}</span>
+          <>
+            <span className="text-sm font-medium text-foreground truncate">{cat.name}</span>
+            <span className="text-xs text-muted-foreground ml-1 shrink-0">{bookCount}</span>
+          </>
         )}
       </div>
       <div className="flex items-center gap-0.5 shrink-0">
@@ -110,7 +116,7 @@ function SortableCategoryItem({
   );
 }
 
-export function CategoryManager() {
+export function CategoryManager({ books = [] }: { books?: Book[] }) {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [newName, setNewName] = useState("");
@@ -247,6 +253,7 @@ export function CategoryManager() {
                   onUpdate={handleUpdate}
                   onCancelEdit={() => setEditingId(null)}
                   onDelete={handleDelete}
+                  bookCount={books.filter((b) => b.category === cat.name).length}
                 />
               ))}
             </div>

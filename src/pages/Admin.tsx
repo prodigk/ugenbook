@@ -222,7 +222,7 @@ const Admin = () => {
           }
         </section>
 
-        <CategoryManager />
+        <CategoryManager books={books} />
 
         <PaginatedBookList books={books} loading={loading} onDelete={handleDelete} onUpdateBooks={setBooks} />
       </main>
