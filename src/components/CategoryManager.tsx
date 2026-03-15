@@ -27,6 +27,7 @@ import {
   deleteCategory,
   type Category,
 } from "@/lib/categoryApi";
+import type { Book } from "@/types/book";
 
 function SortableCategoryItem({
   cat,
@@ -37,6 +38,7 @@ function SortableCategoryItem({
   onUpdate,
   onCancelEdit,
   onDelete,
+  bookCount,
 }: {
   cat: Category;
   editingId: string | null;
@@ -46,6 +48,7 @@ function SortableCategoryItem({
   onUpdate: (id: string) => void;
   onCancelEdit: () => void;
   onDelete: (cat: Category) => void;
+  bookCount: number;
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: cat.id });
 
