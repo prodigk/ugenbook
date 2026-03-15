@@ -250,6 +250,7 @@ export function CategoryManager({ books = [] }: { books?: Book[] }) {
                   onUpdate={handleUpdate}
                   onCancelEdit={() => setEditingId(null)}
                   onDelete={handleDelete}
+                  bookCount={books.filter((b) => b.category === cat.name).length}
                 />
               ))}
             </div>
