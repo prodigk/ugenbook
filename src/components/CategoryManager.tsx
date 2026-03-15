@@ -81,7 +81,7 @@ function SortableCategoryItem({
           />
         ) : (
           <span className="text-sm font-medium text-foreground truncate">{cat.name}</span>
-        )}
+          <span className="text-xs text-muted-foreground ml-1 shrink-0">{bookCount}</span>
       </div>
       <div className="flex items-center gap-0.5 shrink-0">
         {editingId === cat.id ? (
