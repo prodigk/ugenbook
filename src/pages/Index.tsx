@@ -39,8 +39,8 @@ const Index = () => {
   const handleToggleLike = useCallback((bookId: string, newLiked: boolean) => {
     setLikedIds((prev) => {
       const next = new Set(prev);
-      if (newLiked) next.add(bookId);
-      else next.delete(bookId);
+      if (newLiked) next.add(bookId);else
+      next.delete(bookId);
       return next;
     });
   }, []);
@@ -52,13 +52,13 @@ const Index = () => {
 
   const categoryCounts = useMemo(() => {
     const counts: Record<string, number> = {};
-    visibleBooks.forEach((b) => { counts[b.category] = (counts[b.category] || 0) + 1; });
+    visibleBooks.forEach((b) => {counts[b.category] = (counts[b.category] || 0) + 1;});
     return counts;
   }, [visibleBooks]);
 
   const statusCounts = useMemo(() => {
     const counts: Record<string, number> = {};
-    visibleBooks.forEach((b) => { counts[b.status] = (counts[b.status] || 0) + 1; });
+    visibleBooks.forEach((b) => {counts[b.status] = (counts[b.status] || 0) + 1;});
     return counts;
   }, [visibleBooks]);
 
@@ -69,9 +69,9 @@ const Index = () => {
       const q = query.normalize("NFC").toLowerCase();
       result = result.filter(
         (b) =>
-          b.title.normalize("NFC").toLowerCase().includes(q) ||
-          b.author.normalize("NFC").toLowerCase().includes(q) ||
-          b.tags.some((t) => t.normalize("NFC").toLowerCase().includes(q))
+        b.title.normalize("NFC").toLowerCase().includes(q) ||
+        b.author.normalize("NFC").toLowerCase().includes(q) ||
+        b.tags.some((t) => t.normalize("NFC").toLowerCase().includes(q))
       );
     }
 
@@ -105,7 +105,7 @@ const Index = () => {
       <main className="container py-8">
         <div className="mb-8">
           <h1 className="font-serif text-3xl font-bold text-foreground sm:text-4xl">
-            UGEN 책장
+            UGEN's Library  
           </h1>
           <p className="mt-2 text-muted-foreground">
             읽고, 기록하고, 나누는 독서의 여정
@@ -123,40 +123,40 @@ const Index = () => {
           onSortChange={setSortOption}
           totalCount={filteredBooks.length}
           categoryCounts={categoryCounts}
-          statusCounts={statusCounts}
-        />
+          statusCounts={statusCounts} />
+        
 
-        {loading ? (
-          <div className="mt-16 text-center text-muted-foreground">불러오는 중...</div>
-        ) : filteredBooks.length > 0 ? (
-          <div className="mt-8 grid grid-cols-2 gap-6 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
-            {filteredBooks.map((book, idx) => (
-              <BookCard
-                key={book.id}
-                book={book}
-                index={idx}
-                liked={likedIds.has(book.id)}
-                onToggleLike={handleToggleLike}
-              />
-            ))}
-          </div>
-        ) : (
-          <div className="mt-16 flex flex-col items-center justify-center text-center">
+        {loading ?
+        <div className="mt-16 text-center text-muted-foreground">불러오는 중...</div> :
+        filteredBooks.length > 0 ?
+        <div className="mt-8 grid grid-cols-2 gap-6 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+            {filteredBooks.map((book, idx) =>
+          <BookCard
+            key={book.id}
+            book={book}
+            index={idx}
+            liked={likedIds.has(book.id)}
+            onToggleLike={handleToggleLike} />
+
+          )}
+          </div> :
+
+        <div className="mt-16 flex flex-col items-center justify-center text-center">
             <p className="font-serif text-xl text-muted-foreground">
-              {books.length === 0
-                ? "아직 등록된 도서가 없습니다"
-                : "검색 결과가 없습니다"}
+              {books.length === 0 ?
+            "아직 등록된 도서가 없습니다" :
+            "검색 결과가 없습니다"}
             </p>
-            {books.length === 0 && (
-              <p className="mt-2 text-sm text-muted-foreground">
+            {books.length === 0 &&
+          <p className="mt-2 text-sm text-muted-foreground">
                 관리 페이지에서 마크다운 파일을 업로드하여 시작하세요
               </p>
-            )}
+          }
           </div>
-        )}
+        }
       </main>
-    </div>
-  );
+    </div>);
+
 };
 
 export default Index;
