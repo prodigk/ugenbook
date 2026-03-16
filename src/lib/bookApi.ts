@@ -85,6 +85,7 @@ export async function upsertBookFromMd(
         category: parsed.category,
         status: parsed.status,
         markdown: parsed.markdown,
+        read_date: parsed.readDate || null,
       })
       .eq("id", existing.id)
       .select()
