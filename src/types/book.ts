@@ -24,6 +24,7 @@ export interface Book {
   fileName: string;
   createdAt: string;
   updatedAt: string;
+  readDate?: string;
   isHidden?: boolean;
 }
 

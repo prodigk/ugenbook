@@ -140,7 +140,7 @@ export async function checkDuplicateFileNames(
 
 export async function updateBookFields(
   id: string,
-  fields: { category?: string; status?: string; author?: string; is_hidden?: boolean }
+  fields: { category?: string; status?: string; author?: string; is_hidden?: boolean; read_date?: string | null }
 ): Promise<void> {
   const { error } = await supabase
     .from("books")

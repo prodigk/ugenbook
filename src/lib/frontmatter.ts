@@ -97,6 +97,8 @@ export function mdToBook(fileName: string, raw: string): Book {
   const status = (data.status as string) === "완료" ? "완료" : "작성중";
   const category = (data.category as BookCategory) || inferCategory(cleanTitle, tags, content);
 
+  const readDate = (data.date as string) || undefined;
+
   const now = new Date().toISOString();
 
   return {
@@ -111,5 +113,6 @@ export function mdToBook(fileName: string, raw: string): Book {
     fileName,
     createdAt: now,
     updatedAt: now,
+    readDate,
   };
 }
