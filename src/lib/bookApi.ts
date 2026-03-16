@@ -16,6 +16,7 @@ type DbBook = {
   created_at: string;
   updated_at: string;
   is_hidden: boolean;
+  read_date: string | null;
 };
 
 function dbToBook(row: DbBook): Book {
