@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { ArrowLeft, ImageIcon, Check, X, Pencil, Sparkles, Loader2 } from "lucide-react";
+import { ArrowLeft, ImageIcon, Check, X, Pencil, Sparkles, Loader2, CalendarIcon } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { Header } from "@/components/Header";
 import { MarkdownRenderer } from "@/components/MarkdownRenderer";
@@ -10,6 +10,9 @@ import { BookAdminActions } from "@/components/BookAdminActions";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { cn } from "@/lib/utils";
 import { fetchBookById, updateBookcover, updateBookFields } from "@/lib/bookApi";
 import { fetchUserLikes } from "@/lib/likesApi";
 import { useAuth } from "@/contexts/AuthContext";
