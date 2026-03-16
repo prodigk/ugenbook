@@ -33,6 +33,7 @@ function dbToBook(row: DbBook): Book {
     fileName: row.file_name,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
+    readDate: row.read_date || undefined,
     isHidden: row.is_hidden,
   };
 }
