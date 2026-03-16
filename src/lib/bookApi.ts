@@ -106,6 +106,7 @@ export async function upsertBookFromMd(
         status: parsed.status,
         markdown: parsed.markdown,
         file_name: fileName,
+        read_date: parsed.readDate || null,
       })
       .select()
       .single();
