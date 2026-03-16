@@ -24,6 +24,7 @@ export type Database = {
           id: string
           is_hidden: boolean
           markdown: string
+          read_date: string | null
           status: string
           tags: string[] | null
           title: string
@@ -39,6 +40,7 @@ export type Database = {
           id?: string
           is_hidden?: boolean
           markdown?: string
+          read_date?: string | null
           status?: string
           tags?: string[] | null
           title: string
@@ -54,6 +56,7 @@ export type Database = {
           id?: string
           is_hidden?: boolean
           markdown?: string
+          read_date?: string | null
           status?: string
           tags?: string[] | null
           title?: string

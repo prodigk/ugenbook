@@ -16,6 +16,7 @@ type DbBook = {
   created_at: string;
   updated_at: string;
   is_hidden: boolean;
+  read_date: string | null;
 };
 
 function dbToBook(row: DbBook): Book {
@@ -32,6 +33,7 @@ function dbToBook(row: DbBook): Book {
     fileName: row.file_name,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
+    readDate: row.read_date || undefined,
     isHidden: row.is_hidden,
   };
 }
@@ -83,6 +85,7 @@ export async function upsertBookFromMd(
         category: parsed.category,
         status: parsed.status,
         markdown: parsed.markdown,
+        read_date: parsed.readDate || null,
       })
       .eq("id", existing.id)
       .select()
@@ -103,6 +106,7 @@ export async function upsertBookFromMd(
         status: parsed.status,
         markdown: parsed.markdown,
         file_name: fileName,
+        read_date: parsed.readDate || null,
       })
       .select()
       .single();
@@ -136,7 +140,7 @@ export async function checkDuplicateFileNames(
 
 export async function updateBookFields(
   id: string,
-  fields: { category?: string; status?: string; author?: string; is_hidden?: boolean }
+  fields: { category?: string; status?: string; author?: string; is_hidden?: boolean; read_date?: string | null }
 ): Promise<void> {
   const { error } = await supabase
     .from("books")
