@@ -153,3 +153,29 @@ export async function deleteBookById(id: string): Promise<void> {
   const { error } = await supabase.from("books").delete().eq("id", id);
   if (error) throw error;
 }
+
+/** 기존 도서의 마크다운에서 Date/date를 추출하여 read_date가 비어있는 경우 일괄 업데이트 */
+export async function syncReadDatesFromMarkdown(): Promise<number> {
+  const { data, error } = await supabase
+    .from("books")
+    .select("id, markdown, read_date")
+    .is("read_date", null);
+
+  if (error) throw error;
+  if (!data || data.length === 0) return 0;
+
+  let updated = 0;
+  for (const book of data) {
+    const { parseFrontmatter } = await import("@/lib/frontmatter");
+    const { data: fm } = parseFrontmatter(book.markdown);
+    const dateVal = (fm.date as string) || (fm.Date as string);
+    if (dateVal) {
+      const { error: updateErr } = await supabase
+        .from("books")
+        .update({ read_date: dateVal })
+        .eq("id", book.id);
+      if (!updateErr) updated++;
+    }
+  }
+  return updated;
+}
