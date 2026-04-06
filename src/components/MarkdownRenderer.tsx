@@ -21,10 +21,11 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
       prose-headings:font-serif prose-headings:text-foreground
       prose-p:text-foreground/90 prose-p:leading-relaxed
       prose-blockquote:border-l-primary prose-blockquote:text-muted-foreground
-      prose-strong:text-foreground
+      prose-strong:[color:hsl(var(--md-bold))]
       prose-a:text-primary prose-a:no-underline hover:prose-a:underline
       prose-li:text-foreground/90
       [&_mark]:bg-primary/20 [&_mark]:px-1 [&_mark]:rounded-sm [&_mark]:text-foreground
+      [&_u]:[color:hsl(var(--md-underline))] [&_u]:decoration-[hsl(var(--md-underline))]
     ">
       <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}>
         {processed}

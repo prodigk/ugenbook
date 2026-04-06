@@ -48,6 +48,8 @@
     --warm-cream: 40 30% 95%;
     --warm-sand: 35 20% 85%;
     --book-shadow: 0 4px 20px -4px hsl(30 10% 15% / 0.08);
+    --md-bold: 0 75% 50%;
+    --md-underline: 215 75% 50%;
   }
 
   .dark {
@@ -87,6 +89,8 @@
     --sidebar-accent-foreground: 35 15% 85%;
     --sidebar-border: 30 10% 18%;
     --sidebar-ring: 28 55% 55%;
+    --md-bold: 0 80% 65%;
+    --md-underline: 210 80% 65%;
 
     --warm-cream: 30 12% 12%;
     --warm-sand: 30 10% 22%;
