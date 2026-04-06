@@ -21,9 +21,14 @@ function buildFrontmatter(book: Book): string {
 }
 
 export function bookToMarkdown(book: Book): string {
+  const raw = book.markdown || "";
+  // If markdown already has frontmatter, rebuild it with updated properties
+  const hasFrontmatter = /^---\r?\n[\s\S]*?\r?\n---/.test(raw);
+  const body = hasFrontmatter
+    ? raw.replace(/^---\r?\n[\s\S]*?\r?\n---\r?\n?/, "")
+    : raw;
   const frontmatter = buildFrontmatter(book);
-  const content = book.markdown || "";
-  return `${frontmatter}\n${content}`;
+  return `${frontmatter}\n${body}`;
 }
 
 export async function downloadBooksAsZip(books: Book[]) {
