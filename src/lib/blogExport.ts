@@ -1,8 +1,13 @@
 import type { Book } from "@/types/book";
 
+function stripFrontmatter(raw: string): string {
+  const match = raw.match(/^---\r?\n[\s\S]*?\r?\n---\r?\n?([\s\S]*)$/);
+  return match ? match[1] : raw;
+}
+
 /** Convert markdown to simple HTML for Naver blog */
 export function toNaverHtml(book: Book): string {
-  let html = book.markdown;
+  let html = stripFrontmatter(book.markdown);
 
   // Headers
   html = html.replace(/^### (.+)$/gm, "<h3>$1</h3>");
@@ -40,7 +45,7 @@ export function toNaverHtml(book: Book): string {
 export function toBrunchText(book: Book): string {
   let text = `${book.title}\n저자: ${book.author}\n\n---\n\n`;
 
-  let body = book.markdown;
+  let body = stripFrontmatter(book.markdown);
 
   // Remove markdown syntax, keep readable text
   body = body.replace(/^#{1,6} /gm, "");
