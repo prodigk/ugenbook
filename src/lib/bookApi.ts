@@ -84,7 +84,7 @@ export async function upsertBookFromMd(
         tags: parsed.tags,
         category: parsed.category,
         status: parsed.status,
-        markdown: parsed.markdown,
+        markdown: rawMd,
         read_date: parsed.readDate || null,
       })
       .eq("id", existing.id)
@@ -104,7 +104,7 @@ export async function upsertBookFromMd(
         tags: parsed.tags,
         category: parsed.category,
         status: parsed.status,
-        markdown: parsed.markdown,
+        markdown: rawMd,
         file_name: fileName,
         read_date: parsed.readDate || null,
       })

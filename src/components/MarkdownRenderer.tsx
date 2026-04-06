@@ -6,9 +6,15 @@ interface MarkdownRendererProps {
   content: string;
 }
 
+function stripFrontmatter(raw: string): string {
+  const match = raw.match(/^---\r?\n[\s\S]*?\r?\n---\r?\n?([\s\S]*)$/);
+  return match ? match[1] : raw;
+}
+
 export function MarkdownRenderer({ content }: MarkdownRendererProps) {
-  // Convert obsidian highlights ==text== to <mark>
-  const processed = content.replace(/==(.+?)==/g, "<mark>$1</mark>");
+  // Strip frontmatter if present, then convert obsidian highlights
+  const body = stripFrontmatter(content);
+  const processed = body.replace(/==(.+?)==/g, "<mark>$1</mark>");
 
   return (
     <div className="prose prose-sm sm:prose-base dark:prose-invert max-w-none
