@@ -130,6 +130,8 @@ const Index = () => {
           </p>
         </div>
 
+        <FeaturedCarousel books={featuredBooks} />
+
         <SearchFilter
           query={query}
           onQueryChange={setQuery}
