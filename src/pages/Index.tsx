@@ -55,11 +55,11 @@ const Index = () => {
     const writing = visibleBooks
       .filter((b) => b.status === "작성중")
       .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
-      .slice(0, 2);
+      .slice(0, 3);
     const waiting = visibleBooks
       .filter((b) => b.status === "대기")
       .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
-      .slice(0, 1);
+      .slice(0, 2);
     return [...writing, ...waiting];
   }, [visibleBooks]);
 

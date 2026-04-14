@@ -71,7 +71,7 @@ export function FeaturedCarousel({ books }: FeaturedCarouselProps) {
 
                     {/* Info */}
                     <div className="flex min-w-0 flex-1 flex-col gap-1">
-                      <h3 className="font-serif text-sm font-bold text-foreground line-clamp-1">
+                      <h3 className="font-serif text-base font-bold text-foreground line-clamp-1">
                         {book.title}
                       </h3>
                       <div className="flex flex-wrap items-center gap-1.5">
