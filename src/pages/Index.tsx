@@ -2,6 +2,7 @@ import { useState, useMemo, useEffect, useCallback } from "react";
 import { Header } from "@/components/Header";
 import { BookCard } from "@/components/BookCard";
 import { SearchFilter } from "@/components/SearchFilter";
+import { FeaturedCarousel } from "@/components/FeaturedCarousel";
 import { fetchBooks } from "@/lib/bookApi";
 import { fetchUserLikes } from "@/lib/likesApi";
 import { useAuth } from "@/contexts/AuthContext";
@@ -49,6 +50,18 @@ const Index = () => {
     const isAdmin = user && isAdminEmail(user.email);
     return isAdmin ? books : books.filter((b) => !b.isHidden);
   }, [books, user]);
+
+  const featuredBooks = useMemo(() => {
+    const writing = visibleBooks
+      .filter((b) => b.status === "작성중")
+      .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
+      .slice(0, 2);
+    const waiting = visibleBooks
+      .filter((b) => b.status === "대기")
+      .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
+      .slice(0, 1);
+    return [...writing, ...waiting];
+  }, [visibleBooks]);
 
   const categoryCounts = useMemo(() => {
     const counts: Record<string, number> = {};
@@ -116,6 +129,8 @@ const Index = () => {
             읽고, 기록하고, 나누는 독서의 여정
           </p>
         </div>
+
+        <FeaturedCarousel books={featuredBooks} />
 
         <SearchFilter
           query={query}
