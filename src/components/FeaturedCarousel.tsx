@@ -45,7 +45,7 @@ export function FeaturedCarousel({ books }: FeaturedCarouselProps) {
   return (
     <div className="mb-6">
       <Carousel opts={{ align: "start", loop: books.length > 1 }} className="w-full">
-        <CarouselContent className="-ml-3">
+        <CarouselContent className="-ml-3 py-2">
           {books.map((book) => {
             const preview = getPreview(book.markdown);
             return (
