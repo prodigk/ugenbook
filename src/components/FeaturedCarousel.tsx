@@ -51,7 +51,13 @@ export function FeaturedCarousel({ books }: FeaturedCarouselProps) {
             return (
               <CarouselItem key={book.id} className="pl-3 basis-full md:basis-1/2 lg:basis-1/3">
                 <Link to={`/book/${book.id}`} className="block">
-                  <div className="flex gap-4 rounded-lg border bg-card p-4 transition-transform hover:scale-[1.02] hover:shadow-md">
+                  <div className={`flex gap-4 rounded-lg border-2 bg-card p-4 transition-transform hover:scale-[1.02] hover:shadow-md ${
+                    book.status === "작성중"
+                      ? "border-amber-400 dark:border-amber-500"
+                      : book.status === "대기"
+                      ? "border-violet-400 dark:border-violet-500"
+                      : "border-border"
+                  }`}>
                     {/* Cover */}
                     <div className="w-20 shrink-0">
                       {book.bookcover ? (
