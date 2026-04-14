@@ -51,6 +51,18 @@ const Index = () => {
     return isAdmin ? books : books.filter((b) => !b.isHidden);
   }, [books, user]);
 
+  const featuredBooks = useMemo(() => {
+    const writing = visibleBooks
+      .filter((b) => b.status === "작성중")
+      .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
+      .slice(0, 2);
+    const waiting = visibleBooks
+      .filter((b) => b.status === "대기")
+      .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
+      .slice(0, 1);
+    return [...writing, ...waiting];
+  }, [visibleBooks]);
+
   const categoryCounts = useMemo(() => {
     const counts: Record<string, number> = {};
     visibleBooks.forEach((b) => {counts[b.category] = (counts[b.category] || 0) + 1;});
