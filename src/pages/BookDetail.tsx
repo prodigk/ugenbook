@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
+import { ReadDateCalendar } from "@/components/ReadDateCalendar";
 import { cn } from "@/lib/utils";
 import { fetchBookById, updateBookcover, updateBookFields } from "@/lib/bookApi";
 import { fetchUserLikes } from "@/lib/likesApi";
@@ -306,8 +306,7 @@ const BookDetail = () => {
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
+                      <ReadDateCalendar
                         selected={book.readDate ? new Date(book.readDate + "T00:00:00") : undefined}
                         onSelect={async (date) => {
                           if (!date) return;
@@ -320,7 +319,6 @@ const BookDetail = () => {
                             toast({ title: "업데이트 실패", description: String(e), variant: "destructive" });
                           }
                         }}
-                        className={cn("p-3 pointer-events-auto")}
                       />
                     </PopoverContent>
                   </Popover>
