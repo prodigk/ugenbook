@@ -1,6 +1,8 @@
 import { useState, useEffect, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Trash2, ChevronLeft, ChevronRight, AlertTriangle, Search, Download } from "lucide-react";
+import { Trash2, ChevronLeft, ChevronRight, AlertTriangle, Search, Download, CalendarIcon } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { ReadDateCalendar } from "@/components/ReadDateCalendar";
 import { Input } from "@/components/ui/input";
 import { Header } from "@/components/Header";
 import { FileUpload } from "@/components/FileUpload";
@@ -372,12 +374,40 @@ function PaginatedBookList({
               
                 </div>
                 <div className="flex items-center gap-1 shrink-0">
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="ghost" size="sm" className="h-8 px-2 text-xs gap-1">
+                        <CalendarIcon className="h-3 w-3" />
+                        {book.readDate
+                          ? new Date(book.readDate + "T00:00:00").toLocaleDateString("ko-KR")
+                          : "미지정"}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="end">
+                      <ReadDateCalendar
+                        selected={book.readDate ? new Date(book.readDate + "T00:00:00") : undefined}
+                        onSelect={async (date) => {
+                          if (!date) return;
+                          const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+                          try {
+                            await updateBookFields(book.id, { read_date: dateStr });
+                            onUpdateBooks((prev) =>
+                              prev.map((b) => (b.id === book.id ? { ...b, readDate: dateStr } : b))
+                            );
+                            toast({ title: "읽은 날짜가 업데이트되었습니다." });
+                          } catch (err) {
+                            toast({ title: "업데이트 실패", description: String(err), variant: "destructive" });
+                          }
+                        }}
+                      />
+                    </PopoverContent>
+                  </Popover>
                   <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => onDelete(book.id)}
-                className="text-destructive hover:text-destructive">
-                
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => onDelete(book.id)}
+                    className="text-destructive hover:text-destructive">
+                    
                     <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>
