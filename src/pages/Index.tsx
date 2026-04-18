@@ -60,7 +60,9 @@ const Index = () => {
       .filter((b) => b.status === "대기")
       .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
       .slice(0, 2);
-    return [...writing, ...waiting];
+    return [...writing, ...waiting].sort(
+      (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+    );
   }, [visibleBooks]);
 
   const categoryCounts = useMemo(() => {
