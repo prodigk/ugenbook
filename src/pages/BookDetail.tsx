@@ -306,8 +306,7 @@ const BookDetail = () => {
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
+                      <ReadDateCalendar
                         selected={book.readDate ? new Date(book.readDate + "T00:00:00") : undefined}
                         onSelect={async (date) => {
                           if (!date) return;
@@ -320,7 +319,6 @@ const BookDetail = () => {
                             toast({ title: "업데이트 실패", description: String(e), variant: "destructive" });
                           }
                         }}
-                        className={cn("p-3 pointer-events-auto")}
                       />
                     </PopoverContent>
                   </Popover>
