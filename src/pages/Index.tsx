@@ -57,12 +57,13 @@ const Index = () => {
       const bTime = b.readDate ? new Date(b.readDate + "T00:00:00").getTime() : 0;
       return bTime - aTime;
     };
+    // readDate가 있는 책만 후보로 사용 (없는 책은 캐러셀 노출 제외)
     const writing = visibleBooks
-      .filter((b) => b.status === "작성중")
+      .filter((b) => b.status === "작성중" && b.readDate)
       .sort(byReadDateDesc)
       .slice(0, 3);
     const waiting = visibleBooks
-      .filter((b) => b.status === "대기")
+      .filter((b) => b.status === "대기" && b.readDate)
       .sort(byReadDateDesc)
       .slice(0, 2);
     return [...writing, ...waiting].sort(byReadDateDesc);
