@@ -61,12 +61,16 @@ const Index = () => {
     const writing = visibleBooks
       .filter((b) => b.status === "작성중" && b.readDate)
       .sort(byReadDateDesc)
-      .slice(0, 3);
+      .slice(0, 2);
+    const done = visibleBooks
+      .filter((b) => b.status === "완료" && b.readDate)
+      .sort(byReadDateDesc)
+      .slice(0, 2);
     const waiting = visibleBooks
       .filter((b) => b.status === "대기" && b.readDate)
       .sort(byReadDateDesc)
-      .slice(0, 2);
-    return [...writing, ...waiting].sort(byReadDateDesc);
+      .slice(0, 1);
+    return [...writing, ...done, ...waiting].sort(byReadDateDesc);
   }, [visibleBooks]);
 
   const categoryCounts = useMemo(() => {
