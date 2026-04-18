@@ -52,17 +52,20 @@ const Index = () => {
   }, [books, user]);
 
   const featuredBooks = useMemo(() => {
+    const byReadDateDesc = (a: Book, b: Book) => {
+      const aTime = a.readDate ? new Date(a.readDate + "T00:00:00").getTime() : 0;
+      const bTime = b.readDate ? new Date(b.readDate + "T00:00:00").getTime() : 0;
+      return bTime - aTime;
+    };
     const writing = visibleBooks
       .filter((b) => b.status === "작성중")
-      .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
+      .sort(byReadDateDesc)
       .slice(0, 3);
     const waiting = visibleBooks
       .filter((b) => b.status === "대기")
-      .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
+      .sort(byReadDateDesc)
       .slice(0, 2);
-    return [...writing, ...waiting].sort(
-      (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
-    );
+    return [...writing, ...waiting].sort(byReadDateDesc);
   }, [visibleBooks]);
 
   const categoryCounts = useMemo(() => {
