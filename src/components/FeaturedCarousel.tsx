@@ -49,7 +49,7 @@ export function FeaturedCarousel({ books }: FeaturedCarouselProps) {
           {books.map((book) => {
             const preview = getPreview(book.markdown);
             return (
-              <CarouselItem key={book.id} className="pl-3 basis-full md:basis-1/2 lg:basis-1/3">
+              <CarouselItem key={book.id} className="pl-3 basis-full md:basis-1/2 lg:basis-2/5">
                 <Link to={`/book/${book.id}`} className="block">
                   <div className={`flex gap-4 rounded-lg border-2 bg-card p-4 transition-transform hover:scale-[1.02] hover:shadow-md ${
                     book.status === "작성중"
