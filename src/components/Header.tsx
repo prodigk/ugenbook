@@ -1,9 +1,10 @@
 import { Link, useLocation } from "react-router-dom";
-import { Settings, Heart, LogIn, LogOut, BookMarked } from "lucide-react";
+import { Settings, Heart, LogIn, LogOut } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { isAdminEmail } from "@/lib/adminAuth";
+import ugenSymbol from "@/assets/ugen-symbol.png";
 
 export function Header() {
   const location = useLocation();
@@ -13,9 +14,12 @@ export function Header() {
   return (
     <header className="sticky top-0 z-50 border-b bg-background/80 backdrop-blur-md">
       <div className="container flex h-14 items-center justify-between">
-        <Link to="/" className="flex items-center gap-2">
-          <BookMarked className="h-[20px] w-[20px] text-[#2a1313]" />
-          <span className="font-serif text-lg font-semibold text-foreground">UGEN's Library   </span>
+        <Link to="/" className="flex items-center" aria-label="UGEN's Library 홈">
+          <img
+            src={ugenSymbol}
+            alt="UGEN's Library"
+            className="h-8 w-8 rounded-full object-cover"
+          />
         </Link>
         <div className="flex items-center gap-1">
           {user ?
