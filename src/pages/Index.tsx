@@ -8,6 +8,7 @@ import { fetchUserLikes } from "@/lib/likesApi";
 import { useAuth } from "@/contexts/AuthContext";
 import { isAdminEmail } from "@/lib/adminAuth";
 import type { Book, BookCategory, BookStatus, SortOption } from "@/types/book";
+import ugenSymbol from "@/assets/ugen-symbol.png";
 
 const Index = () => {
   const { user } = useAuth();
@@ -132,8 +133,14 @@ const Index = () => {
       <Header />
       <main className="container py-8">
         <div className="mb-8">
-          <h1 className="font-serif text-3xl font-bold text-foreground sm:text-4xl">
-            UGEN's Library  
+          <h1 className="flex items-center gap-2 font-serif text-3xl font-bold text-foreground sm:text-4xl">
+            <img
+              src={ugenSymbol}
+              alt=""
+              aria-hidden="true"
+              className="h-9 w-9 rounded-full object-cover sm:hidden"
+            />
+            UGEN's Library
           </h1>
           <p className="mt-2 text-muted-foreground">
             읽고, 기록하고, 나누는 독서의 여정

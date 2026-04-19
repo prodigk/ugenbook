@@ -18,7 +18,7 @@ export function Header() {
           <img
             src={ugenSymbol}
             alt="UGEN's Library"
-            className="h-8 w-8 rounded-full object-cover"
+            className="hidden h-8 w-8 rounded-full object-cover sm:block"
           />
         </Link>
         <div className="flex items-center gap-1">
