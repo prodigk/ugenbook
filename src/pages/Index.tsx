@@ -143,7 +143,7 @@ const Index = () => {
             UGEN's Library
           </h1>
           <p className="mt-2 text-muted-foreground">
-            읽고, 기록하고, 나누는 독서의 여정
+            읽고, 기록하는 공간
           </p>
         </div>
 
