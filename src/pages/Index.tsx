@@ -62,7 +62,7 @@ const Index = () => {
     const writing = visibleBooks
       .filter((b) => b.status === "작성중" && b.readDate)
       .sort(byReadDateDesc)
-      .slice(0, 2);
+      .slice(0, 3);
     const done = visibleBooks
       .filter((b) => b.status === "완료" && b.readDate)
       .sort(byReadDateDesc)
@@ -70,7 +70,7 @@ const Index = () => {
     const waiting = visibleBooks
       .filter((b) => b.status === "대기" && b.readDate)
       .sort(byReadDateDesc)
-      .slice(0, 1);
+      .slice(0, 3);
     return [...writing, ...done, ...waiting].sort(byReadDateDesc);
   }, [visibleBooks]);
 
