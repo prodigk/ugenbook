@@ -3,6 +3,11 @@ import { Header } from "@/components/Header";
 import { BookCard } from "@/components/BookCard";
 import { SearchFilter } from "@/components/SearchFilter";
 import { FeaturedCarousel } from "@/components/FeaturedCarousel";
+import {
+  FeaturedCarouselSkeleton,
+  SearchFilterSkeleton,
+  BookGridSkeleton,
+} from "@/components/skeletons/MainPageSkeleton";
 import { fetchBooks } from "@/lib/bookApi";
 import { fetchUserLikes } from "@/lib/likesApi";
 import { useAuth } from "@/contexts/AuthContext";
@@ -147,26 +152,32 @@ const Index = () => {
           </p>
         </div>
 
-        <FeaturedCarousel books={featuredBooks} />
+        {loading ? (
+          <>
+            <FeaturedCarouselSkeleton />
+            <SearchFilterSkeleton />
+            <BookGridSkeleton />
+          </>
+        ) : (
+          <>
+            <FeaturedCarousel books={featuredBooks} />
 
-        <SearchFilter
-          query={query}
-          onQueryChange={setQuery}
-          selectedCategory={selectedCategory}
-          onCategoryChange={setSelectedCategory}
-          selectedStatus={selectedStatus}
-          onStatusChange={setSelectedStatus}
-          sortOption={sortOption}
-          onSortChange={setSortOption}
-          totalCount={filteredBooks.length}
-          categoryCounts={categoryCounts}
-          statusCounts={statusCounts} />
-        
+            <SearchFilter
+              query={query}
+              onQueryChange={setQuery}
+              selectedCategory={selectedCategory}
+              onCategoryChange={setSelectedCategory}
+              selectedStatus={selectedStatus}
+              onStatusChange={setSelectedStatus}
+              sortOption={sortOption}
+              onSortChange={setSortOption}
+              totalCount={filteredBooks.length}
+              categoryCounts={categoryCounts}
+              statusCounts={statusCounts}
+            />
 
-        {loading ?
-        <div className="mt-16 text-center text-muted-foreground">불러오는 중...</div> :
-        filteredBooks.length > 0 ?
-        <div className="mt-8 grid grid-cols-2 gap-6 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+            {filteredBooks.length > 0 ? (
+              <div className="mt-8 grid grid-cols-2 gap-6 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
             {filteredBooks.map((book, idx) =>
           <BookCard
             key={book.id}
@@ -176,9 +187,9 @@ const Index = () => {
             onToggleLike={handleToggleLike} />
 
           )}
-          </div> :
-
-        <div className="mt-16 flex flex-col items-center justify-center text-center">
+              </div>
+            ) : (
+              <div className="mt-16 flex flex-col items-center justify-center text-center">
             <p className="font-serif text-xl text-muted-foreground">
               {books.length === 0 ?
             "아직 등록된 도서가 없습니다" :
@@ -189,8 +200,10 @@ const Index = () => {
                 관리 페이지에서 마크다운 파일을 업로드하여 시작하세요
               </p>
           }
-          </div>
-        }
+              </div>
+            )}
+          </>
+        )}
       </main>
     </div>);
 
