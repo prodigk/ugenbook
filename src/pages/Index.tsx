@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect, useCallback } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { BookCard } from "@/components/BookCard";
 import { SearchFilter } from "@/components/SearchFilter";
@@ -20,10 +21,41 @@ const Index = () => {
   const [books, setBooks] = useState<Book[]>([]);
   const [likedIds, setLikedIds] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
-  const [query, setQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState<BookCategory | null>(null);
-  const [selectedStatus, setSelectedStatus] = useState<BookStatus | null>(null);
-  const [sortOption, setSortOption] = useState<SortOption>("newest");
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const query = searchParams.get("q") ?? "";
+  const selectedCategory = (searchParams.get("category") as BookCategory | null) || null;
+  const selectedStatus = (searchParams.get("status") as BookStatus | null) || null;
+  const sortOption = ((searchParams.get("sort") as SortOption) || "newest") as SortOption;
+
+  const updateParam = useCallback(
+    (key: string, value: string | null) => {
+      setSearchParams(
+        (prev) => {
+          const next = new URLSearchParams(prev);
+          if (value === null || value === "") next.delete(key);
+          else next.set(key, value);
+          return next;
+        },
+        { replace: true }
+      );
+    },
+    [setSearchParams]
+  );
+
+  const setQuery = useCallback((v: string) => updateParam("q", v), [updateParam]);
+  const setSelectedCategory = useCallback(
+    (v: BookCategory | null) => updateParam("category", v),
+    [updateParam]
+  );
+  const setSelectedStatus = useCallback(
+    (v: BookStatus | null) => updateParam("status", v),
+    [updateParam]
+  );
+  const setSortOption = useCallback(
+    (v: SortOption) => updateParam("sort", v === "newest" ? null : v),
+    [updateParam]
+  );
 
   useEffect(() => {
     const load = async () => {
