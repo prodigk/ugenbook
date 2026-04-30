@@ -152,7 +152,7 @@ const Index = () => {
       result = result.filter((b) => b.status === selectedStatus);
     }
 
-    const statusPriority = (s: string) => s === "완료" ? 0 : s === "작성중" ? 1 : 2;
+    const statusPriority = (s: string) => s === "작성중" ? 0 : s === "완료" ? 1 : 2;
 
     result = [...result].sort((a, b) => {
       const sp = statusPriority(a.status) - statusPriority(b.status);
