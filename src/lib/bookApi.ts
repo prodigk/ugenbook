@@ -1,5 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import { mdToBook } from "@/lib/frontmatter";
+import { logRevision, type ChangeType } from "@/lib/revisionsApi";
 import type { Book, BookCategory } from "@/types/book";
 
 type DbBook = {
@@ -75,6 +76,13 @@ export async function upsertBookFromMd(
     .maybeSingle();
 
   if (existing) {
+    // 변경된 항목 감지
+    const { data: prev } = await supabase
+      .from("books")
+      .select("title, status, category, tags, markdown, author, bookcover, read_date")
+      .eq("id", existing.id)
+      .maybeSingle();
+
     const { data, error } = await supabase
       .from("books")
       .update({
@@ -92,6 +100,23 @@ export async function upsertBookFromMd(
       .single();
 
     if (error) throw error;
+
+    if (prev) {
+      const changes: ChangeType[] = [];
+      if (prev.markdown !== rawMd) changes.push("본문 수정");
+      if (prev.title !== parsed.title) changes.push("제목 수정");
+      if (prev.status !== parsed.status) changes.push("상태 변경");
+      if (prev.category !== parsed.category) changes.push("카테고리 변경");
+      if (prev.author !== parsed.author) changes.push("작가 수정");
+      if ((prev.bookcover || "") !== (parsed.bookcover || "")) changes.push("표지 변경");
+      if ((prev.read_date || null) !== (parsed.readDate || null)) changes.push("읽은 날짜 변경");
+      const prevTags = JSON.stringify((prev.tags || []).slice().sort());
+      const newTags = JSON.stringify((parsed.tags || []).slice().sort());
+      if (prevTags !== newTags) changes.push("태그 변경");
+      for (const c of changes) {
+        await logRevision(existing.id, userId, c);
+      }
+    }
     return dbToBook(data);
   } else {
     const { data, error } = await supabase
@@ -112,6 +137,7 @@ export async function upsertBookFromMd(
       .single();
 
     if (error) throw error;
+    await logRevision(data.id, userId, "생성");
     return dbToBook(data);
   }
 }
