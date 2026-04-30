@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
-import { Search } from "lucide-react";
+import { Search, Link2, Check } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { toast } from "@/hooks/use-toast";
 import { fetchCategories } from "@/lib/categoryApi";
 import type { BookCategory, BookStatus, SortOption } from "@/types/book";
 
@@ -40,10 +41,22 @@ export function SearchFilter({
   statusCounts,
 }: SearchFilterProps) {
   const [categories, setCategories] = useState<string[]>([]);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     fetchCategories().then((cats) => setCategories(cats.map((c) => c.name)));
   }, []);
+
+  const handleCopyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      setCopied(true);
+      toast({ title: "링크가 복사되었습니다", description: "현재 필터/정렬 상태가 포함된 링크입니다." });
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      toast({ title: "복사 실패", description: "클립보드 권한을 확인해주세요.", variant: "destructive" });
+    }
+  };
 
   return (
     <div className="space-y-4">
@@ -108,7 +121,7 @@ export function SearchFilter({
       {/* Sort & count */}
       <div className="flex items-center justify-between">
         <p className="text-sm text-muted-foreground">{totalCount}권의 도서</p>
-        <div className="flex gap-1">
+        <div className="flex items-center gap-1">
           {SORT_OPTIONS.map((opt) => (
             <Button
               key={opt.value}
@@ -120,6 +133,17 @@ export function SearchFilter({
               {opt.label}
             </Button>
           ))}
+          <span className="mx-1 h-4 w-px bg-border" />
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleCopyLink}
+            className="text-xs gap-1"
+            title="현재 필터/정렬 상태 링크 복사"
+          >
+            {copied ? <Check className="h-3.5 w-3.5" /> : <Link2 className="h-3.5 w-3.5" />}
+            링크 복사
+          </Button>
         </div>
       </div>
     </div>
