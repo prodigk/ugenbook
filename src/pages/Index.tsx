@@ -11,6 +11,7 @@ import {
 } from "@/components/skeletons/MainPageSkeleton";
 import { fetchBooks } from "@/lib/bookApi";
 import { fetchUserLikes } from "@/lib/likesApi";
+import { fetchLatestRevisionMap } from "@/lib/revisionsApi";
 import { useAuth } from "@/contexts/AuthContext";
 import { isAdminEmail } from "@/lib/adminAuth";
 import type { Book, BookCategory, BookStatus, SortOption } from "@/types/book";
@@ -20,6 +21,7 @@ const Index = () => {
   const { user } = useAuth();
   const [books, setBooks] = useState<Book[]>([]);
   const [likedIds, setLikedIds] = useState<Set<string>>(new Set());
+  const [revisionMap, setRevisionMap] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -65,6 +67,12 @@ const Index = () => {
         if (user && isAdminEmail(user.email)) {
           const ids = await fetchUserLikes(user.id);
           setLikedIds(new Set(ids));
+        }
+        try {
+          const map = await fetchLatestRevisionMap(allBooks.map((b) => b.id));
+          setRevisionMap(map);
+        } catch (e) {
+          console.error(e);
         }
       } catch (err) {
         console.error(err);
@@ -216,6 +224,7 @@ const Index = () => {
             book={book}
             index={idx}
             liked={likedIds.has(book.id)}
+            lastRevisionAt={revisionMap[book.id]}
             onToggleLike={handleToggleLike} />
 
           )}
