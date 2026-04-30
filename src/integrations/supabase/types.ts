@@ -14,6 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      book_revisions: {
+        Row: {
+          book_id: string
+          change_type: string
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          book_id: string
+          change_type: string
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          book_id?: string
+          change_type?: string
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       books: {
         Row: {
           author: string
