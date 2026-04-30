@@ -7,6 +7,7 @@ import { MarkdownRenderer } from "@/components/MarkdownRenderer";
 import { BlogExportButtons } from "@/components/BlogExportButtons";
 import { BookTagEditor } from "@/components/BookTagEditor";
 import { BookAdminActions } from "@/components/BookAdminActions";
+import { BookRevisionHistory } from "@/components/BookRevisionHistory";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -405,6 +406,10 @@ const BookDetail = () => {
 
         <div className="rounded-lg border bg-card p-6 sm:p-8">
           <MarkdownRenderer content={book.markdown} />
+        </div>
+
+        <div className="mt-6">
+          <BookRevisionHistory bookId={book.id} />
         </div>
       </main>
     </div>

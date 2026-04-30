@@ -11,14 +11,19 @@ interface BookCardProps {
   book: Book;
   index: number;
   liked?: boolean;
+  lastRevisionAt?: string;
   onToggleLike?: (bookId: string, newLiked: boolean) => void;
 }
 
-export const BookCard = memo(function BookCard({ book, index, liked = false, onToggleLike }: BookCardProps) {
+export const BookCard = memo(function BookCard({ book, index, liked = false, lastRevisionAt, onToggleLike }: BookCardProps) {
   const { user } = useAuth();
   const isAdmin = isAdminEmail(user?.email);
   const [isLiked, setIsLiked] = useState(liked);
   const [toggling, setToggling] = useState(false);
+
+  const isRecentlyUpdated = lastRevisionAt
+    ? Date.now() - new Date(lastRevisionAt).getTime() < 7 * 24 * 60 * 60 * 1000
+    : false;
 
   // Sync with parent prop
   useEffect(() => {setIsLiked(liked);}, [liked]);
@@ -96,6 +101,11 @@ export const BookCard = memo(function BookCard({ book, index, liked = false, onT
               작성중
             </Badge>
             }
+          {isRecentlyUpdated && (
+            <Badge className="text-xs font-normal bg-primary/15 text-primary hover:bg-primary/15">
+              업데이트됨
+            </Badge>
+          )}
         </div>
         </div>
       </div>
