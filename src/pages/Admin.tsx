@@ -224,6 +224,8 @@ const Admin = () => {
           }
         </section>
 
+        <RecentUpdates books={books} />
+
         <CategoryManager books={books} />
 
         <PaginatedBookList books={books} loading={loading} onDelete={handleDelete} onUpdateBooks={setBooks} />
@@ -261,6 +263,56 @@ const Admin = () => {
 };
 
 const ITEMS_PER_PAGE = 15;
+
+function RecentUpdates({ books }: { books: Book[] }) {
+  const recent = useMemo(
+    () =>
+      [...books]
+        .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
+        .slice(0, 5),
+    [books]
+  );
+
+  const formatDateTime = (iso: string) =>
+    new Date(iso).toLocaleString("ko-KR", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+
+  return (
+    <section className="mb-8">
+      <h2 className="mb-3 flex items-center gap-2 font-serif text-lg font-semibold text-foreground">
+        <Clock className="h-4 w-4" />
+        최근 업데이트
+      </h2>
+      {recent.length === 0 ? (
+        <p className="text-sm text-muted-foreground">업데이트된 파일이 없습니다.</p>
+      ) : (
+        <ul className="space-y-1.5 rounded-lg border bg-card p-3">
+          {recent.map((b) => (
+            <li
+              key={b.id}
+              className="flex items-center justify-between gap-3 rounded-md px-2 py-1.5 text-sm hover:bg-muted/40"
+            >
+              <Link
+                to={`/book/${b.id}`}
+                className="truncate font-medium text-foreground hover:text-primary hover:underline"
+              >
+                {b.fileName || b.title}
+              </Link>
+              <span className="shrink-0 text-xs text-muted-foreground">
+                {formatDateTime(b.updatedAt)}
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  );
+}
 
 function PaginatedBookList({
   books,
