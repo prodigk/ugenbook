@@ -21,6 +21,7 @@ import { toast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { isAdminEmail } from "@/lib/adminAuth";
 import { fetchBooks, upsertBookFromMd, deleteBookById, updateBookFields, checkDuplicateFileNames } from "@/lib/bookApi";
+import { supabase } from "@/integrations/supabase/client";
 import { BookTagEditor } from "@/components/BookTagEditor";
 import { CategoryManager } from "@/components/CategoryManager";
 import { downloadBooksAsZip } from "@/lib/bookExport";
@@ -265,13 +266,43 @@ const Admin = () => {
 const ITEMS_PER_PAGE = 15;
 
 function RecentUpdates({ books }: { books: Book[] }) {
-  const recent = useMemo(
-    () =>
-      [...books]
-        .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
-        .slice(0, 5),
-    [books]
-  );
+  const [recent, setRecent] = useState<Array<{ id: string; fileName: string; title: string; uploadedAt: string }>>([]);
+
+  useEffect(() => {
+    if (books.length === 0) {
+      setRecent([]);
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      const { data, error } = await supabase
+        .from("book_revisions")
+        .select("book_id, created_at, change_type")
+        .in("change_type", ["생성", "본문 수정"])
+        .order("created_at", { ascending: false })
+        .limit(200);
+      if (cancelled || error) return;
+      const seen = new Set<string>();
+      const items: Array<{ id: string; fileName: string; title: string; uploadedAt: string }> = [];
+      for (const r of data || []) {
+        if (seen.has(r.book_id)) continue;
+        const book = books.find((b) => b.id === r.book_id);
+        if (!book) continue;
+        seen.add(r.book_id);
+        items.push({
+          id: book.id,
+          fileName: book.fileName || book.title,
+          title: book.title,
+          uploadedAt: r.created_at,
+        });
+        if (items.length >= 5) break;
+      }
+      setRecent(items);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [books]);
 
   const formatDateTime = (iso: string) =>
     new Date(iso).toLocaleString("ko-KR", {
@@ -301,10 +332,10 @@ function RecentUpdates({ books }: { books: Book[] }) {
                 to={`/book/${b.id}`}
                 className="truncate font-medium text-foreground hover:text-primary hover:underline"
               >
-                {b.fileName || b.title}
+                {b.fileName}
               </Link>
               <span className="shrink-0 text-xs text-muted-foreground">
-                {formatDateTime(b.updatedAt)}
+                {formatDateTime(b.uploadedAt)}
               </span>
             </li>
           ))}
