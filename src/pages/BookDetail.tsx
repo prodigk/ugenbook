@@ -1,3 +1,4 @@
+import { BookRevisionHistory } from "@/components/BookRevisionHistory";
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { ArrowLeft, ImageIcon, Check, X, Pencil, Sparkles, Loader2, CalendarIcon } from "lucide-react";
@@ -406,6 +407,12 @@ const BookDetail = () => {
         <div className="rounded-lg border bg-card p-6 sm:p-8">
           <MarkdownRenderer content={book.markdown} />
         </div>
+
+        {false && (
+          <div className="mt-6">
+            <BookRevisionHistory bookId={book.id} />
+          </div>
+        )}
       </main>
     </div>
   );
