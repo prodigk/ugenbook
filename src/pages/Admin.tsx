@@ -280,22 +280,18 @@ function RecentUpdates({ books }: { books: Book[] }) {
         .select("book_id, created_at, change_type")
         .in("change_type", ["생성", "본문 수정"])
         .order("created_at", { ascending: false })
-        .limit(200);
+        .limit(5);
       if (cancelled || error) return;
-      const seen = new Set<string>();
       const items: Array<{ id: string; fileName: string; title: string; uploadedAt: string }> = [];
       for (const r of data || []) {
-        if (seen.has(r.book_id)) continue;
         const book = books.find((b) => b.id === r.book_id);
         if (!book) continue;
-        seen.add(r.book_id);
         items.push({
           id: book.id,
           fileName: book.fileName || book.title,
           title: book.title,
           uploadedAt: r.created_at,
         });
-        if (items.length >= 5) break;
       }
       setRecent(items);
     })();
@@ -325,7 +321,7 @@ function RecentUpdates({ books }: { books: Book[] }) {
         <ul className="space-y-1.5 rounded-lg border bg-card p-3">
           {recent.map((b) => (
             <li
-              key={b.id}
+              key={`${b.id}-${b.uploadedAt}`}
               className="flex items-center justify-between gap-3 rounded-md px-2 py-1.5 text-sm hover:bg-muted/40"
             >
               <Link
