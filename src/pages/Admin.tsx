@@ -321,7 +321,7 @@ function RecentUpdates({ books }: { books: Book[] }) {
         <ul className="space-y-1.5 rounded-lg border bg-card p-3">
           {recent.map((b) => (
             <li
-              key={b.id}
+              key={`${b.id}-${b.uploadedAt}`}
               className="flex items-center justify-between gap-3 rounded-md px-2 py-1.5 text-sm hover:bg-muted/40"
             >
               <Link
