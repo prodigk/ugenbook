@@ -24,6 +24,7 @@ import { fetchBooks, upsertBookFromMd, deleteBookById, updateBookFields, checkDu
 import { supabase } from "@/integrations/supabase/client";
 import { BookTagEditor } from "@/components/BookTagEditor";
 import { CategoryManager } from "@/components/CategoryManager";
+import { MainSortModeManager } from "@/components/MainSortModeManager";
 import { downloadBooksAsZip } from "@/lib/bookExport";
 import type { Book } from "@/types/book";
 
@@ -226,6 +227,8 @@ const Admin = () => {
         </section>
 
         <RecentUpdates books={books} />
+
+        <MainSortModeManager />
 
         <CategoryManager books={books} />
 
