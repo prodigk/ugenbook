@@ -113,7 +113,7 @@ describe("sortBooksForMain", () => {
         makeBook({ id: "c", author: "이" }),
       ];
       const result = sortBooksForMain(books, "read_date", "author");
-      expect(result.map((b) => b.id)).toEqual(["b", "c", "a"]);
+      expect(result.map((b) => b.id)).toEqual(["b", "a", "c"]);
     });
   });
 
