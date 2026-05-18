@@ -13,6 +13,7 @@ import { fetchBooks } from "@/lib/bookApi";
 import { fetchUserLikes } from "@/lib/likesApi";
 import { fetchLatestRevisionMap } from "@/lib/revisionsApi";
 import { fetchMainSortMode, DEFAULT_MAIN_SORT_MODE, type MainSortMode } from "@/lib/settingsApi";
+import { sortBooksForMain } from "@/lib/mainSort";
 import { useAuth } from "@/contexts/AuthContext";
 import { isAdminEmail } from "@/lib/adminAuth";
 import type { Book, BookCategory, BookStatus, SortOption } from "@/types/book";
@@ -155,35 +156,7 @@ const Index = () => {
       result = result.filter((b) => b.status === selectedStatus);
     }
 
-    const statusPriority = (s: string) => (s === "작성중" ? 0 : s === "완료" ? 1 : 2);
-    const readTime = (b: Book) => (b.readDate ? new Date(b.readDate + "T00:00:00").getTime() : 0);
-    const updatedTime = (b: Book) => new Date(b.updatedAt).getTime();
-
-    const userSort = (a: Book, b: Book) => {
-      switch (sortOption) {
-        case "title":
-          return a.title.localeCompare(b.title, "ko");
-        case "author":
-          return a.author.localeCompare(b.author, "ko");
-        case "newest":
-        default:
-          // 관리자 설정에 따른 기본 정렬
-          if (mainSortMode === "read_date") return readTime(b) - readTime(a);
-          if (mainSortMode === "updated") return updatedTime(b) - updatedTime(a);
-          return readTime(b) - readTime(a);
-      }
-    };
-
-    result = [...result].sort((a, b) => {
-      // 상태값 우선 모드일 때만 상태 우선 정렬
-      if (mainSortMode === "status_read_date" && sortOption === "newest") {
-        const sp = statusPriority(a.status) - statusPriority(b.status);
-        if (sp !== 0) return sp;
-      }
-      return userSort(a, b);
-    });
-
-    return result;
+    return sortBooksForMain(result, mainSortMode, sortOption);
   }, [visibleBooks, query, selectedCategory, selectedStatus, sortOption, mainSortMode]);
 
   return (
