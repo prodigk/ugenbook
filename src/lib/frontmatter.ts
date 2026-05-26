@@ -92,7 +92,8 @@ export function mdToBook(fileName: string, raw: string): Book {
   // Strip leading '@' from title if present
   const cleanTitle = title.replace(/^@\s*/, "").trim();
 
-  const author = (data.author as string) || (data.Author as string) || (data.bookauthor as string) || "미상";
+  const rawAuthor = data.author ?? data.Author ?? data.bookauthor;
+  const author = normalizeAuthor(rawAuthor) || "미상";
   const bookcover = (data.bookcover as string) || "";
   const status = (data.status as string) === "완료" ? "완료" : "작성중";
   const category = (data.category as BookCategory) || inferCategory(cleanTitle, tags, content);
