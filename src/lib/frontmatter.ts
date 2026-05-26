@@ -71,6 +71,21 @@ function inferCategory(title: string, tags: string[], content: string): BookCate
   return "기타";
 }
 
+function normalizeAuthor(value: unknown): string {
+  if (value == null) return "";
+  let s = Array.isArray(value) ? value.join(", ") : String(value);
+  s = s.trim();
+  // Strip wrapping brackets like [ ... ] repeatedly
+  while (/^\[.*\]$/.test(s)) s = s.slice(1, -1).trim();
+  // Split by comma, strip quotes/brackets per item, rejoin
+  s = s
+    .split(",")
+    .map((p) => p.trim().replace(/^["'\[\]]+|["'\[\]]+$/g, "").trim())
+    .filter(Boolean)
+    .join(", ");
+  return s;
+}
+
 export function mdToBook(fileName: string, raw: string): Book {
   const { data, content } = parseFrontmatter(raw);
 
@@ -92,7 +107,8 @@ export function mdToBook(fileName: string, raw: string): Book {
   // Strip leading '@' from title if present
   const cleanTitle = title.replace(/^@\s*/, "").trim();
 
-  const author = (data.author as string) || (data.Author as string) || (data.bookauthor as string) || "미상";
+  const rawAuthor = data.author ?? data.Author ?? data.bookauthor;
+  const author = normalizeAuthor(rawAuthor) || "미상";
   const bookcover = (data.bookcover as string) || "";
   const status = (data.status as string) === "완료" ? "완료" : "작성중";
   const category = (data.category as BookCategory) || inferCategory(cleanTitle, tags, content);
