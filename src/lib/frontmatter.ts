@@ -72,6 +72,23 @@ function inferCategory(title: string, tags: string[], content: string): BookCate
 }
 
 export function mdToBook(fileName: string, raw: string): Book {
+
+function normalizeAuthor(value: unknown): string {
+  if (value == null) return "";
+  let s = Array.isArray(value) ? value.join(", ") : String(value);
+  s = s.trim();
+  // Strip wrapping brackets like [ ... ] repeatedly
+  while (/^\[.*\]$/.test(s)) s = s.slice(1, -1).trim();
+  // Split by comma, strip quotes/brackets per item, rejoin
+  s = s
+    .split(",")
+    .map((p) => p.trim().replace(/^["'\[\]]+|["'\[\]]+$/g, "").trim())
+    .filter(Boolean)
+    .join(", ");
+  return s;
+}
+
+export function mdToBook2(fileName: string, raw: string): Book {
   const { data, content } = parseFrontmatter(raw);
 
   const tags = Array.isArray(data.tags)
