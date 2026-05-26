@@ -71,8 +71,6 @@ function inferCategory(title: string, tags: string[], content: string): BookCate
   return "기타";
 }
 
-export function mdToBook(fileName: string, raw: string): Book {
-
 function normalizeAuthor(value: unknown): string {
   if (value == null) return "";
   let s = Array.isArray(value) ? value.join(", ") : String(value);
@@ -88,7 +86,7 @@ function normalizeAuthor(value: unknown): string {
   return s;
 }
 
-export function mdToBook2(fileName: string, raw: string): Book {
+export function mdToBook(fileName: string, raw: string): Book {
   const { data, content } = parseFrontmatter(raw);
 
   const tags = Array.isArray(data.tags)
