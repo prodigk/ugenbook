@@ -71,7 +71,7 @@ function inferCategory(title: string, tags: string[], content: string): BookCate
   return "기타";
 }
 
-function normalizeAuthor(value: unknown): string {
+export function normalizeAuthor(value: unknown): string {
   if (value == null) return "";
   let s = Array.isArray(value) ? value.join(", ") : String(value);
   s = s.trim();
