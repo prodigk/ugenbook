@@ -25,6 +25,8 @@ export const BookCard = memo(function BookCard({ book, index, liked = false, las
     ? Date.now() - new Date(lastRevisionAt).getTime() < 7 * 24 * 60 * 60 * 1000
     : false;
 
+  const hasMamaTag = book.tags.some((t) => t === "엄마");
+
   // Sync with parent prop
   useEffect(() => {setIsLiked(liked);}, [liked]);
 
