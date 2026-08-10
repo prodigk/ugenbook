@@ -1,0 +1,156 @@
+{
+  "version": 1,
+  "sdk_version": "0.26.1",
+  "path": "/functions/v1/mcp",
+  "auth": {
+    "type": "oauth",
+    "issuer": "https://bdlcjyrhbtbobdkahvus.supabase.co/auth/v1",
+    "accepted_audiences": [
+      "authenticated"
+    ]
+  },
+  "mcp": {
+    "server": {
+      "name": "bookreview-sync",
+      "version": "0.1.0",
+      "title": "BookReview Sync"
+    },
+    "tools": [
+      {
+        "name": "search_books",
+        "title": "Search books",
+        "description": "Search the reading library for books by title, author, or tag. Returns metadata (title, author, category, status, read date), not the full note body.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "query": {
+              "type": "string",
+              "description": "Text matched against title and author."
+            },
+            "status": {
+              "type": "string",
+              "enum": [
+                "작성중",
+                "완료",
+                "대기"
+              ],
+              "description": "Filter by writing status."
+            },
+            "category": {
+              "type": "string",
+              "description": "Filter by category name."
+            },
+            "limit": {
+              "type": "integer",
+              "description": "Max rows to return (default 20, max 100)."
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "get_book",
+        "title": "Get book note",
+        "description": "Fetch one book from the reading library including its full markdown reading note. Look up by id, or by exact title.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "Book id (uuid)."
+            },
+            "title": {
+              "type": "string",
+              "description": "Exact book title, used when no id is given."
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_categories",
+        "title": "List categories",
+        "description": "List the reading library's categories in their configured display order.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {}
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "update_book_metadata",
+        "title": "Update book metadata",
+        "description": "Update metadata for one book in the reading library: status, category, read date, tags, or visibility. Only the library owner can do this.",
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "Book id (uuid)."
+            },
+            "status": {
+              "type": "string",
+              "enum": [
+                "작성중",
+                "완료",
+                "대기"
+              ],
+              "description": "New writing status."
+            },
+            "category": {
+              "type": "string",
+              "description": "New category name."
+            },
+            "read_date": {
+              "type": "string",
+              "description": "Read date as YYYY-MM-DD."
+            },
+            "tags": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Replacement tag list."
+            },
+            "is_hidden": {
+              "type": "boolean",
+              "description": "Hide the book from the public library."
+            }
+          },
+          "required": [
+            "id"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}
