@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { isAdminEmail } from "@/lib/adminAuth";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,9 @@ import { toast } from "@/hooks/use-toast";
 const Login = () => {
   const { signIn } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const rawNext = searchParams.get("next") ?? "";
+  const next = /^\/(?!\/)/.test(rawNext) ? rawNext : "";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -31,7 +34,8 @@ const Login = () => {
     if (error) {
       toast({ title: "오류", description: error.message, variant: "destructive" });
     } else {
-      navigate("/admin");
+      if (next) window.location.href = next;
+      else navigate("/admin");
     }
   };
 
