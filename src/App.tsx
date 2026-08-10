@@ -10,6 +10,7 @@ import BookDetail from "./pages/BookDetail";
 import Admin from "./pages/Admin";
 import Login from "./pages/Login";
 import Likes from "./pages/Likes";
+import OAuthConsent from "./pages/OAuthConsent";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,6 +29,7 @@ const App = () => (
               <Route path="/admin" element={<Admin />} />
               <Route path="/login" element={<Login />} />
               <Route path="/likes" element={<Likes />} />
+              <Route path="/.lovable/oauth/consent" element={<OAuthConsent />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </AuthProvider>
