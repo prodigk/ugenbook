@@ -203,6 +203,12 @@ const Admin = () => {
           </Button>
         </div>
 
+        <div className="mb-6">
+          <Button variant="outline" size="sm" asChild>
+            <Link to="/mcp">에이전트 연동 (MCP) 문서</Link>
+          </Button>
+        </div>
+
         <section className="mb-8">
           <h2 className="mb-3 font-serif text-lg font-semibold text-foreground">
             마크다운 파일 업로드
