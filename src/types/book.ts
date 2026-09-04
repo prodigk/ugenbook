@@ -36,4 +36,4 @@ export interface PublishRecord {
   publishUrl?: string;
 }
 
-export type SortOption = "newest" | "author" | "title";
+export type SortOption = "newest" | "author" | "title" | "dateGroup";
