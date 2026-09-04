@@ -273,6 +273,7 @@ const Index = () => {
 
           )}
               </div>
+              )
             ) : (
               <div className="mt-16 flex flex-col items-center justify-center text-center">
             <p className="font-serif text-xl text-muted-foreground">
