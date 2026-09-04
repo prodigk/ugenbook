@@ -157,8 +157,32 @@ const Index = () => {
       result = result.filter((b) => b.status === selectedStatus);
     }
 
-    return sortBooksForMain(result, mainSortMode, sortOption);
+    return sortBooksForMain(result, mainSortMode, sortOption === "dateGroup" ? "newest" : sortOption);
   }, [visibleBooks, query, selectedCategory, selectedStatus, sortOption, mainSortMode]);
+
+  // 연/월별 보기: 읽은 날짜 기준 연도(크게) > 월(작게) 그룹, 최신순
+  const dateGroups = useMemo(() => {
+    if (sortOption !== "dateGroup") return [];
+    const byTime = (a: Book, b: Book) => {
+      const aT = a.readDate ? new Date(a.readDate + "T00:00:00").getTime() : 0;
+      const bT = b.readDate ? new Date(b.readDate + "T00:00:00").getTime() : 0;
+      return bT - aT;
+    };
+    const sorted = [...filteredBooks].sort(byTime);
+    const years: { year: string; months: { month: string; books: Book[] }[] }[] = [];
+    const noDate: Book[] = [];
+    sorted.forEach((b) => {
+      if (!b.readDate) { noDate.push(b); return; }
+      const [y, m] = b.readDate.split("-");
+      let yg = years.find((g) => g.year === y);
+      if (!yg) { yg = { year: y, months: [] }; years.push(yg); }
+      let mg = yg.months.find((g) => g.month === m);
+      if (!mg) { mg = { month: m, books: [] }; yg.months.push(mg); }
+      mg.books.push(b);
+    });
+    if (noDate.length) years.push({ year: "날짜 미지정", months: [{ month: "", books: noDate }] });
+    return years;
+  }, [filteredBooks, sortOption]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -204,6 +228,39 @@ const Index = () => {
             />
 
             {filteredBooks.length > 0 ? (
+              sortOption === "dateGroup" ? (
+              <div className="mt-8 space-y-10">
+                {dateGroups.map((yg) => (
+                  <section key={yg.year}>
+                    <h2 className="mb-4 font-serif text-2xl font-bold text-foreground border-b pb-2">
+                      {yg.year === "날짜 미지정" ? yg.year : `${yg.year}년`}
+                    </h2>
+                    <div className="space-y-6">
+                      {yg.months.map((mg) => (
+                        <div key={mg.month || "nodate"}>
+                          {mg.month && (
+                            <h3 className="mb-3 font-serif text-base font-semibold text-muted-foreground">
+                              {Number(mg.month)}월
+                            </h3>
+                          )}
+                          <div className="grid grid-cols-2 gap-6 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+                            {mg.books.map((book, idx) => (
+                              <BookCard
+                                key={book.id}
+                                book={book}
+                                index={idx}
+                                liked={likedIds.has(book.id)}
+                                lastRevisionAt={revisionMap[book.id]}
+                                onToggleLike={handleToggleLike} />
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </section>
+                ))}
+              </div>
+              ) : (
               <div className="mt-8 grid grid-cols-2 gap-6 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
             {filteredBooks.map((book, idx) =>
           <BookCard
@@ -216,6 +273,7 @@ const Index = () => {
 
           )}
               </div>
+              )
             ) : (
               <div className="mt-16 flex flex-col items-center justify-center text-center">
             <p className="font-serif text-xl text-muted-foreground">

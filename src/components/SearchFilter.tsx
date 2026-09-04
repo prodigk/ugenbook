@@ -11,6 +11,7 @@ const SORT_OPTIONS: { value: SortOption; label: string }[] = [
   { value: "newest", label: "최신순" },
   { value: "title", label: "제목순" },
   { value: "author", label: "저자순" },
+  { value: "dateGroup", label: "연/월별" },
 ];
 
 interface SearchFilterProps {
