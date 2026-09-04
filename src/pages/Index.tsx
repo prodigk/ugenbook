@@ -157,8 +157,32 @@ const Index = () => {
       result = result.filter((b) => b.status === selectedStatus);
     }
 
-    return sortBooksForMain(result, mainSortMode, sortOption);
+    return sortBooksForMain(result, mainSortMode, sortOption === "dateGroup" ? "newest" : sortOption);
   }, [visibleBooks, query, selectedCategory, selectedStatus, sortOption, mainSortMode]);
+
+  // 연/월별 보기: 읽은 날짜 기준 연도(크게) > 월(작게) 그룹, 최신순
+  const dateGroups = useMemo(() => {
+    if (sortOption !== "dateGroup") return [];
+    const byTime = (a: Book, b: Book) => {
+      const aT = a.readDate ? new Date(a.readDate + "T00:00:00").getTime() : 0;
+      const bT = b.readDate ? new Date(b.readDate + "T00:00:00").getTime() : 0;
+      return bT - aT;
+    };
+    const sorted = [...filteredBooks].sort(byTime);
+    const years: { year: string; months: { month: string; books: Book[] }[] }[] = [];
+    const noDate: Book[] = [];
+    sorted.forEach((b) => {
+      if (!b.readDate) { noDate.push(b); return; }
+      const [y, m] = b.readDate.split("-");
+      let yg = years.find((g) => g.year === y);
+      if (!yg) { yg = { year: y, months: [] }; years.push(yg); }
+      let mg = yg.months.find((g) => g.month === m);
+      if (!mg) { mg = { month: m, books: [] }; yg.months.push(mg); }
+      mg.books.push(b);
+    });
+    if (noDate.length) years.push({ year: "날짜 미지정", months: [{ month: "", books: noDate }] });
+    return years;
+  }, [filteredBooks, sortOption]);
 
   return (
     <div className="min-h-screen bg-background">
