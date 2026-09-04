@@ -228,6 +228,39 @@ const Index = () => {
             />
 
             {filteredBooks.length > 0 ? (
+              sortOption === "dateGroup" ? (
+              <div className="mt-8 space-y-10">
+                {dateGroups.map((yg) => (
+                  <section key={yg.year}>
+                    <h2 className="mb-4 font-serif text-2xl font-bold text-foreground border-b pb-2">
+                      {yg.year === "날짜 미지정" ? yg.year : `${yg.year}년`}
+                    </h2>
+                    <div className="space-y-6">
+                      {yg.months.map((mg) => (
+                        <div key={mg.month || "nodate"}>
+                          {mg.month && (
+                            <h3 className="mb-3 font-serif text-base font-semibold text-muted-foreground">
+                              {Number(mg.month)}월
+                            </h3>
+                          )}
+                          <div className="grid grid-cols-2 gap-6 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+                            {mg.books.map((book, idx) => (
+                              <BookCard
+                                key={book.id}
+                                book={book}
+                                index={idx}
+                                liked={likedIds.has(book.id)}
+                                lastRevisionAt={revisionMap[book.id]}
+                                onToggleLike={handleToggleLike} />
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </section>
+                ))}
+              </div>
+              ) : (
               <div className="mt-8 grid grid-cols-2 gap-6 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
             {filteredBooks.map((book, idx) =>
           <BookCard
