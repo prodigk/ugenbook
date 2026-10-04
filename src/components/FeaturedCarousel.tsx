@@ -34,30 +34,38 @@ function getPreview(markdown: string, maxLen = 80): string {
 }
 
 const statusStyle: Record<string, string> = {
-  "작성중": "bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300",
-  "대기": "bg-muted text-muted-foreground",
-  "완료": "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300",
+  작성중:
+    "bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300",
+  대기: "bg-muted text-muted-foreground",
+  완료: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300",
 };
 
 export function FeaturedCarousel({ books }: FeaturedCarouselProps) {
   if (books.length === 0) return null;
 
   return (
-    <div className="mb-6">
-      <Carousel opts={{ align: "start", loop: books.length > 1 }} className="w-full">
-        <CarouselContent className="-ml-3 py-2">
+    <div className="featured-shelf">
+      <div className="featured-title">
+        <div>
+          <p className="mono-label">ON MY DESK</p>
+          <h2>요즘, 책장 위에는.</h2>
+        </div>
+        <span>최근 읽고 기록한 책들</span>
+      </div>
+      <Carousel
+        opts={{ align: "start", loop: books.length > 1 }}
+        className="w-full"
+      >
+        <CarouselContent className="-ml-6">
           {books.map((book) => {
             const preview = getPreview(book.markdown);
             return (
-              <CarouselItem key={book.id} className="pl-3 basis-full md:basis-1/2 lg:basis-2/5">
+              <CarouselItem
+                key={book.id}
+                className="pl-6 basis-full md:basis-1/2 lg:basis-1/3"
+              >
                 <Link to={`/book/${book.id}`} className="block">
-                  <div className={`flex gap-4 rounded-lg border-2 bg-card p-4 transition-transform hover:scale-[1.02] hover:shadow-md ${
-                    book.status === "작성중"
-                      ? "border-amber-300/50 dark:border-amber-500/50"
-                      : book.status === "대기"
-                      ? "border-violet-300/50 dark:border-violet-500/50"
-                      : "border-border"
-                  }`}>
+                  <div className="featured-book">
                     {/* Cover */}
                     <div className="w-20 shrink-0">
                       {book.bookcover ? (
@@ -77,20 +85,25 @@ export function FeaturedCarousel({ books }: FeaturedCarouselProps) {
 
                     {/* Info */}
                     <div className="flex min-w-0 flex-1 flex-col gap-1">
-                      <h3 className="font-serif text-base font-bold text-foreground line-clamp-1">
+                      <h3 className="font-serif text-lg font-normal text-white line-clamp-2">
                         {book.title}
                       </h3>
                       <div className="flex flex-wrap items-center gap-1.5">
-                        <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
+                        <Badge
+                          variant="secondary"
+                          className="text-[10px] px-1.5 py-0"
+                        >
                           {book.category}
                         </Badge>
-                        <Badge className={`text-[10px] px-1.5 py-0 border-0 ${statusStyle[book.status] || ""}`}>
+                        <Badge
+                          className={`text-[10px] px-1.5 py-0 border-0 ${statusStyle[book.status] || ""}`}
+                        >
                           {book.status}
                         </Badge>
                       </div>
-                      <p className="text-xs text-muted-foreground">{book.author}</p>
+                      <p className="text-xs text-white/65">{book.author}</p>
                       {preview && (
-                        <p className="mt-auto text-xs text-muted-foreground/80 line-clamp-2 leading-relaxed">
+                        <p className="mt-auto text-xs text-white/65 line-clamp-2 leading-relaxed">
                           {preview}
                         </p>
                       )}
@@ -103,8 +116,14 @@ export function FeaturedCarousel({ books }: FeaturedCarouselProps) {
         </CarouselContent>
         {books.length > 1 && (
           <>
-            <CarouselPrevious className="-left-4 h-7 w-7" />
-            <CarouselNext className="-right-4 h-7 w-7" />
+            <CarouselPrevious
+              aria-label="이전 추천 도서"
+              className="featured-prev"
+            />
+            <CarouselNext
+              aria-label="다음 추천 도서"
+              className="featured-next"
+            />
           </>
         )}
       </Carousel>

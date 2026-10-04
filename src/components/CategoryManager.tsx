@@ -50,7 +50,14 @@ function SortableCategoryItem({
   onDelete: (cat: Category) => void;
   bookCount: number;
 }) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: cat.id });
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: cat.id });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -62,14 +69,20 @@ function SortableCategoryItem({
     <div
       ref={setNodeRef}
       style={style}
-      className="flex items-center justify-between rounded-lg border bg-card p-2 gap-1.5"
+      className="category-manager-row flex items-center justify-between gap-2"
     >
       <div className="flex items-center gap-1.5 min-w-0 flex-1">
-        <button {...attributes} {...listeners} className="cursor-grab active:cursor-grabbing touch-none shrink-0">
+        <button
+          aria-label={`${cat.name} 순서 변경`}
+          {...attributes}
+          {...listeners}
+          className="cursor-grab active:cursor-grabbing touch-none shrink-0"
+        >
           <GripVertical className="h-3.5 w-3.5 text-muted-foreground/40" />
         </button>
         {editingId === cat.id ? (
           <Input
+            aria-label="카테고리 이름 수정"
             value={editingName}
             onChange={(e) => setEditingName(e.target.value)}
             onKeyDown={(e) => {
@@ -81,30 +94,53 @@ function SortableCategoryItem({
           />
         ) : (
           <>
-            <span className="text-sm font-medium text-foreground truncate">{cat.name}</span>
-            <span className="text-xs text-muted-foreground ml-1 shrink-0">{bookCount}</span>
+            <span className="text-sm font-medium text-foreground truncate">
+              {cat.name}
+            </span>
+            <span className="text-xs text-muted-foreground ml-1 shrink-0">
+              {bookCount}
+            </span>
           </>
         )}
       </div>
       <div className="flex items-center gap-0.5 shrink-0">
         {editingId === cat.id ? (
           <>
-            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => onUpdate(cat.id)}>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-6 w-6"
+              aria-label="카테고리 저장"
+              onClick={() => onUpdate(cat.id)}
+            >
               <Check className="h-3 w-3 text-primary" />
             </Button>
-            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={onCancelEdit}>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-6 w-6"
+              aria-label="카테고리 편집 취소"
+              onClick={onCancelEdit}
+            >
               <X className="h-3 w-3" />
             </Button>
           </>
         ) : (
           <>
-            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => onStartEdit(cat)}>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-6 w-6"
+              aria-label={`${cat.name} 수정`}
+              onClick={() => onStartEdit(cat)}
+            >
               <Pencil className="h-3 w-3" />
             </Button>
             <Button
               variant="ghost"
               size="icon"
               className="h-6 w-6 text-destructive hover:text-destructive"
+              aria-label={`${cat.name} 삭제`}
               onClick={() => onDelete(cat)}
             >
               <Trash2 className="h-3 w-3" />
@@ -125,7 +161,9 @@ export function CategoryManager({ books = [] }: { books?: Book[] }) {
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
-    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    }),
   );
 
   const load = async () => {
@@ -133,13 +171,19 @@ export function CategoryManager({ books = [] }: { books?: Book[] }) {
       const data = await fetchCategories();
       setCategories(data);
     } catch (err) {
-      toast({ title: "카테고리 로딩 실패", description: String(err), variant: "destructive" });
+      toast({
+        title: "카테고리 로딩 실패",
+        description: String(err),
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    load();
+  }, []);
 
   const handleAdd = async () => {
     const name = newName.trim();
@@ -149,13 +193,20 @@ export function CategoryManager({ books = [] }: { books?: Book[] }) {
       return;
     }
     try {
-      const maxOrder = categories.reduce((m, c) => Math.max(m, c.sort_order), 0);
+      const maxOrder = categories.reduce(
+        (m, c) => Math.max(m, c.sort_order),
+        0,
+      );
       await addCategory(name, maxOrder + 1);
       setNewName("");
       await load();
       toast({ title: `"${name}" 카테고리가 추가되었습니다` });
     } catch (err) {
-      toast({ title: "추가 실패", description: String(err), variant: "destructive" });
+      toast({
+        title: "추가 실패",
+        description: String(err),
+        variant: "destructive",
+      });
     }
   };
 
@@ -172,18 +223,31 @@ export function CategoryManager({ books = [] }: { books?: Book[] }) {
       await load();
       toast({ title: "카테고리가 수정되었습니다" });
     } catch (err) {
-      toast({ title: "수정 실패", description: String(err), variant: "destructive" });
+      toast({
+        title: "수정 실패",
+        description: String(err),
+        variant: "destructive",
+      });
     }
   };
 
   const handleDelete = async (cat: Category) => {
-    if (!confirm(`"${cat.name}" 카테고리를 삭제하시겠습니까?\n이 카테고리가 지정된 도서는 영향을 받지 않습니다.`)) return;
+    if (
+      !confirm(
+        `"${cat.name}" 카테고리를 삭제하시겠습니까?\n이 카테고리가 지정된 도서는 영향을 받지 않습니다.`,
+      )
+    )
+      return;
     try {
       await deleteCategory(cat.id);
       await load();
       toast({ title: `"${cat.name}" 카테고리가 삭제되었습니다` });
     } catch (err) {
-      toast({ title: "삭제 실패", description: String(err), variant: "destructive" });
+      toast({
+        title: "삭제 실패",
+        description: String(err),
+        variant: "destructive",
+      });
     }
   };
 
@@ -201,10 +265,14 @@ export function CategoryManager({ books = [] }: { books?: Book[] }) {
     // Persist new sort_order values
     try {
       await Promise.all(
-        reordered.map((cat, i) => updateCategory(cat.id, { sort_order: i }))
+        reordered.map((cat, i) => updateCategory(cat.id, { sort_order: i })),
       );
     } catch (err) {
-      toast({ title: "순서 변경 실패", description: String(err), variant: "destructive" });
+      toast({
+        title: "순서 변경 실패",
+        description: String(err),
+        variant: "destructive",
+      });
       await load();
     }
   };
@@ -222,6 +290,7 @@ export function CategoryManager({ books = [] }: { books?: Book[] }) {
 
       <div className="flex gap-2 mb-4">
         <Input
+          aria-label="새 카테고리 이름"
           placeholder="새 카테고리 이름"
           value={newName}
           onChange={(e) => setNewName(e.target.value)}
@@ -237,11 +306,20 @@ export function CategoryManager({ books = [] }: { books?: Book[] }) {
       {loading ? (
         <p className="text-sm text-muted-foreground">불러오는 중...</p>
       ) : categories.length === 0 ? (
-        <p className="text-sm text-muted-foreground">등록된 카테고리가 없습니다.</p>
+        <p className="text-sm text-muted-foreground">
+          등록된 카테고리가 없습니다.
+        </p>
       ) : (
-        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-          <SortableContext items={categories.map((c) => c.id)} strategy={rectSortingStrategy}>
-            <div className="grid grid-cols-2 gap-1.5">
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+        >
+          <SortableContext
+            items={categories.map((c) => c.id)}
+            strategy={rectSortingStrategy}
+          >
+            <div className="category-manager-grid">
               {categories.map((cat) => (
                 <SortableCategoryItem
                   key={cat.id}
@@ -253,7 +331,9 @@ export function CategoryManager({ books = [] }: { books?: Book[] }) {
                   onUpdate={handleUpdate}
                   onCancelEdit={() => setEditingId(null)}
                   onDelete={handleDelete}
-                  bookCount={books.filter((b) => b.category === cat.name).length}
+                  bookCount={
+                    books.filter((b) => b.category === cat.name).length
+                  }
                 />
               ))}
             </div>

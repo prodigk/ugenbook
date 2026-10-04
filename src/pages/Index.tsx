@@ -12,26 +12,34 @@ import {
 import { fetchBooks } from "@/lib/bookApi";
 import { fetchUserLikes } from "@/lib/likesApi";
 import { fetchLatestRevisionMap } from "@/lib/revisionsApi";
-import { fetchMainSortMode, DEFAULT_MAIN_SORT_MODE, type MainSortMode } from "@/lib/settingsApi";
+import {
+  fetchMainSortMode,
+  DEFAULT_MAIN_SORT_MODE,
+  type MainSortMode,
+} from "@/lib/settingsApi";
 import { sortBooksForMain } from "@/lib/mainSort";
 import { useAuth } from "@/contexts/AuthContext";
 import { isAdminEmail } from "@/lib/adminAuth";
 import type { Book, BookCategory, BookStatus, SortOption } from "@/types/book";
-import ugenSymbol from "@/assets/ugen-symbol.png";
 
 const Index = () => {
   const { user } = useAuth();
   const [books, setBooks] = useState<Book[]>([]);
   const [likedIds, setLikedIds] = useState<Set<string>>(new Set());
   const [revisionMap, setRevisionMap] = useState<Record<string, string>>({});
-  const [mainSortMode, setMainSortMode] = useState<MainSortMode>(DEFAULT_MAIN_SORT_MODE);
+  const [mainSortMode, setMainSortMode] = useState<MainSortMode>(
+    DEFAULT_MAIN_SORT_MODE,
+  );
   const [loading, setLoading] = useState(true);
   const [searchParams, setSearchParams] = useSearchParams();
 
   const query = searchParams.get("q") ?? "";
-  const selectedCategory = (searchParams.get("category") as BookCategory | null) || null;
-  const selectedStatus = (searchParams.get("status") as BookStatus | null) || null;
-  const sortOption = ((searchParams.get("sort") as SortOption) || "newest") as SortOption;
+  const selectedCategory =
+    (searchParams.get("category") as BookCategory | null) || null;
+  const selectedStatus =
+    (searchParams.get("status") as BookStatus | null) || null;
+  const sortOption = ((searchParams.get("sort") as SortOption) ||
+    "newest") as SortOption;
 
   const updateParam = useCallback(
     (key: string, value: string | null) => {
@@ -42,24 +50,27 @@ const Index = () => {
           else next.set(key, value);
           return next;
         },
-        { replace: true }
+        { replace: true },
       );
     },
-    [setSearchParams]
+    [setSearchParams],
   );
 
-  const setQuery = useCallback((v: string) => updateParam("q", v), [updateParam]);
+  const setQuery = useCallback(
+    (v: string) => updateParam("q", v),
+    [updateParam],
+  );
   const setSelectedCategory = useCallback(
     (v: BookCategory | null) => updateParam("category", v),
-    [updateParam]
+    [updateParam],
   );
   const setSelectedStatus = useCallback(
     (v: BookStatus | null) => updateParam("status", v),
-    [updateParam]
+    [updateParam],
   );
   const setSortOption = useCallback(
     (v: SortOption) => updateParam("sort", v === "newest" ? null : v),
-    [updateParam]
+    [updateParam],
   );
 
   useEffect(() => {
@@ -90,8 +101,8 @@ const Index = () => {
   const handleToggleLike = useCallback((bookId: string, newLiked: boolean) => {
     setLikedIds((prev) => {
       const next = new Set(prev);
-      if (newLiked) next.add(bookId);else
-      next.delete(bookId);
+      if (newLiked) next.add(bookId);
+      else next.delete(bookId);
       return next;
     });
   }, []);
@@ -103,8 +114,12 @@ const Index = () => {
 
   const featuredBooks = useMemo(() => {
     const byReadDateDesc = (a: Book, b: Book) => {
-      const aTime = a.readDate ? new Date(a.readDate + "T00:00:00").getTime() : 0;
-      const bTime = b.readDate ? new Date(b.readDate + "T00:00:00").getTime() : 0;
+      const aTime = a.readDate
+        ? new Date(a.readDate + "T00:00:00").getTime()
+        : 0;
+      const bTime = b.readDate
+        ? new Date(b.readDate + "T00:00:00").getTime()
+        : 0;
       return bTime - aTime;
     };
     const noMama = (b: Book) => !b.tags.includes("엄마");
@@ -126,13 +141,17 @@ const Index = () => {
 
   const categoryCounts = useMemo(() => {
     const counts: Record<string, number> = {};
-    visibleBooks.forEach((b) => {counts[b.category] = (counts[b.category] || 0) + 1;});
+    visibleBooks.forEach((b) => {
+      counts[b.category] = (counts[b.category] || 0) + 1;
+    });
     return counts;
   }, [visibleBooks]);
 
   const statusCounts = useMemo(() => {
     const counts: Record<string, number> = {};
-    visibleBooks.forEach((b) => {counts[b.status] = (counts[b.status] || 0) + 1;});
+    visibleBooks.forEach((b) => {
+      counts[b.status] = (counts[b.status] || 0) + 1;
+    });
     return counts;
   }, [visibleBooks]);
 
@@ -143,9 +162,9 @@ const Index = () => {
       const q = query.normalize("NFC").toLowerCase();
       result = result.filter(
         (b) =>
-        b.title.normalize("NFC").toLowerCase().includes(q) ||
-        b.author.normalize("NFC").toLowerCase().includes(q) ||
-        b.tags.some((t) => t.normalize("NFC").toLowerCase().includes(q))
+          b.title.normalize("NFC").toLowerCase().includes(q) ||
+          b.author.normalize("NFC").toLowerCase().includes(q) ||
+          b.tags.some((t) => t.normalize("NFC").toLowerCase().includes(q)),
       );
     }
 
@@ -157,8 +176,19 @@ const Index = () => {
       result = result.filter((b) => b.status === selectedStatus);
     }
 
-    return sortBooksForMain(result, mainSortMode, sortOption === "dateGroup" ? "newest" : sortOption);
-  }, [visibleBooks, query, selectedCategory, selectedStatus, sortOption, mainSortMode]);
+    return sortBooksForMain(
+      result,
+      mainSortMode,
+      sortOption === "dateGroup" ? "newest" : sortOption,
+    );
+  }, [
+    visibleBooks,
+    query,
+    selectedCategory,
+    selectedStatus,
+    sortOption,
+    mainSortMode,
+  ]);
 
   // 연/월별 보기: 읽은 날짜 기준 연도(크게) > 월(작게) 그룹, 최신순
   const dateGroups = useMemo(() => {
@@ -169,39 +199,68 @@ const Index = () => {
       return bT - aT;
     };
     const sorted = [...filteredBooks].sort(byTime);
-    const years: { year: string; months: { month: string; books: Book[] }[] }[] = [];
+    const years: {
+      year: string;
+      months: { month: string; books: Book[] }[];
+    }[] = [];
     const noDate: Book[] = [];
     sorted.forEach((b) => {
-      if (!b.readDate) { noDate.push(b); return; }
+      if (!b.readDate) {
+        noDate.push(b);
+        return;
+      }
       const [y, m] = b.readDate.split("-");
       let yg = years.find((g) => g.year === y);
-      if (!yg) { yg = { year: y, months: [] }; years.push(yg); }
+      if (!yg) {
+        yg = { year: y, months: [] };
+        years.push(yg);
+      }
       let mg = yg.months.find((g) => g.month === m);
-      if (!mg) { mg = { month: m, books: [] }; yg.months.push(mg); }
+      if (!mg) {
+        mg = { month: m, books: [] };
+        yg.months.push(mg);
+      }
       mg.books.push(b);
     });
-    if (noDate.length) years.push({ year: "날짜 미지정", months: [{ month: "", books: noDate }] });
+    if (noDate.length)
+      years.push({
+        year: "날짜 미지정",
+        months: [{ month: "", books: noDate }],
+      });
     return years;
   }, [filteredBooks, sortOption]);
 
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <main className="container py-8">
-        <div className="mb-8">
-          <h1 className="flex items-center gap-2 font-serif text-3xl font-bold text-foreground sm:text-4xl">
-            <img
-              src={ugenSymbol}
-              alt=""
-              aria-hidden="true"
-              className="h-9 w-9 rounded-full object-cover sm:hidden"
-            />
-            UGEN's Library
-          </h1>
-          <p className="mt-2 text-muted-foreground">
-            읽고, 기록하는 공간
-          </p>
-        </div>
+      <main id="main-content" className="container library-main">
+        <section className="library-intro" aria-labelledby="library-title">
+          <div>
+            <p className="mono-label">UGEN’S PERSONAL LIBRARY</p>
+            <h1 id="library-title">
+              한 권의 책,
+              <br />
+              <span>그 너머의 생각.</span>
+            </h1>
+          </div>
+          <div className="intro-notes">
+            <p>
+              책장을 넘기며 만난 문장과
+              <br />
+              오래 간직하고 싶은 생각을 기록합니다.
+            </p>
+            <div className="library-stats">
+              <div>
+                <strong>{loading ? "—" : visibleBooks.length}</strong>
+                <span>책장에 담은 책</span>
+              </div>
+              <div>
+                <strong>{loading ? "—" : statusCounts["완료"] || 0}</strong>
+                <span>완성한 독서 기록</span>
+              </div>
+            </div>
+          </div>
+        </section>
 
         {loading ? (
           <>
@@ -216,6 +275,18 @@ const Index = () => {
             <SearchFilter
               query={query}
               onQueryChange={setQuery}
+              onReset={() =>
+                setSearchParams(
+                  (prev) => {
+                    const next = new URLSearchParams(prev);
+                    ["q", "category", "status"].forEach((key) =>
+                      next.delete(key),
+                    );
+                    return next;
+                  },
+                  { replace: true },
+                )
+              }
               selectedCategory={selectedCategory}
               onCategoryChange={setSelectedCategory}
               selectedStatus={selectedStatus}
@@ -229,70 +300,71 @@ const Index = () => {
 
             {filteredBooks.length > 0 ? (
               sortOption === "dateGroup" ? (
-              <div className="mt-8 space-y-10">
-                {dateGroups.map((yg) => (
-                  <section key={yg.year}>
-                    <h2 className="mb-4 font-serif text-2xl font-bold text-foreground border-b pb-2">
-                      {yg.year === "날짜 미지정" ? yg.year : `${yg.year}년`}
-                    </h2>
-                    <div className="space-y-6">
-                      {yg.months.map((mg) => (
-                        <div key={mg.month || "nodate"}>
-                          {mg.month && (
-                            <h3 className="mb-3 font-serif text-base font-semibold text-muted-foreground">
-                              {Number(mg.month)}월
-                            </h3>
-                          )}
-                          <div className="grid grid-cols-2 gap-6 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
-                            {mg.books.map((book, idx) => (
-                              <BookCard
-                                key={book.id}
-                                book={book}
-                                index={idx}
-                                liked={likedIds.has(book.id)}
-                                lastRevisionAt={revisionMap[book.id]}
-                                onToggleLike={handleToggleLike} />
-                            ))}
+                <div className="mt-8 space-y-10">
+                  {dateGroups.map((yg) => (
+                    <section key={yg.year}>
+                      <h2 className="mb-4 font-serif text-2xl font-bold text-foreground border-b pb-2">
+                        {yg.year === "날짜 미지정" ? yg.year : `${yg.year}년`}
+                      </h2>
+                      <div className="space-y-6">
+                        {yg.months.map((mg) => (
+                          <div key={mg.month || "nodate"}>
+                            {mg.month && (
+                              <h3 className="mb-3 font-serif text-base font-semibold text-muted-foreground">
+                                {Number(mg.month)}월
+                              </h3>
+                            )}
+                            <div className="books-grid">
+                              {mg.books.map((book, idx) => (
+                                <BookCard
+                                  key={book.id}
+                                  book={book}
+                                  index={idx}
+                                  liked={likedIds.has(book.id)}
+                                  lastRevisionAt={revisionMap[book.id]}
+                                  onToggleLike={handleToggleLike}
+                                />
+                              ))}
+                            </div>
                           </div>
-                        </div>
-                      ))}
-                    </div>
-                  </section>
-                ))}
-              </div>
+                        ))}
+                      </div>
+                    </section>
+                  ))}
+                </div>
               ) : (
-              <div className="mt-8 grid grid-cols-2 gap-6 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
-            {filteredBooks.map((book, idx) =>
-          <BookCard
-            key={book.id}
-            book={book}
-            index={idx}
-            liked={likedIds.has(book.id)}
-            lastRevisionAt={revisionMap[book.id]}
-            onToggleLike={handleToggleLike} />
-
-          )}
-              </div>
+                <div className="books-grid">
+                  {filteredBooks.map((book, idx) => (
+                    <BookCard
+                      key={book.id}
+                      book={book}
+                      index={idx}
+                      liked={likedIds.has(book.id)}
+                      lastRevisionAt={revisionMap[book.id]}
+                      onToggleLike={handleToggleLike}
+                    />
+                  ))}
+                </div>
               )
             ) : (
               <div className="mt-16 flex flex-col items-center justify-center text-center">
-            <p className="font-serif text-xl text-muted-foreground">
-              {books.length === 0 ?
-            "아직 등록된 도서가 없습니다" :
-            "검색 결과가 없습니다"}
-            </p>
-            {books.length === 0 &&
-          <p className="mt-2 text-sm text-muted-foreground">
-                관리 페이지에서 마크다운 파일을 업로드하여 시작하세요
-              </p>
-          }
+                <p className="font-serif text-xl text-muted-foreground">
+                  {books.length === 0
+                    ? "아직 등록된 도서가 없습니다"
+                    : "검색 결과가 없습니다"}
+                </p>
+                {books.length === 0 && (
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    관리 페이지에서 마크다운 파일을 업로드하여 시작하세요
+                  </p>
+                )}
               </div>
             )}
           </>
         )}
       </main>
-    </div>);
-
+    </div>
+  );
 };
 
 export default Index;

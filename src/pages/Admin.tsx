@@ -1,7 +1,24 @@
 import { useState, useEffect, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Trash2, ChevronLeft, ChevronRight, AlertTriangle, Search, Download, CalendarIcon, Clock } from "lucide-react";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  BookOpen,
+  Upload,
+  FolderOpen,
+  SlidersHorizontal,
+  Trash2,
+  ChevronLeft,
+  ChevronRight,
+  AlertTriangle,
+  Search,
+  Download,
+  CalendarIcon,
+  Clock,
+} from "lucide-react";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { ReadDateCalendar } from "@/components/ReadDateCalendar";
 import { Input } from "@/components/ui/input";
 import { Header } from "@/components/Header";
@@ -15,12 +32,18 @@ import {
   DialogDescription,
   DialogFooter,
   DialogHeader,
-  DialogTitle } from
-"@/components/ui/dialog";
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { isAdminEmail } from "@/lib/adminAuth";
-import { fetchBooks, upsertBookFromMd, deleteBookById, updateBookFields, checkDuplicateFileNames } from "@/lib/bookApi";
+import {
+  fetchBooks,
+  upsertBookFromMd,
+  deleteBookById,
+  updateBookFields,
+  checkDuplicateFileNames,
+} from "@/lib/bookApi";
 import { supabase } from "@/integrations/supabase/client";
 import { BookTagEditor } from "@/components/BookTagEditor";
 import { CategoryManager } from "@/components/CategoryManager";
@@ -34,9 +57,15 @@ const Admin = () => {
   const [books, setBooks] = useState<Book[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState("books");
+  const [deleting, setDeleting] = useState(false);
+  const [pendingDelete, setPendingDelete] = useState<string | null>(null);
 
   // Progress tracking
-  const [uploadProgress, setUploadProgress] = useState({ current: 0, total: 0 });
+  const [uploadProgress, setUploadProgress] = useState({
+    current: 0,
+    total: 0,
+  });
 
   // Duplicate confirmation state
   const [duplicateFiles, setDuplicateFiles] = useState<File[]>([]);
@@ -49,10 +78,10 @@ const Admin = () => {
   }, [user, authLoading, navigate]);
 
   useEffect(() => {
-    fetchBooks().
-    then(setBooks).
-    catch(console.error).
-    finally(() => setLoading(false));
+    fetchBooks()
+      .then(setBooks)
+      .catch(console.error)
+      .finally(() => setLoading(false));
   }, []);
 
   const uploadFiles = async (files: File[], updateProgress = true) => {
@@ -74,7 +103,7 @@ const Admin = () => {
         toast({
           title: `${file.name} 처리 실패`,
           description: String(err),
-          variant: "destructive"
+          variant: "destructive",
         });
       }
       if (updateProgress) {
@@ -107,7 +136,7 @@ const Admin = () => {
         if (successCount > 0) {
           toast({
             title: `${successCount}개 신규 파일 업로드 완료`,
-            description: "도서 목록이 업데이트되었습니다."
+            description: "도서 목록이 업데이트되었습니다.",
           });
         }
       }
@@ -119,7 +148,11 @@ const Admin = () => {
         setShowDuplicateDialog(true);
       }
     } catch (err) {
-      toast({ title: "파일 처리 중 오류", description: String(err), variant: "destructive" });
+      toast({
+        title: "파일 처리 중 오류",
+        description: String(err),
+        variant: "destructive",
+      });
     } finally {
       if (!hasDuplicates) {
         setIsProcessing(false);
@@ -139,7 +172,7 @@ const Admin = () => {
     if (count > 0) {
       toast({
         title: `${count}개 중복 파일 업데이트 완료`,
-        description: "기존 도서가 최신 내용으로 업데이트되었습니다."
+        description: "기존 도서가 최신 내용으로 업데이트되었습니다.",
       });
     }
   };
@@ -151,13 +184,25 @@ const Admin = () => {
     setUploadProgress({ current: 0, total: 0 });
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = (id: string) => setPendingDelete(id);
+
+  const confirmDelete = async () => {
+    const id = pendingDelete;
+    if (!id || deleting) return;
+    setDeleting(true);
     try {
       await deleteBookById(id);
       setBooks((prev) => prev.filter((b) => b.id !== id));
+      setPendingDelete(null);
       toast({ title: "도서가 삭제되었습니다" });
     } catch (err) {
-      toast({ title: "삭제 실패", description: String(err), variant: "destructive" });
+      toast({
+        title: "삭제 실패",
+        description: String(err),
+        variant: "destructive",
+      });
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -165,27 +210,36 @@ const Admin = () => {
     return (
       <div className="min-h-screen bg-background">
         <Header />
-        <div className="container py-20 text-center text-muted-foreground">로딩 중...</div>
-      </div>);
-
+        <div className="container py-20 text-center text-muted-foreground">
+          로딩 중...
+        </div>
+      </div>
+    );
   }
 
-  if (!user) return null;
+  if (!user || !isAdminEmail(user.email)) return null;
 
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <main className="container max-w-3xl py-8">
-        <div className="mb-6 flex items-center justify-between">
-          <h1 className="font-serif text-foreground font-extrabold text-3xl">
-            도서 관리
-          </h1>
+      <main id="main-content" className="container admin-main">
+        <div className="admin-heading">
+          <div>
+            <p className="mono-label">THE LIBRARY DESK</p>
+            <h1>책장을 가꾸는 공간.</h1>
+            <p className="admin-description">
+              기록을 더하고, 분류를 정돈하고, 읽은 흔적을 남기세요.
+            </p>
+          </div>
           <Button
             variant="outline"
             size="sm"
             onClick={async () => {
               if (books.length === 0) {
-                toast({ title: "다운로드할 도서가 없습니다", variant: "destructive" });
+                toast({
+                  title: "다운로드할 도서가 없습니다",
+                  variant: "destructive",
+                });
                 return;
               }
               toast({ title: "마크다운 파일 생성 중..." });
@@ -193,56 +247,160 @@ const Admin = () => {
                 await downloadBooksAsZip(books);
                 toast({ title: `${books.length}개 도서 다운로드 완료` });
               } catch (err) {
-                toast({ title: "다운로드 실패", description: String(err), variant: "destructive" });
+                toast({
+                  title: "다운로드 실패",
+                  description: String(err),
+                  variant: "destructive",
+                });
               }
             }}
-            disabled={books.length === 0}>
-            
+            disabled={books.length === 0}
+          >
             <Download className="h-4 w-4 mr-1.5" />
             전체 다운로드
           </Button>
         </div>
 
-        <div className="mb-6">
-          <Button variant="outline" size="sm" asChild>
-            <Link to="/mcp">에이전트 연동 (MCP) 문서</Link>
-          </Button>
+        <div className="admin-overview">
+          <div>
+            <span>전체 도서</span>
+            <strong>
+              {books.length}
+              <small>권</small>
+            </strong>
+          </div>
+          <div>
+            <span>기록 완료</span>
+            <strong>
+              {books.filter((b) => b.status === "완료").length}
+              <small>권</small>
+            </strong>
+          </div>
+          <div>
+            <span>작성 중</span>
+            <strong>
+              {books.filter((b) => b.status === "작성중").length}
+              <small>권</small>
+            </strong>
+          </div>
+          <Link to="/mcp">에이전트 연동 문서 ↗</Link>
         </div>
+        <div className="admin-layout">
+          <nav className="admin-nav" aria-label="관리 메뉴">
+            <span className="mono-label">WORKSPACE</span>
+            {[
+              { id: "books", label: "도서 목록", Icon: BookOpen },
+              { id: "upload", label: "기록 업로드", Icon: Upload },
+              { id: "categories", label: "카테고리", Icon: FolderOpen },
+              { id: "settings", label: "책장 설정", Icon: SlidersHorizontal },
+            ].map(({ id, label, Icon }) => (
+              <button
+                key={id}
+                onClick={() => setActiveTab(id)}
+                aria-current={activeTab === id ? "page" : undefined}
+              >
+                <Icon size={17} />
+                {label}
+                <span>↗</span>
+              </button>
+            ))}
+            <p>
+              한 번의 기록이
+              <br />
+              오래 읽히는 책장을 만듭니다.
+            </p>
+          </nav>
+          <div className="admin-content">
+            <div hidden={activeTab !== "upload"}>
+              <section className="mb-8">
+                <h2 className="mb-3 font-serif text-lg font-semibold text-foreground">
+                  마크다운 파일 업로드
+                </h2>
+                <FileUpload
+                  onFilesSelected={handleFilesSelected}
+                  isProcessing={isProcessing}
+                />
 
-        <section className="mb-8">
-          <h2 className="mb-3 font-serif text-lg font-semibold text-foreground">
-            마크다운 파일 업로드
-          </h2>
-          <FileUpload onFilesSelected={handleFilesSelected} isProcessing={isProcessing} />
-          
-          {/* Upload progress bar */}
-          {isProcessing && uploadProgress.total > 0 &&
-          <div className="mt-4 space-y-2">
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">업로드 진행 중...</span>
-                <span className="font-medium text-foreground">
-                  {uploadProgress.current} / {uploadProgress.total}
-                </span>
-              </div>
-              <Progress
-              value={uploadProgress.current / uploadProgress.total * 100}
-              className="h-2" />
-            
+                {/* Upload progress bar */}
+                {isProcessing && uploadProgress.total > 0 && (
+                  <div className="mt-4 space-y-2">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground">
+                        업로드 진행 중...
+                      </span>
+                      <span className="font-medium text-foreground">
+                        {uploadProgress.current} / {uploadProgress.total}
+                      </span>
+                    </div>
+                    <Progress
+                      value={
+                        (uploadProgress.current / uploadProgress.total) * 100
+                      }
+                      className="h-2"
+                    />
+                  </div>
+                )}
+              </section>
+
+              <RecentUpdates books={books} />
             </div>
-          }
-        </section>
-
-        <RecentUpdates books={books} />
-
-        <MainSortModeManager />
-
-        <CategoryManager books={books} />
-
-        <PaginatedBookList books={books} loading={loading} onDelete={handleDelete} onUpdateBooks={setBooks} />
+            <div hidden={activeTab !== "settings"}>
+              <MainSortModeManager />
+            </div>
+            <div hidden={activeTab !== "categories"}>
+              <CategoryManager books={books} />
+            </div>
+            <div hidden={activeTab !== "books"}>
+              <PaginatedBookList
+                books={books}
+                loading={loading}
+                onDelete={handleDelete}
+                onUpdateBooks={setBooks}
+              />
+            </div>
+          </div>
+        </div>
       </main>
 
+      <Dialog
+        open={!!pendingDelete}
+        onOpenChange={(open) => {
+          if (!open && !deleting) setPendingDelete(null);
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>도서를 삭제하시겠습니까?</DialogTitle>
+            <DialogDescription>
+              “{books.find((b) => b.id === pendingDelete)?.title}” 기록이
+              삭제됩니다. 이 작업은 되돌릴 수 없습니다.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              disabled={deleting}
+              onClick={() => setPendingDelete(null)}
+            >
+              취소
+            </Button>
+            <Button
+              variant="destructive"
+              disabled={deleting}
+              onClick={confirmDelete}
+            >
+              {deleting ? "삭제 중..." : "삭제"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
       {/* Duplicate confirmation dialog */}
-      <Dialog open={showDuplicateDialog} onOpenChange={(open) => {if (!open) handleCancelDuplicates();}}>
+      <Dialog
+        open={showDuplicateDialog}
+        onOpenChange={(open) => {
+          if (!open) handleCancelDuplicates();
+        }}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
@@ -250,32 +408,35 @@ const Admin = () => {
               중복 파일 발견
             </DialogTitle>
             <DialogDescription>
-              다음 {duplicateFiles.length}개 파일이 이미 등록되어 있습니다. 최신 내용으로 업데이트하시겠습니까?
+              다음 {duplicateFiles.length}개 파일이 이미 등록되어 있습니다. 최신
+              내용으로 업데이트하시겠습니까?
             </DialogDescription>
           </DialogHeader>
           <div className="max-h-48 overflow-y-auto space-y-1 rounded-md border bg-muted p-3">
-            {duplicateFiles.map((f) =>
-            <p key={f.name} className="text-sm text-foreground">📄 {f.name}</p>
-            )}
+            {duplicateFiles.map((f) => (
+              <p key={f.name} className="text-sm text-foreground">
+                📄 {f.name}
+              </p>
+            ))}
           </div>
           <DialogFooter className="gap-2 sm:gap-0">
             <Button variant="outline" onClick={handleCancelDuplicates}>
               건너뛰기
             </Button>
-            <Button onClick={handleConfirmDuplicates}>
-              업데이트
-            </Button>
+            <Button onClick={handleConfirmDuplicates}>업데이트</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>);
-
+    </div>
+  );
 };
 
 const ITEMS_PER_PAGE = 15;
 
 function RecentUpdates({ books }: { books: Book[] }) {
-  const [recent, setRecent] = useState<Array<{ id: string; fileName: string; title: string; uploadedAt: string }>>([]);
+  const [recent, setRecent] = useState<
+    Array<{ id: string; fileName: string; title: string; uploadedAt: string }>
+  >([]);
 
   useEffect(() => {
     if (books.length === 0) {
@@ -291,7 +452,12 @@ function RecentUpdates({ books }: { books: Book[] }) {
         .order("created_at", { ascending: false })
         .limit(5);
       if (cancelled || error) return;
-      const items: Array<{ id: string; fileName: string; title: string; uploadedAt: string }> = [];
+      const items: Array<{
+        id: string;
+        fileName: string;
+        title: string;
+        uploadedAt: string;
+      }> = [];
       for (const r of data || []) {
         const book = books.find((b) => b.id === r.book_id);
         if (!book) continue;
@@ -325,7 +491,9 @@ function RecentUpdates({ books }: { books: Book[] }) {
         최근 업데이트
       </h2>
       {recent.length === 0 ? (
-        <p className="text-sm text-muted-foreground">업데이트된 파일이 없습니다.</p>
+        <p className="text-sm text-muted-foreground">
+          업데이트된 파일이 없습니다.
+        </p>
       ) : (
         <ul className="space-y-1.5 rounded-lg border bg-card p-3">
           {recent.map((b) => (
@@ -354,13 +522,13 @@ function PaginatedBookList({
   books,
   loading,
   onDelete,
-  onUpdateBooks
-
-
-
-
-
-}: {books: Book[];loading: boolean;onDelete: (id: string) => void;onUpdateBooks: React.Dispatch<React.SetStateAction<Book[]>>;}) {
+  onUpdateBooks,
+}: {
+  books: Book[];
+  loading: boolean;
+  onDelete: (id: string) => void;
+  onUpdateBooks: React.Dispatch<React.SetStateAction<Book[]>>;
+}) {
   const [page, setPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -369,13 +537,16 @@ function PaginatedBookList({
     const q = searchQuery.normalize("NFC").toLowerCase();
     return books.filter(
       (b) =>
-      b.title.normalize("NFC").toLowerCase().includes(q) ||
-      b.author.normalize("NFC").toLowerCase().includes(q) ||
-      b.tags.some((t) => t.normalize("NFC").toLowerCase().includes(q))
+        b.title.normalize("NFC").toLowerCase().includes(q) ||
+        b.author.normalize("NFC").toLowerCase().includes(q) ||
+        b.tags.some((t) => t.normalize("NFC").toLowerCase().includes(q)),
     );
   }, [books, searchQuery]);
 
-  const totalPages = Math.max(1, Math.ceil(filteredBooks.length / ITEMS_PER_PAGE));
+  const totalPages = Math.max(
+    1,
+    Math.ceil(filteredBooks.length / ITEMS_PER_PAGE),
+  );
 
   // Reset to page 1 if filtered list changes and current page is out of range
   useEffect(() => {
@@ -383,108 +554,147 @@ function PaginatedBookList({
   }, [filteredBooks.length, totalPages, page]);
 
   const paginatedBooks = useMemo(
-    () => filteredBooks.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE),
-    [filteredBooks, page]
+    () =>
+      filteredBooks.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE),
+    [filteredBooks, page],
   );
 
   return (
     <section>
       <h2 className="mb-3 font-serif text-lg font-semibold text-foreground">
-        등록된 도서 ({filteredBooks.length}권{searchQuery.trim() ? ` / 전체 ${books.length}권` : ""})
+        등록된 도서 ({filteredBooks.length}권
+        {searchQuery.trim() ? ` / 전체 ${books.length}권` : ""})
       </h2>
 
       {/* Search */}
       <div className="relative mb-4">
         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <Input
+          aria-label="관리 도서 검색"
           placeholder="도서명, 작가명, 태그로 검색..."
           value={searchQuery}
-          onChange={(e) => {setSearchQuery(e.target.value);setPage(1);}}
-          className="pl-10" />
-        
+          onChange={(e) => {
+            setSearchQuery(e.target.value);
+            setPage(1);
+          }}
+          className="pl-10"
+        />
       </div>
-      {loading ?
-      <p className="text-sm text-muted-foreground">불러오는 중...</p> :
-      books.length === 0 ?
-      <p className="text-sm text-muted-foreground">등록된 도서가 없습니다.</p> :
-
-      <>
+      {loading ? (
+        <p className="text-sm text-muted-foreground">불러오는 중...</p>
+      ) : books.length === 0 ? (
+        <p className="text-sm text-muted-foreground">등록된 도서가 없습니다.</p>
+      ) : (
+        <>
           <div className="space-y-2">
-            {paginatedBooks.map((book) =>
-          <div
-            key={book.id}
-            className="flex items-center justify-between rounded-lg border bg-card p-3">
-            
-                <div className="flex items-center gap-3 min-w-0">
-                  {book.bookcover &&
-              <img
-                src={book.bookcover}
-                alt=""
-                className="h-12 w-8 rounded object-cover shrink-0" />
-
-              }
+            {paginatedBooks.map((book) => (
+              <div key={book.id} className="admin-book-row">
+                <div className="admin-book-info">
+                  {book.bookcover && (
+                    <img
+                      src={book.bookcover}
+                      alt=""
+                      className="h-12 w-8 rounded object-cover shrink-0"
+                    />
+                  )}
                   <div className="min-w-0">
-                    <Link
-                  to={`/book/${book.id}`}
-                  className="truncate text-sm font-medium text-foreground hover:text-primary hover:underline">
-                  
+                    <Link to={`/book/${book.id}`} className="admin-book-link">
                       {book.title}
                     </Link>
-                    <p className="text-xs text-muted-foreground">{book.author}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {book.author}
+                    </p>
                   </div>
                   <BookTagEditor
-                type="category"
-                value={book.category}
-                onUpdate={async (val) => {
-                  try {
-                    await updateBookFields(book.id, { category: val });
-                    onUpdateBooks((prev) =>
-                    prev.map((b) => b.id === book.id ? { ...b, category: val as Book["category"] } : b)
-                    );
-                  } catch (err) {
-                    toast({ title: "카테고리 변경 실패", description: String(err), variant: "destructive" });
-                  }
-                }} />
-              
+                    type="category"
+                    value={book.category}
+                    onUpdate={async (val) => {
+                      try {
+                        await updateBookFields(book.id, { category: val });
+                        onUpdateBooks((prev) =>
+                          prev.map((b) =>
+                            b.id === book.id
+                              ? { ...b, category: val as Book["category"] }
+                              : b,
+                          ),
+                        );
+                      } catch (err) {
+                        toast({
+                          title: "카테고리 변경 실패",
+                          description: String(err),
+                          variant: "destructive",
+                        });
+                      }
+                    }}
+                  />
+
                   <BookTagEditor
-                type="status"
-                value={book.status}
-                onUpdate={async (val) => {
-                  try {
-                    await updateBookFields(book.id, { status: val });
-                    onUpdateBooks((prev) =>
-                    prev.map((b) => b.id === book.id ? { ...b, status: val as Book["status"] } : b)
-                    );
-                  } catch (err) {
-                    toast({ title: "상태 변경 실패", description: String(err), variant: "destructive" });
-                  }
-                }} />
-              
+                    type="status"
+                    value={book.status}
+                    onUpdate={async (val) => {
+                      try {
+                        await updateBookFields(book.id, { status: val });
+                        onUpdateBooks((prev) =>
+                          prev.map((b) =>
+                            b.id === book.id
+                              ? { ...b, status: val as Book["status"] }
+                              : b,
+                          ),
+                        );
+                      } catch (err) {
+                        toast({
+                          title: "상태 변경 실패",
+                          description: String(err),
+                          variant: "destructive",
+                        });
+                      }
+                    }}
+                  />
                 </div>
                 <div className="flex items-center gap-1 shrink-0">
                   <Popover>
                     <PopoverTrigger asChild>
-                      <Button variant="ghost" size="sm" className="h-8 px-2 text-xs gap-1">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 px-2 text-xs gap-1"
+                      >
                         <CalendarIcon className="h-3 w-3" />
                         {book.readDate
-                          ? new Date(book.readDate + "T00:00:00").toLocaleDateString("ko-KR")
+                          ? new Date(
+                              book.readDate + "T00:00:00",
+                            ).toLocaleDateString("ko-KR")
                           : "미지정"}
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0" align="end">
                       <ReadDateCalendar
-                        selected={book.readDate ? new Date(book.readDate + "T00:00:00") : undefined}
+                        selected={
+                          book.readDate
+                            ? new Date(book.readDate + "T00:00:00")
+                            : undefined
+                        }
                         onSelect={async (date) => {
                           if (!date) return;
                           const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
                           try {
-                            await updateBookFields(book.id, { read_date: dateStr });
+                            await updateBookFields(book.id, {
+                              read_date: dateStr,
+                            });
                             onUpdateBooks((prev) =>
-                              prev.map((b) => (b.id === book.id ? { ...b, readDate: dateStr } : b))
+                              prev.map((b) =>
+                                b.id === book.id
+                                  ? { ...b, readDate: dateStr }
+                                  : b,
+                              ),
                             );
                             toast({ title: "읽은 날짜가 업데이트되었습니다." });
                           } catch (err) {
-                            toast({ title: "업데이트 실패", description: String(err), variant: "destructive" });
+                            toast({
+                              title: "업데이트 실패",
+                              description: String(err),
+                              variant: "destructive",
+                            });
                           }
                         }}
                       />
@@ -493,97 +703,125 @@ function PaginatedBookList({
                   <Button
                     variant="ghost"
                     size="icon"
+                    aria-label={`${book.title} 삭제`}
                     onClick={() => onDelete(book.id)}
-                    className="text-destructive hover:text-destructive">
-                    
+                    className="text-destructive hover:text-destructive"
+                  >
                     <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>
               </div>
-          )}
+            ))}
           </div>
 
           {/* Pagination */}
-          {totalPages > 1 &&
-        <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
-        }
+          {totalPages > 1 && (
+            <Pagination
+              page={page}
+              totalPages={totalPages}
+              onPageChange={setPage}
+            />
+          )}
         </>
-      }
-    </section>);
-
+      )}
+    </section>
+  );
 }
 
-const PAGES_VISIBLE = 10;
+const PAGES_VISIBLE = 5;
 
 function Pagination({
   page,
   totalPages,
-  onPageChange
-
-
-
-
-}: {page: number;totalPages: number;onPageChange: (p: number) => void;}) {
+  onPageChange,
+}: {
+  page: number;
+  totalPages: number;
+  onPageChange: (p: number) => void;
+}) {
   // Calculate visible page range (up to 10 pages)
-  const startPage = Math.max(1, Math.min(page - Math.floor(PAGES_VISIBLE / 2), totalPages - PAGES_VISIBLE + 1));
+  const startPage = Math.max(
+    1,
+    Math.min(
+      page - Math.floor(PAGES_VISIBLE / 2),
+      totalPages - PAGES_VISIBLE + 1,
+    ),
+  );
   const endPage = Math.min(totalPages, startPage + PAGES_VISIBLE - 1);
-  const pages = Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i);
+  const pages = Array.from(
+    { length: endPage - startPage + 1 },
+    (_, i) => startPage + i,
+  );
 
   return (
-    <div className="mt-4 flex items-center justify-center gap-1">
+    <div className="admin-pagination">
       <Button
         variant="ghost"
         size="sm"
         onClick={() => onPageChange(Math.max(1, page - 1))}
         disabled={page === 1}
-        className="text-xs">
-        
+        className="text-xs"
+      >
         <ChevronLeft className="h-4 w-4 mr-1" />
         이전
       </Button>
 
-      {startPage > 1 &&
-      <>
-          <Button variant="ghost" size="sm" onClick={() => onPageChange(1)} className="h-8 w-8 p-0 text-xs">
+      {startPage > 1 && (
+        <>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => onPageChange(1)}
+            className="h-8 w-8 p-0 text-xs"
+          >
             1
           </Button>
-          {startPage > 2 && <span className="px-1 text-muted-foreground text-xs">…</span>}
+          {startPage > 2 && (
+            <span className="px-1 text-muted-foreground text-xs">…</span>
+          )}
         </>
-      }
-
-      {pages.map((p) =>
-      <Button
-        key={p}
-        variant={p === page ? "default" : "ghost"}
-        size="sm"
-        onClick={() => onPageChange(p)}
-        className="h-8 w-8 p-0 text-xs">
-        
-          {p}
-        </Button>
       )}
 
-      {endPage < totalPages &&
-      <>
-          {endPage < totalPages - 1 && <span className="px-1 text-muted-foreground text-xs">…</span>}
-          <Button variant="ghost" size="sm" onClick={() => onPageChange(totalPages)} className="h-8 w-8 p-0 text-xs">
+      {pages.map((p) => (
+        <Button
+          key={p}
+          variant={p === page ? "default" : "ghost"}
+          size="sm"
+          onClick={() => onPageChange(p)}
+          className="h-8 w-8 p-0 text-xs"
+        >
+          {p}
+        </Button>
+      ))}
+
+      {endPage < totalPages && (
+        <>
+          {endPage < totalPages - 1 && (
+            <span className="px-1 text-muted-foreground text-xs">…</span>
+          )}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => onPageChange(totalPages)}
+            className="h-8 w-8 p-0 text-xs"
+          >
             {totalPages}
           </Button>
         </>
-      }
+      )}
 
       <Button
         variant="ghost"
         size="sm"
         onClick={() => onPageChange(Math.min(totalPages, page + 1))}
         disabled={page === totalPages}
-        className="text-xs">
-        
+        className="text-xs"
+      >
         다음
         <ChevronRight className="h-4 w-4 ml-1" />
       </Button>
-    </div>);
-
+    </div>
+  );
 }
 
 export default Admin;

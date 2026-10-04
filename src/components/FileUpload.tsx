@@ -11,22 +11,19 @@ export function FileUpload({ onFilesSelected, isProcessing }: FileUploadProps) {
   const [dragOver, setDragOver] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 
-  const handleDrop = useCallback(
-    (e: React.DragEvent) => {
-      e.preventDefault();
-      setDragOver(false);
-      const files = Array.from(e.dataTransfer.files).filter((f) =>
-        f.name.endsWith(".md")
-      );
-      setSelectedFiles(files);
-    },
-    []
-  );
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setDragOver(false);
+    const files = Array.from(e.dataTransfer.files).filter((f) =>
+      f.name.endsWith(".md"),
+    );
+    setSelectedFiles(files);
+  }, []);
 
   const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const files = Array.from(e.target.files).filter((f) =>
-        f.name.endsWith(".md")
+        f.name.endsWith(".md"),
       );
       setSelectedFiles(files);
     }
@@ -52,7 +49,7 @@ export function FileUpload({ onFilesSelected, isProcessing }: FileUploadProps) {
         }}
         onDragLeave={() => setDragOver(false)}
         onDrop={handleDrop}
-        className={`relative flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed p-8 transition-colors ${
+        className={`markdown-upload relative flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed p-8 transition-colors ${
           dragOver
             ? "border-primary bg-primary/5"
             : "border-border hover:border-primary/50"
@@ -65,6 +62,8 @@ export function FileUpload({ onFilesSelected, isProcessing }: FileUploadProps) {
         <p className="text-xs text-muted-foreground">.md 파일만 지원</p>
         <input
           type="file"
+          aria-label="마크다운 파일 선택"
+          disabled={isProcessing}
           accept=".md"
           multiple
           onChange={handleFileInput}
@@ -83,13 +82,23 @@ export function FileUpload({ onFilesSelected, isProcessing }: FileUploadProps) {
                 <FileText className="h-4 w-4 text-muted-foreground" />
                 <span className="text-sm">{file.name}</span>
               </div>
-              <button onClick={() => removeFile(idx)} className="text-muted-foreground hover:text-foreground">
+              <button
+                aria-label={`${file.name} 선택 취소`}
+                onClick={() => removeFile(idx)}
+                className="text-muted-foreground hover:text-foreground"
+              >
                 <X className="h-4 w-4" />
               </button>
             </div>
           ))}
-          <Button onClick={handleUpload} disabled={isProcessing} className="w-full">
-            {isProcessing ? "처리 중..." : `${selectedFiles.length}개 파일 업로드`}
+          <Button
+            onClick={handleUpload}
+            disabled={isProcessing}
+            className="w-full"
+          >
+            {isProcessing
+              ? "처리 중..."
+              : `${selectedFiles.length}개 파일 업로드`}
           </Button>
         </div>
       )}

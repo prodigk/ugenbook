@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { Settings, Heart, LogIn, LogOut } from "lucide-react";
+import { Settings, Heart, LogOut, ArrowUpRight, BookOpen } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
@@ -7,61 +7,69 @@ import { isAdminEmail } from "@/lib/adminAuth";
 import ugenSymbol from "@/assets/ugen-symbol.png";
 
 export function Header() {
-  const location = useLocation();
+  const { pathname } = useLocation();
   const { user, signOut } = useAuth();
   const isAdmin = isAdminEmail(user?.email);
-
   return (
-    <header className="sticky top-0 z-50 border-b bg-background/80 backdrop-blur-md">
-      <div className="container flex h-14 items-center justify-between">
-        <Link to="/" className="flex items-center" aria-label="UGEN's Library 홈">
-          <img
-            src={ugenSymbol}
-            alt="UGEN's Library"
-            className="hidden h-8 w-8 rounded-full object-cover sm:block"
-          />
-        </Link>
-        <div className="flex items-center gap-1">
-          {user ?
-          <>
-              {isAdmin &&
-            <Button
-              variant={location.pathname === "/likes" ? "secondary" : "ghost"}
-              size="sm"
-              asChild>
-              
-                  <Link to="/likes">
-                    <Heart className="mr-1.5 h-4 w-4" />
-                    좋아요
-                  </Link>
-                </Button>
-            }
-              <Button
-              variant={location.pathname === "/admin" ? "secondary" : "ghost"}
-              size="sm"
-              asChild>
-              
-                <Link to="/admin">
-                  <Settings className="mr-1.5 h-4 w-4" />
-                  관리
-                </Link>
-              </Button>
-              <Button variant="ghost" size="sm" onClick={signOut}>
-                <LogOut className="mr-1.5 h-4 w-4" />
-                로그아웃
-              </Button>
-            </> :
-
-          <Button variant="ghost" size="sm" asChild>
-              <Link to="/login">
-                <LogIn className="mr-1.5 h-4 w-4" />
-                로그인
+    <>
+      <a href="#main-content" className="skip-link">
+        본문으로 건너뛰기
+      </a>
+      <header className="library-header">
+        <div className="container header-inner">
+          <Link to="/" className="library-brand" aria-label="UGEN's Library 홈">
+            <img src={ugenSymbol} alt="" />
+            <span>
+              ugen<span className="brand-slash">/</span>
+              <span className="brand-label">library</span>
+              <span className="brand-dot">.</span>
+            </span>
+          </Link>
+          <nav aria-label="주 메뉴" className="main-nav">
+            <Link to="/" className={pathname === "/" ? "active" : ""}>
+              <BookOpen size={15} />
+              책장
+            </Link>
+            {isAdmin && (
+              <Link
+                to="/likes"
+                className={pathname === "/likes" ? "active" : ""}
+              >
+                <Heart size={15} />
+                좋아요
               </Link>
-            </Button>
-          }
-          <ThemeToggle />
+            )}
+            <Link
+              to="/admin"
+              className={
+                pathname === "/admin" || pathname === "/login" ? "active" : ""
+              }
+            >
+              <Settings size={15} />
+              관리
+            </Link>
+          </nav>
+          <div className="header-actions">
+            {user ? (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={signOut}
+                aria-label="로그아웃"
+              >
+                <LogOut size={15} />
+                <span className="desktop-label">로그아웃</span>
+              </Button>
+            ) : (
+              <Link to="/login" className="login-link">
+                <span>로그인</span>
+                <ArrowUpRight size={14} />
+              </Link>
+            )}
+            <ThemeToggle />
+          </div>
         </div>
-      </div>
-    </header>);
-
+      </header>
+    </>
+  );
 }

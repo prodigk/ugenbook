@@ -5,6 +5,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { ScrollToTop } from "@/components/ScrollToTop";
+import { LibraryFooter } from "@/components/LibraryFooter";
 import Index from "./pages/Index";
 import BookDetail from "./pages/BookDetail";
 import Admin from "./pages/Admin";
@@ -23,6 +25,7 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
+          <ScrollToTop />
           <AuthProvider>
             <Routes>
               <Route path="/" element={<Index />} />
@@ -31,9 +34,13 @@ const App = () => (
               <Route path="/login" element={<Login />} />
               <Route path="/likes" element={<Likes />} />
               <Route path="/mcp" element={<McpDocs />} />
-              <Route path="/.lovable/oauth/consent" element={<OAuthConsent />} />
+              <Route
+                path="/.lovable/oauth/consent"
+                element={<OAuthConsent />}
+              />
               <Route path="*" element={<NotFound />} />
             </Routes>
+            <LibraryFooter />
           </AuthProvider>
         </BrowserRouter>
       </TooltipProvider>

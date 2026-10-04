@@ -27,7 +27,7 @@ const Likes = () => {
 
   const likedBooks = useMemo(
     () => books.filter((b) => likedIds.includes(b.id)),
-    [books, likedIds]
+    [books, likedIds],
   );
 
   if (authLoading) return null;
@@ -36,8 +36,8 @@ const Likes = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <main className="container py-8">
-        <div className="mb-8">
+      <main id="main-content" className="container likes-main">
+        <div className="simple-page-heading">
           <h1 className="font-serif text-3xl font-bold text-foreground sm:text-4xl">
             좋아요 목록
           </h1>
@@ -47,13 +47,21 @@ const Likes = () => {
         </div>
 
         {loading ? (
-          <div className="mt-16 text-center text-muted-foreground">불러오는 중...</div>
+          <div className="mt-16 text-center text-muted-foreground">
+            불러오는 중...
+          </div>
         ) : likedBooks.length > 0 ? (
-          <div className="mt-8 grid grid-cols-2 gap-6 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+          <div className="books-grid">
             {likedBooks.map((book, idx) => (
-              <BookCard key={book.id} book={book} index={idx} liked onToggleLike={() => {
-                setLikedIds((prev) => prev.filter((id) => id !== book.id));
-              }} />
+              <BookCard
+                key={book.id}
+                book={book}
+                index={idx}
+                liked
+                onToggleLike={() => {
+                  setLikedIds((prev) => prev.filter((id) => id !== book.id));
+                }}
+              />
             ))}
           </div>
         ) : (

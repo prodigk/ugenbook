@@ -51,7 +51,7 @@ export function SearchFilterSkeleton() {
 export function BookCardSkeleton() {
   return (
     <div className="block">
-      <Skeleton className="mb-3 aspect-[2/3] w-full rounded-lg" />
+      <Skeleton className="mb-3 aspect-[4/5] w-full rounded-2xl" />
       <Skeleton className="h-4 w-5/6" />
       <Skeleton className="mt-2 h-3 w-1/2" />
       <div className="mt-2 flex gap-1">
@@ -63,7 +63,7 @@ export function BookCardSkeleton() {
 
 export function BookGridSkeleton({ count = 12 }: { count?: number }) {
   return (
-    <div className="mt-8 grid grid-cols-2 gap-6 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+    <div className="mt-8 books-grid">
       {Array.from({ length: count }).map((_, i) => (
         <BookCardSkeleton key={i} />
       ))}

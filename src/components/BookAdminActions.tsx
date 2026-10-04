@@ -26,7 +26,13 @@ interface Props {
   onBookChange: (book: Book) => void;
 }
 
-export function BookAdminActions({ book, userId, liked, onLikeChange, onBookChange }: Props) {
+export function BookAdminActions({
+  book,
+  userId,
+  liked,
+  onLikeChange,
+  onBookChange,
+}: Props) {
   const navigate = useNavigate();
   const [togglingLike, setTogglingLike] = useState(false);
   const [togglingHide, setTogglingHide] = useState(false);
@@ -52,9 +58,15 @@ export function BookAdminActions({ book, userId, liked, onLikeChange, onBookChan
       const newHidden = !book.isHidden;
       await updateBookFields(book.id, { is_hidden: newHidden });
       onBookChange({ ...book, isHidden: newHidden });
-      toast({ title: newHidden ? "도서가 숨겨졌습니다" : "도서가 다시 공개되었습니다" });
+      toast({
+        title: newHidden ? "도서가 숨겨졌습니다" : "도서가 다시 공개되었습니다",
+      });
     } catch (e) {
-      toast({ title: "변경 실패", description: String(e), variant: "destructive" });
+      toast({
+        title: "변경 실패",
+        description: String(e),
+        variant: "destructive",
+      });
     } finally {
       setTogglingHide(false);
     }
@@ -67,13 +79,17 @@ export function BookAdminActions({ book, userId, liked, onLikeChange, onBookChan
       toast({ title: "도서가 삭제되었습니다" });
       navigate("/");
     } catch (e) {
-      toast({ title: "삭제 실패", description: String(e), variant: "destructive" });
+      toast({
+        title: "삭제 실패",
+        description: String(e),
+        variant: "destructive",
+      });
       setDeleting(false);
     }
   };
 
   return (
-    <div className="flex items-center gap-1.5">
+    <div className="book-admin-actions flex flex-wrap items-center gap-1.5">
       {/* Like */}
       <Button
         variant="ghost"
@@ -84,7 +100,9 @@ export function BookAdminActions({ book, userId, liked, onLikeChange, onBookChan
       >
         <Heart
           className={`h-4 w-4 transition-colors ${
-            liked ? "fill-destructive text-destructive" : "text-muted-foreground"
+            liked
+              ? "fill-destructive text-destructive"
+              : "text-muted-foreground"
           }`}
         />
         <span className="text-xs">{liked ? "좋아요 취소" : "좋아요"}</span>
@@ -111,7 +129,11 @@ export function BookAdminActions({ book, userId, liked, onLikeChange, onBookChan
       {/* Delete */}
       <AlertDialog>
         <AlertDialogTrigger asChild>
-          <Button variant="ghost" size="sm" className="gap-1.5 text-destructive hover:text-destructive">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="gap-1.5 text-destructive hover:text-destructive"
+          >
             <Trash2 className="h-4 w-4" />
             <span className="text-xs">삭제</span>
           </Button>
@@ -126,7 +148,9 @@ export function BookAdminActions({ book, userId, liked, onLikeChange, onBookChan
           <AlertDialogFooter>
             <AlertDialogCancel>취소</AlertDialogCancel>
             <AlertDialogAction onClick={handleDelete} disabled={deleting}>
-              {deleting ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> : null}
+              {deleting ? (
+                <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
+              ) : null}
               삭제
             </AlertDialogAction>
           </AlertDialogFooter>
