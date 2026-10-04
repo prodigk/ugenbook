@@ -628,6 +628,30 @@
     word-break: keep-all;
     overflow-wrap: anywhere;
   }
+  .detail-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+  .detail-heading-actions {
+    display: flex;
+    flex-shrink: 0;
+    gap: 2px;
+  }
+  .detail-icon-action {
+    width: 36px;
+    height: 36px;
+    color: hsl(var(--muted-foreground));
+    border-radius: 50%;
+  }
+  .detail-favorite-subtle[aria-pressed="true"] {
+    color: hsl(var(--primary));
+  }
+  .detail-author {
+    margin-top: 12px;
+    min-height: 32px;
+  }
   .detail-tools {
     display: flex;
     flex-wrap: wrap;
@@ -639,13 +663,6 @@
   }
   .detail-tools button {
     font-size: 12px;
-  }
-  .cover-editor {
-    padding: 20px;
-    background: hsl(var(--muted));
-    border: 1px solid hsl(var(--border));
-    border-radius: 16px;
-    margin-bottom: 30px;
   }
   .summary-panel {
     border-radius: 22px;
@@ -731,10 +748,6 @@
   }
   .reading-paper .prose img {
     border-radius: 16px;
-  }
-  .book-admin-actions {
-    border-left: 1px solid hsl(var(--border));
-    padding-left: 8px;
   }
   .admin-main {
     padding-top: 56px;
@@ -1469,83 +1482,90 @@
   background: #003c33;
   color: #edfce9;
 }
-.reading-controls {
-  margin-top: 24px;
-  padding: 20px;
-  background: hsl(var(--muted));
-  border: 1px solid hsl(var(--border));
-  border-radius: 16px;
+.book-metadata {
+  margin-top: 28px;
 }
-.reading-control-title,
-.reading-control-title > span {
+.detail-tags {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 8px;
 }
-.reading-control-title {
-  justify-content: space-between;
-  margin-bottom: 18px;
+.detail-tags > div {
+  min-height: 28px;
+  padding: 4px 12px;
   font-size: 12px;
-  color: hsl(var(--muted-foreground));
+  font-weight: 500;
 }
-.reading-status,
-.reading-date {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 12px;
-}
-.reading-date {
-  margin-top: 14px;
-}
-.reading-field-label {
-  min-width: 78px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 12px;
-}
-.reading-status > div {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-.reading-status button {
+.detail-status {
+  position: relative;
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  gap: 5px;
-  min-width: 65px;
-  min-height: 40px;
-  padding: 8px 14px;
-  border: 1px solid hsl(var(--border));
-  border-radius: 24px;
+  min-height: 28px;
+  border-radius: 999px;
+  background: hsl(var(--accent));
+  color: hsl(var(--primary));
+  font-size: 12px;
+}
+.detail-status select {
+  appearance: none;
+  cursor: pointer;
+  background: transparent;
+  padding: 4px 28px 4px 12px;
+  min-height: 28px;
+  border-radius: inherit;
+  font: inherit;
+  color: inherit;
+}
+.detail-status select option {
   background: hsl(var(--background));
-  font-size: 12px;
+  color: hsl(var(--foreground));
 }
-.reading-status button[aria-pressed="true"] {
-  background: hsl(var(--primary));
-  color: hsl(var(--primary-foreground));
-  border-color: hsl(var(--primary));
+.detail-status > svg {
+  position: absolute;
+  right: 10px;
+  pointer-events: none;
 }
-.reading-status button:disabled {
-  cursor: default;
+.detail-status > span {
+  padding: 4px 12px;
 }
-.reading-date > p {
-  font-size: 13px;
-}
-.reading-login {
+.detail-dates {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 24px;
   margin-top: 18px;
-  padding-top: 14px;
-  border-top: 1px solid hsl(var(--border));
+  color: hsl(var(--muted-foreground));
   font-size: 12px;
-  text-decoration: underline;
+  font-variant-numeric: tabular-nums;
+}
+.detail-date-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 32px;
+  white-space: nowrap;
+}
+.detail-date-label {
+  color: hsl(var(--muted-foreground) / 0.8);
+}
+.metadata-date-button {
+  min-height: 32px;
+  border-radius: 4px;
   text-underline-offset: 4px;
 }
-.reading-save-notice {
-  margin-top: 12px;
-  font-size: 12px;
-  color: hsl(var(--primary));
+.metadata-date-button:hover {
+  color: hsl(var(--foreground));
+  text-decoration: underline;
+}
+.metadata-date-button:focus-visible,
+.detail-status select:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 3px;
+}
+.metadata-date-button:disabled,
+.detail-status select:disabled {
+  opacity: 0.5;
+  cursor: wait;
 }
 .read-date-popover {
   width: 310px;
@@ -1654,18 +1674,22 @@
   line-height: 1.8;
 }
 @media (max-width: 767px) {
-  .reading-controls {
-    padding: 16px;
+  .detail-heading {
+    gap: 8px;
+    align-items: flex-start;
   }
-  .reading-status {
-    gap: 10px;
+  .detail-heading-actions {
+    padding-top: 4px;
   }
-  .reading-field-label {
-    min-width: 65px;
+  .book-metadata {
+    margin-top: 20px;
   }
-  .reading-status button {
-    min-width: 57px;
-    padding: 8px 10px;
+  .detail-dates {
+    gap: 0 16px;
+    margin-top: 14px;
+  }
+  .detail-date-item {
+    gap: 6px;
   }
   .favorites-heading {
     padding: 24px;

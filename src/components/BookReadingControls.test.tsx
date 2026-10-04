@@ -63,29 +63,27 @@ it("jumps directly to a past year and month without rolling January 31 into Marc
 });
 it("updates status and keeps only the saved status selected", async () => {
   render(<Example />);
-  fireEvent.click(screen.getByRole("button", { name: "대기" }));
+  fireEvent.change(screen.getByRole("combobox", { name: "기록 상태" }), {
+    target: { value: "대기" },
+  });
   await waitFor(() =>
-    expect(screen.getByRole("button", { name: "대기" })).toHaveAttribute(
-      "aria-pressed",
-      "true",
+    expect(screen.getByRole("combobox", { name: "기록 상태" })).toHaveValue(
+      "대기",
     ),
   );
   expect(updateBookFields).toHaveBeenCalledWith("old-book", { status: "대기" });
-  expect(screen.getByRole("button", { name: "작성중" })).toHaveAttribute(
-    "aria-pressed",
-    "false",
-  );
 });
 it("does not display an unsuccessful write as saved", async () => {
   vi.mocked(updateBookFields).mockRejectedValueOnce(new Error("Denied"));
   render(<Example />);
-  fireEvent.click(screen.getByRole("button", { name: "완료" }));
+  fireEvent.change(screen.getByRole("combobox", { name: "기록 상태" }), {
+    target: { value: "완료" },
+  });
   expect(await screen.findByRole("alert")).toHaveTextContent(
     "저장하지 못했습니다",
   );
-  expect(screen.getByRole("button", { name: "작성중" })).toHaveAttribute(
-    "aria-pressed",
-    "true",
+  expect(screen.getByRole("combobox", { name: "기록 상태" })).toHaveValue(
+    "작성중",
   );
 });
 it("clears a date only when the user saves", async () => {
@@ -103,14 +101,14 @@ it("clears a date only when the user saves", async () => {
     screen.getByRole("button", { name: "읽은 날짜 변경" }),
   ).toHaveTextContent("날짜 지정");
 });
-it("guides visitors back to the book after login without allowing a metadata write", () => {
+it("shows visitors plain metadata without edit controls", () => {
   render(<Example canEdit={false} />);
-  expect(screen.getByRole("button", { name: "완료" })).toBeDisabled();
+  expect(screen.getByText("작성중")).toBeVisible();
   expect(
-    screen.getByRole("link", { name: /관리자 로그인 후/ }),
-  ).toHaveAttribute(
-    "href",
-    "/login?next=%2Fbook%2Fold-book%23reading-settings",
-  );
+    screen.queryByRole("combobox", { name: "기록 상태" }),
+  ).not.toBeInTheDocument();
+  expect(
+    screen.queryByRole("button", { name: "읽은 날짜 변경" }),
+  ).not.toBeInTheDocument();
   expect(updateBookFields).not.toHaveBeenCalled();
 });

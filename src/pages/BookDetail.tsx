@@ -1,14 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import {
-  ArrowLeft,
-  ImageIcon,
-  Check,
-  X,
-  Pencil,
-  Sparkles,
-  Loader2,
-} from "lucide-react";
+import { ArrowLeft, Check, X, Pencil, Sparkles, Loader2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { Header } from "@/components/Header";
 import { MarkdownRenderer } from "@/components/MarkdownRenderer";
@@ -19,11 +11,7 @@ import { BookAdminActions } from "@/components/BookAdminActions";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  fetchBookById,
-  updateBookcover,
-  updateBookFields,
-} from "@/lib/bookApi";
+import { fetchBookById, updateBookFields } from "@/lib/bookApi";
 import { useAuth } from "@/contexts/AuthContext";
 import { isAdminEmail } from "@/lib/adminAuth";
 import { toast } from "@/hooks/use-toast";
@@ -94,9 +82,6 @@ const BookDetail = () => {
   const { id } = useParams<{ id: string }>();
   const [book, setBook] = useState<Book | null>(null);
   const [loading, setLoading] = useState(true);
-  const [editingCover, setEditingCover] = useState(false);
-  const [coverUrl, setCoverUrl] = useState("");
-  const [saving, setSaving] = useState(false);
 
   // AI Summary state
   const [summary, setSummary] = useState("");
@@ -114,7 +99,6 @@ const BookDetail = () => {
     setBook(null);
     setSummary("");
     setEditingAuthor(false);
-    setEditingCover(false);
     fetchBookById(id)
       .then((value) => {
         if (!cancelled) setBook(value);
@@ -127,30 +111,6 @@ const BookDetail = () => {
       cancelled = true;
     };
   }, [id]);
-
-  const handleSaveCover = async () => {
-    if (!book) return;
-    setSaving(true);
-    try {
-      await updateBookcover(book.id, coverUrl);
-      setBook({ ...book, bookcover: coverUrl });
-      setEditingCover(false);
-      toast({ title: "북커버 이미지가 업데이트되었습니다." });
-    } catch (e) {
-      toast({
-        title: "업데이트 실패",
-        description: String(e),
-        variant: "destructive",
-      });
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const startEditing = () => {
-    setCoverUrl(book?.bookcover || "");
-    setEditingCover(true);
-  };
 
   const startEditingAuthor = () => {
     setAuthorValue(book?.author || "");
@@ -260,19 +220,22 @@ const BookDetail = () => {
 
           <div className="detail-information">
             <p className="mono-label">BETWEEN THE PAGES / READING NOTES</p>
-            <h1 className="detail-title">{book.title}</h1>
+            <div className="detail-heading">
+              <h1 className="detail-title">{book.title}</h1>
+              <div className="detail-heading-actions">
+                <FavoriteButton bookId={book.id} title={book.title} subtle />
+                {isAdminEmail(user?.email) && (
+                  <BookAdminActions book={book} onBookChange={setBook} />
+                )}
+              </div>
+            </div>
             {book.isHidden && (
               <Badge variant="outline" className="mt-1 text-muted-foreground">
                 숨김
               </Badge>
             )}
-            {isAdminEmail(user?.email) && (
-              <div className="mt-2">
-                <BookAdminActions book={book} onBookChange={setBook} />
-              </div>
-            )}
             {isAdminEmail(user?.email) && editingAuthor ? (
-              <div className="mt-1 flex items-center gap-2">
+              <div className="detail-author flex items-center gap-2">
                 <Input
                   aria-label="작가명"
                   value={authorValue}
@@ -298,7 +261,7 @@ const BookDetail = () => {
                 </Button>
               </div>
             ) : (
-              <div className="mt-1 flex items-center gap-2">
+              <div className="detail-author flex items-center gap-2">
                 <p className="text-lg text-muted-foreground">{book.author}</p>
                 {isAdminEmail(user?.email) && (
                   <Button
@@ -306,7 +269,7 @@ const BookDetail = () => {
                     variant="ghost"
                     aria-label="작가 정보 수정"
                     onClick={startEditingAuthor}
-                    className="h-6 w-6 p-0"
+                    className="h-8 w-8 p-0 text-muted-foreground"
                   >
                     <Pencil className="h-3 w-3" />
                   </Button>
@@ -314,18 +277,6 @@ const BookDetail = () => {
               </div>
             )}
 
-            <div className="mt-4 flex flex-wrap gap-2">
-              <Badge>{book.category}</Badge>
-              {book.tags.map((tag) => (
-                <Badge key={tag} variant="secondary">
-                  {tag}
-                </Badge>
-              ))}
-            </div>
-
-            <div className="mt-5">
-              <FavoriteButton bookId={book.id} title={book.title} />
-            </div>
             <BookReadingControls
               key={book.id}
               book={book}
@@ -336,68 +287,6 @@ const BookDetail = () => {
                 )
               }
             />
-            <p className="mt-4 text-xs text-muted-foreground">
-              최종 수정: {new Date(book.updatedAt).toLocaleDateString("ko-KR")}
-            </p>
-
-            {/* Bookcover URL display & edit - only visible to owner */}
-            {isAdminEmail(user?.email) && (
-              <div className="cover-editor">
-                <div className="flex items-center gap-2 text-sm font-medium text-foreground">
-                  <ImageIcon className="h-4 w-4" />
-                  표지 이미지
-                </div>
-                {editingCover ? (
-                  <div className="mt-2 flex gap-2">
-                    <Input
-                      aria-label="표지 이미지 URL"
-                      value={coverUrl}
-                      onChange={(e) => setCoverUrl(e.target.value)}
-                      placeholder="이미지 URL을 입력하세요"
-                      className="flex-1 text-sm"
-                    />
-                    <Button
-                      size="sm"
-                      aria-label="표지 저장"
-                      onClick={handleSaveCover}
-                      disabled={saving}
-                    >
-                      <Check className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      aria-label="표지 편집 취소"
-                      onClick={() => setEditingCover(false)}
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="mt-1.5 flex items-center gap-2">
-                    {book.bookcover ? (
-                      <p className="flex-1 truncate text-xs text-muted-foreground">
-                        {book.bookcover}
-                      </p>
-                    ) : (
-                      <p className="flex-1 text-xs text-destructive">
-                        표지이미지 업데이트 필요
-                      </p>
-                    )}
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={startEditing}
-                      className="shrink-0"
-                    >
-                      <Pencil className="mr-1 h-3 w-3" />
-                      {book.bookcover ? "수정" : "추가"}
-                    </Button>
-                  </div>
-                )}
-              </div>
-            )}
-
             <div className="detail-tools">
               <BlogExportButtons book={book} />
               <Button

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
-import { CalendarDays, Check, Pencil, Loader2 } from "lucide-react";
+import { ChevronDown } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ReadDateCalendar } from "@/components/ReadDateCalendar";
@@ -78,164 +78,162 @@ export function BookReadingControls({
   };
   return (
     <section
-      className="reading-controls"
+      className="book-metadata"
       aria-label="독서 기록 설정"
       id="reading-settings"
     >
-      <div className="reading-control-title">
-        <span>
-          <Pencil size={14} /> 나의 독서 기록
+      <div className="detail-tags">
+        <Badge>{book.category}</Badge>
+        {book.tags.map((tag) => (
+          <Badge key={tag} variant="secondary">
+            {tag}
+          </Badge>
+        ))}
+        <span className="detail-status" data-status={book.status}>
+          {canEdit ? (
+            <>
+              <select
+                aria-label="기록 상태"
+                value={book.status}
+                disabled={saving}
+                onChange={(event) =>
+                  void save({ status: event.target.value as BookStatus })
+                }
+              >
+                {(["작성중", "대기", "완료"] as BookStatus[]).map((status) => (
+                  <option key={status} value={status}>
+                    {status}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown size={12} aria-hidden="true" />
+            </>
+          ) : (
+            <span>{book.status}</span>
+          )}
         </span>
-        {saving && (
-          <span role="status">
-            <Loader2 size={13} className="animate-spin" />
-            저장 중...
-          </span>
-        )}
       </div>
-      <div className="reading-status">
-        <span className="reading-field-label">기록 상태</span>
-        <div role="group" aria-label="기록 상태 선택">
-          {(["작성중", "대기", "완료"] as BookStatus[]).map((status) => (
-            <button
-              key={status}
-              type="button"
-              aria-pressed={book.status === status}
-              disabled={!canEdit || saving}
-              onClick={() => void save({ status })}
+      <div className="detail-dates">
+        <div className="detail-date-item">
+          <span className="detail-date-label">읽은 날짜</span>
+          {canEdit ? (
+            <DatePicker
+              open={dateOpen}
+              onOpenChange={(open) => {
+                if (!saving) {
+                  setDateOpen(open);
+                  setDate(book.readDate || "");
+                  setError("");
+                }
+              }}
             >
-              {book.status === status && <Check size={13} />} {status}
-            </button>
-          ))}
+              <DateTrigger asChild>
+                <button
+                  type="button"
+                  className="metadata-date-button"
+                  disabled={saving}
+                  aria-label="읽은 날짜 변경"
+                >
+                  <span>
+                    {book.readDate
+                      ? new Date(
+                          book.readDate + "T00:00:00",
+                        ).toLocaleDateString("ko-KR")
+                      : "날짜 지정"}
+                  </span>
+                </button>
+              </DateTrigger>
+              <DateContent
+                className="read-date-popover"
+                {...(isMobile ? {} : { align: "start" as const })}
+              >
+                {isMobile ? (
+                  <>
+                    <DialogTitle className="font-normal text-xl">
+                      읽은 날짜
+                    </DialogTitle>
+                    <DialogDescription className="text-xs">
+                      연도와 월을 먼저 선택한 뒤 날짜를 고르세요.
+                    </DialogDescription>
+                  </>
+                ) : (
+                  <>
+                    <h3>읽은 날짜</h3>
+                    <p className="text-xs text-muted-foreground">
+                      연도와 월을 먼저 선택한 뒤 날짜를 고르세요.
+                    </p>
+                  </>
+                )}
+                <fieldset disabled={saving}>
+                  <ReadDateCalendar
+                    selected={date ? new Date(date + "T00:00:00") : undefined}
+                    onSelect={(value) => setDate(value ? localDate(value) : "")}
+                  />
+                  <form
+                    onSubmit={(event) => {
+                      event.preventDefault();
+                      void save({ read_date: date || null });
+                    }}
+                  >
+                    <label
+                      htmlFor={`read-date-${book.id}`}
+                      className="text-xs text-muted-foreground"
+                    >
+                      직접 입력
+                    </label>
+                    <Input
+                      id={`read-date-${book.id}`}
+                      type="date"
+                      value={date}
+                      max="9999-12-31"
+                      onChange={(event) => setDate(event.target.value)}
+                    />
+                    <div className="date-actions">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setDate("")}
+                      >
+                        날짜 지우기
+                      </Button>
+                      <Button
+                        type="submit"
+                        size="sm"
+                        disabled={saving || date === (book.readDate || "")}
+                      >
+                        {saving ? "저장 중..." : "날짜 저장"}
+                      </Button>
+                    </div>
+                  </form>
+                </fieldset>
+                {error && (
+                  <p role="alert" className="text-xs text-destructive">
+                    {error}
+                  </p>
+                )}
+              </DateContent>
+            </DatePicker>
+          ) : (
+            <span>
+              {book.readDate
+                ? new Date(book.readDate + "T00:00:00").toLocaleDateString(
+                    "ko-KR",
+                  )
+                : "미지정"}
+            </span>
+          )}
+        </div>
+        <div className="detail-date-item">
+          <span className="detail-date-label">최종 수정</span>
+          <time dateTime={book.updatedAt}>
+            {new Date(book.updatedAt).toLocaleDateString("ko-KR")}
+          </time>
         </div>
       </div>
-      <div className="reading-date">
-        <span className="reading-field-label">
-          <CalendarDays size={14} />
-          읽은 날짜
-        </span>
-        {canEdit ? (
-          <DatePicker
-            open={dateOpen}
-            onOpenChange={(open) => {
-              if (!saving) {
-                setDateOpen(open);
-                setDate(book.readDate || "");
-                setError("");
-              }
-            }}
-          >
-            <DateTrigger asChild>
-              <Button
-                variant="outline"
-                disabled={saving}
-                aria-label="읽은 날짜 변경"
-              >
-                <span>
-                  {book.readDate
-                    ? new Date(book.readDate + "T00:00:00").toLocaleDateString(
-                        "ko-KR",
-                      )
-                    : "날짜 지정"}
-                </span>
-                <Pencil size={13} />
-              </Button>
-            </DateTrigger>
-            <DateContent
-              className="read-date-popover"
-              {...(isMobile ? {} : { align: "start" as const })}
-            >
-              {isMobile ? (
-                <>
-                  <DialogTitle className="font-normal text-xl">
-                    읽은 날짜
-                  </DialogTitle>
-                  <DialogDescription className="text-xs">
-                    연도와 월을 먼저 선택한 뒤 날짜를 고르세요.
-                  </DialogDescription>
-                </>
-              ) : (
-                <>
-                  <h3>읽은 날짜</h3>
-                  <p className="text-xs text-muted-foreground">
-                    연도와 월을 먼저 선택한 뒤 날짜를 고르세요.
-                  </p>
-                </>
-              )}
-              <fieldset disabled={saving}>
-                <ReadDateCalendar
-                  selected={date ? new Date(date + "T00:00:00") : undefined}
-                  onSelect={(value) => setDate(value ? localDate(value) : "")}
-                />
-                <form
-                  onSubmit={(event) => {
-                    event.preventDefault();
-                    void save({ read_date: date || null });
-                  }}
-                >
-                  <label
-                    htmlFor={`read-date-${book.id}`}
-                    className="text-xs text-muted-foreground"
-                  >
-                    직접 입력
-                  </label>
-                  <Input
-                    id={`read-date-${book.id}`}
-                    type="date"
-                    value={date}
-                    max="9999-12-31"
-                    onChange={(event) => setDate(event.target.value)}
-                  />
-                  <div className="date-actions">
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setDate("")}
-                    >
-                      날짜 지우기
-                    </Button>
-                    <Button
-                      type="submit"
-                      size="sm"
-                      disabled={saving || date === (book.readDate || "")}
-                    >
-                      {saving ? "저장 중..." : "날짜 저장"}
-                    </Button>
-                  </div>
-                </form>
-              </fieldset>
-              {error && (
-                <p role="alert" className="text-xs text-destructive">
-                  {error}
-                </p>
-              )}
-            </DateContent>
-          </DatePicker>
-        ) : (
-          <p>
-            {book.readDate
-              ? new Date(book.readDate + "T00:00:00").toLocaleDateString(
-                  "ko-KR",
-                )
-              : "아직 지정하지 않았습니다."}
-          </p>
-        )}
-      </div>
-      {!canEdit && (
-        <p className="reading-login">
-          <Link
-            to={`/login?next=${encodeURIComponent(`/book/${book.id}#reading-settings`)}`}
-          >
-            관리자 로그인 후 상태·날짜 수정 ↗
-          </Link>
-        </p>
-      )}
-      {notice && (
-        <p role="status" className="reading-save-notice">
-          {notice}
-        </p>
-      )}
+      <p role="status" className="sr-only">
+        {saving ? "저장 중..." : notice}
+      </p>
       {error && !dateOpen && (
         <p role="alert" className="text-sm text-destructive">
           {error}

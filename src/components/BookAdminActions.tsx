@@ -1,6 +1,13 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Trash2, EyeOff, Eye, Loader2 } from "lucide-react";
+import { Trash2, EyeOff, Eye, Loader2, MoreHorizontal } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
@@ -11,7 +18,6 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { deleteBookById, updateBookFields } from "@/lib/bookApi";
 import { toast } from "@/hooks/use-toast";
@@ -26,6 +32,7 @@ export function BookAdminActions({ book, onBookChange }: Props) {
   const navigate = useNavigate();
   const [togglingHide, setTogglingHide] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
 
   const handleToggleHide = async () => {
     if (togglingHide) return;
@@ -65,37 +72,41 @@ export function BookAdminActions({ book, onBookChange }: Props) {
   };
 
   return (
-    <div className="book-admin-actions flex flex-wrap items-center gap-1.5">
-      {/* Hide/Show */}
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={handleToggleHide}
-        disabled={togglingHide}
-        className="gap-1.5"
-      >
-        {togglingHide ? (
-          <Loader2 className="h-4 w-4 animate-spin" />
-        ) : book.isHidden ? (
-          <Eye className="h-4 w-4 text-muted-foreground" />
-        ) : (
-          <EyeOff className="h-4 w-4 text-muted-foreground" />
-        )}
-        <span className="text-xs">{book.isHidden ? "공개" : "감추기"}</span>
-      </Button>
-
-      {/* Delete */}
-      <AlertDialog>
-        <AlertDialogTrigger asChild>
+    <>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
           <Button
             variant="ghost"
-            size="sm"
-            className="gap-1.5 text-destructive hover:text-destructive"
+            size="icon"
+            className="detail-icon-action"
+            aria-label="도서 관리"
+            title="도서 관리"
           >
-            <Trash2 className="h-4 w-4" />
-            <span className="text-xs">삭제</span>
+            <MoreHorizontal className="h-5 w-5" />
           </Button>
-        </AlertDialogTrigger>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem
+            onSelect={() => void handleToggleHide()}
+            disabled={togglingHide}
+          >
+            {book.isHidden ? (
+              <Eye className="mr-2 h-4 w-4" />
+            ) : (
+              <EyeOff className="mr-2 h-4 w-4" />
+            )}
+            {book.isHidden ? "도서 공개" : "도서 감추기"}
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            className="text-destructive focus:text-destructive"
+            onSelect={() => setDeleteOpen(true)}
+          >
+            <Trash2 className="mr-2 h-4 w-4" /> 도서 삭제
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+      <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>도서를 삭제하시겠습니까?</AlertDialogTitle>
@@ -114,6 +125,6 @@ export function BookAdminActions({ book, onBookChange }: Props) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+    </>
   );
 }
