@@ -6,6 +6,7 @@ import { Header } from "@/components/Header";
 import { MarkdownRenderer } from "@/components/MarkdownRenderer";
 import { BlogExportButtons } from "@/components/BlogExportButtons";
 import { BookReadingControls } from "@/components/BookReadingControls";
+import { ReadingAside } from "@/components/ReadingAside";
 import { FavoriteButton } from "@/components/FavoriteButton";
 import { BookAdminActions } from "@/components/BookAdminActions";
 import { Badge } from "@/components/ui/badge";
@@ -325,19 +326,7 @@ const BookDetail = () => {
           id="reading-notes"
           aria-labelledby="notes-heading"
         >
-          <aside className="reading-aside">
-            <p className="mono-label">THE READING JOURNAL</p>
-            <h2 id="notes-heading">
-              책 속에서,
-              <br />내 생각으로.
-            </h2>
-            <p>
-              읽으며 남긴 문장과 생각을
-              <br />
-              차분히 따라가 보세요.
-            </p>
-            <a href="#main-content">도서 정보로 ↑</a>
-          </aside>
+          <ReadingAside key={book.id} title={book.title} />
           <article className="reading-paper">
             <MarkdownRenderer content={book.markdown} />
           </article>

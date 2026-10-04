@@ -678,6 +678,18 @@
     gap: 70px;
     padding-top: 48px;
   }
+  .reading-aside-column {
+    position: relative;
+    min-width: 0;
+  }
+  .reading-sticky-marker {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 1px;
+    height: 1px;
+    pointer-events: none;
+  }
   .reading-aside {
     align-self: start;
     position: sticky;
@@ -692,6 +704,25 @@
     letter-spacing: -0.05em;
     margin: 18px 0;
     font-weight: 400;
+  }
+  .reading-heading {
+    display: grid;
+  }
+  .reading-heading-intro,
+  .reading-heading-book {
+    grid-area: 1 / 1;
+    word-break: keep-all;
+    overflow-wrap: anywhere;
+    transition: opacity 360ms ease;
+  }
+  .reading-heading-book {
+    opacity: 0;
+  }
+  .reading-aside[data-stuck="true"] .reading-heading-intro {
+    opacity: 0;
+  }
+  .reading-aside[data-stuck="true"] .reading-heading-book {
+    opacity: 1;
   }
   .reading-aside p {
     font-size: 13px;
@@ -1274,6 +1305,9 @@
   .reading-aside h2 br {
     display: none;
   }
+  .reading-heading-book {
+    display: none;
+  }
   .reading-aside a {
     margin-top: 12px;
   }
@@ -1418,6 +1452,10 @@
   }
 }
 @media (prefers-reduced-motion: reduce) {
+  .reading-heading-intro,
+  .reading-heading-book {
+    transition: none;
+  }
   html {
     scroll-behavior: auto;
   }
