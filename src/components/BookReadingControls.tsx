@@ -9,10 +9,18 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { useIsMobile } from "@/hooks/use-mobile";
+import {
+  Dialog,
+  DialogContent,
+  DialogTrigger,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { updateBookFields } from "@/lib/bookApi";
 import type { Book, BookStatus } from "@/types/book";
 
-export function localDate(date: Date) {
+function localDate(date: Date) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
 }
 export function BookReadingControls({
@@ -24,6 +32,10 @@ export function BookReadingControls({
   canEdit: boolean;
   onChange: (fields: Partial<Book>) => void;
 }) {
+  const isMobile = useIsMobile();
+  const DatePicker = isMobile ? Dialog : Popover;
+  const DateTrigger = isMobile ? DialogTrigger : PopoverTrigger;
+  const DateContent = isMobile ? DialogContent : PopoverContent;
   const [date, setDate] = useState(book.readDate || "");
   const [dateOpen, setDateOpen] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -103,7 +115,7 @@ export function BookReadingControls({
           읽은 날짜
         </span>
         {canEdit ? (
-          <Popover
+          <DatePicker
             open={dateOpen}
             onOpenChange={(open) => {
               if (!saving) {
@@ -113,7 +125,7 @@ export function BookReadingControls({
               }
             }}
           >
-            <PopoverTrigger asChild>
+            <DateTrigger asChild>
               <Button
                 variant="outline"
                 disabled={saving}
@@ -128,12 +140,28 @@ export function BookReadingControls({
                 </span>
                 <Pencil size={13} />
               </Button>
-            </PopoverTrigger>
-            <PopoverContent className="read-date-popover" align="start">
-              <h3>읽은 날짜</h3>
-              <p className="text-xs text-muted-foreground">
-                연도와 월을 먼저 선택한 뒤 날짜를 고르세요.
-              </p>
+            </DateTrigger>
+            <DateContent
+              className="read-date-popover"
+              {...(isMobile ? {} : { align: "start" as const })}
+            >
+              {isMobile ? (
+                <>
+                  <DialogTitle className="font-normal text-xl">
+                    읽은 날짜
+                  </DialogTitle>
+                  <DialogDescription className="text-xs">
+                    연도와 월을 먼저 선택한 뒤 날짜를 고르세요.
+                  </DialogDescription>
+                </>
+              ) : (
+                <>
+                  <h3>읽은 날짜</h3>
+                  <p className="text-xs text-muted-foreground">
+                    연도와 월을 먼저 선택한 뒤 날짜를 고르세요.
+                  </p>
+                </>
+              )}
               <fieldset disabled={saving}>
                 <ReadDateCalendar
                   selected={date ? new Date(date + "T00:00:00") : undefined}
@@ -182,8 +210,8 @@ export function BookReadingControls({
                   {error}
                 </p>
               )}
-            </PopoverContent>
-          </Popover>
+            </DateContent>
+          </DatePicker>
         ) : (
           <p>
             {book.readDate

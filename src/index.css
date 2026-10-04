@@ -1684,3 +1684,18 @@
     margin-top: 18px;
   }
 }
+
+@media (max-width: 767px) {
+  .read-date-popover {
+    width: min(360px, calc(100vw - 24px));
+    max-height: calc(100dvh - 24px);
+    gap: 8px;
+  }
+  .read-date-popover .rdp {
+    width: 100%;
+  }
+  .read-date-popover table {
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
