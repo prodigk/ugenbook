@@ -8,29 +8,22 @@ import {
   Pencil,
   Sparkles,
   Loader2,
-  CalendarIcon,
 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { Header } from "@/components/Header";
 import { MarkdownRenderer } from "@/components/MarkdownRenderer";
 import { BlogExportButtons } from "@/components/BlogExportButtons";
-import { BookTagEditor } from "@/components/BookTagEditor";
+import { BookReadingControls } from "@/components/BookReadingControls";
+import { FavoriteButton } from "@/components/FavoriteButton";
 import { BookAdminActions } from "@/components/BookAdminActions";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { ReadDateCalendar } from "@/components/ReadDateCalendar";
-import {
   fetchBookById,
   updateBookcover,
   updateBookFields,
 } from "@/lib/bookApi";
-import { fetchUserLikes } from "@/lib/likesApi";
 import { useAuth } from "@/contexts/AuthContext";
 import { isAdminEmail } from "@/lib/adminAuth";
 import { toast } from "@/hooks/use-toast";
@@ -114,21 +107,26 @@ const BookDetail = () => {
   const [authorValue, setAuthorValue] = useState("");
   const [savingAuthor, setSavingAuthor] = useState(false);
 
-  // Like state
-  const [liked, setLiked] = useState(false);
-
   useEffect(() => {
     if (!id) return;
+    let cancelled = false;
+    setLoading(true);
+    setBook(null);
+    setSummary("");
+    setEditingAuthor(false);
+    setEditingCover(false);
     fetchBookById(id)
-      .then(setBook)
+      .then((value) => {
+        if (!cancelled) setBook(value);
+      })
       .catch(console.error)
-      .finally(() => setLoading(false));
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [id]);
-
-  useEffect(() => {
-    if (!id || !user || !isAdminEmail(user.email)) return;
-    fetchUserLikes(user.id).then((ids) => setLiked(ids.includes(id)));
-  }, [id, user]);
 
   const handleSaveCover = async () => {
     if (!book) return;
@@ -270,13 +268,7 @@ const BookDetail = () => {
             )}
             {isAdminEmail(user?.email) && (
               <div className="mt-2">
-                <BookAdminActions
-                  book={book}
-                  userId={user!.id}
-                  liked={liked}
-                  onLikeChange={setLiked}
-                  onBookChange={setBook}
-                />
+                <BookAdminActions book={book} onBookChange={setBook} />
               </div>
             )}
             {isAdminEmail(user?.email) && editingAuthor ? (
@@ -324,31 +316,6 @@ const BookDetail = () => {
 
             <div className="mt-4 flex flex-wrap gap-2">
               <Badge>{book.category}</Badge>
-              {isAdminEmail(user?.email) ? (
-                <BookTagEditor
-                  type="status"
-                  value={book.status}
-                  onUpdate={async (newStatus) => {
-                    try {
-                      await updateBookFields(book.id, { status: newStatus });
-                      setBook({ ...book, status: newStatus as Book["status"] });
-                      toast({
-                        title: `상태가 "${newStatus}"로 변경되었습니다.`,
-                      });
-                    } catch (e) {
-                      toast({
-                        title: "상태 변경 실패",
-                        description: String(e),
-                        variant: "destructive",
-                      });
-                    }
-                  }}
-                />
-              ) : (
-                <Badge variant={book.status === "완료" ? "default" : "outline"}>
-                  {book.status}
-                </Badge>
-              )}
               {book.tags.map((tag) => (
                 <Badge key={tag} variant="secondary">
                   {tag}
@@ -356,67 +323,22 @@ const BookDetail = () => {
               ))}
             </div>
 
-            <div className="mt-4 flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
-              <span>
-                최종 수정:{" "}
-                {new Date(book.updatedAt).toLocaleDateString("ko-KR")}
-              </span>
-              <span className="flex items-center gap-1">
-                <CalendarIcon className="h-3 w-3" />
-                읽은 날짜:&nbsp;
-                {isAdminEmail(user?.email) ? (
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-5 px-1 text-xs"
-                      >
-                        {book.readDate
-                          ? new Date(
-                              book.readDate + "T00:00:00",
-                            ).toLocaleDateString("ko-KR")
-                          : "미지정"}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <ReadDateCalendar
-                        selected={
-                          book.readDate
-                            ? new Date(book.readDate + "T00:00:00")
-                            : undefined
-                        }
-                        onSelect={async (date) => {
-                          if (!date) return;
-                          const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
-                          try {
-                            await updateBookFields(book.id, {
-                              read_date: dateStr,
-                            });
-                            setBook({ ...book, readDate: dateStr });
-                            toast({ title: "읽은 날짜가 업데이트되었습니다." });
-                          } catch (e) {
-                            toast({
-                              title: "업데이트 실패",
-                              description: String(e),
-                              variant: "destructive",
-                            });
-                          }
-                        }}
-                      />
-                    </PopoverContent>
-                  </Popover>
-                ) : (
-                  <span>
-                    {book.readDate
-                      ? new Date(
-                          book.readDate + "T00:00:00",
-                        ).toLocaleDateString("ko-KR")
-                      : "미지정"}
-                  </span>
-                )}
-              </span>
+            <div className="mt-5">
+              <FavoriteButton bookId={book.id} title={book.title} />
             </div>
+            <BookReadingControls
+              key={book.id}
+              book={book}
+              canEdit={isAdminEmail(user?.email)}
+              onChange={(fields) =>
+                setBook((current) =>
+                  current ? { ...current, ...fields } : current,
+                )
+              }
+            />
+            <p className="mt-4 text-xs text-muted-foreground">
+              최종 수정: {new Date(book.updatedAt).toLocaleDateString("ko-KR")}
+            </p>
 
             {/* Bookcover URL display & edit - only visible to owner */}
             {isAdminEmail(user?.email) && (

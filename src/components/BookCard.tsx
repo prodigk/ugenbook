@@ -1,115 +1,68 @@
-import { memo, useState, useEffect } from "react";
+import { memo } from "react";
 import { Link } from "react-router-dom";
-import { Heart } from "lucide-react";
+import { FavoriteButton } from "@/components/FavoriteButton";
 import type { Book } from "@/types/book";
 import { Badge } from "@/components/ui/badge";
-import { useAuth } from "@/contexts/AuthContext";
-import { isAdminEmail } from "@/lib/adminAuth";
-import { toggleLike } from "@/lib/likesApi";
-
 interface BookCardProps {
   book: Book;
   index: number;
-  liked?: boolean;
   lastRevisionAt?: string;
-  onToggleLike?: (bookId: string, newLiked: boolean) => void;
 }
 
 export const BookCard = memo(function BookCard({
   book,
-  liked = false,
   lastRevisionAt,
-  onToggleLike,
 }: BookCardProps) {
-  const { user } = useAuth();
-  const isAdmin = isAdminEmail(user?.email);
-  const [isLiked, setIsLiked] = useState(liked);
-  const [toggling, setToggling] = useState(false);
-
   const isRecentlyUpdated = lastRevisionAt
     ? Date.now() - new Date(lastRevisionAt).getTime() < 7 * 24 * 60 * 60 * 1000
     : false;
 
   const hasMamaTag = book.tags.some((t) => t === "엄마");
 
-  // Sync with parent prop
-  useEffect(() => {
-    setIsLiked(liked);
-  }, [liked]);
-
-  const handleLike = async (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (!user || toggling) return;
-    setToggling(true);
-    try {
-      await toggleLike(user.id, book.id, isLiked);
-      const newLiked = !isLiked;
-      setIsLiked(newLiked);
-      onToggleLike?.(book.id, newLiked);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setToggling(false);
-    }
-  };
-
   return (
-    <Link to={`/book/${book.id}`} className="group block book-card">
-      <div className="book-card-inner">
-        <div className={book.status === "대기" ? "opacity-70" : ""}>
-          <div
-            className={`book-cover-stage ${hasMamaTag ? "family-book" : ""}`}
-          >
-            {book.bookcover ? (
-              <img
-                src={book.bookcover}
-                alt={book.title}
-                className="book-cover-image"
-                loading="lazy"
-              />
-            ) : (
-              <div className="flex h-full w-full items-center justify-center bg-secondary p-4">
-                <span className="text-center font-serif text-lg text-secondary-foreground/70">
-                  {book.title}
-                </span>
-              </div>
-            )}
-            {isAdmin && (
-              <button
-                onClick={handleLike}
-                className="absolute top-2 right-2 z-10 rounded-full bg-background/80 p-1.5 backdrop-blur-sm transition-colors hover:bg-background"
-                aria-label={isLiked ? "좋아요 취소" : "좋아요"}
-              >
-                <Heart
-                  className={`h-4 w-4 transition-colors ${
-                    isLiked
-                      ? "fill-destructive text-destructive"
-                      : "text-muted-foreground"
-                  }`}
+    <article className="group block book-card relative">
+      <FavoriteButton bookId={book.id} title={book.title} compact />
+      <Link to={`/book/${book.id}`} className="block">
+        <div className="book-card-inner">
+          <div className={book.status === "대기" ? "opacity-70" : ""}>
+            <div
+              className={`book-cover-stage ${hasMamaTag ? "family-book" : ""}`}
+            >
+              {book.bookcover ? (
+                <img
+                  src={book.bookcover}
+                  alt={book.title}
+                  className="book-cover-image"
+                  loading="lazy"
                 />
-              </button>
-            )}
-          </div>
-          <h3 className="book-card-title">{book.title}</h3>
-          <p className="book-card-author">{book.author}</p>
-          <div className="mt-2 flex flex-wrap gap-1">
-            <Badge variant="secondary" className="text-xs font-normal">
-              {book.category}
-            </Badge>
-            {book.status === "작성중" && (
-              <Badge variant="outline" className="text-xs font-normal">
-                작성중
+              ) : (
+                <div className="flex h-full w-full items-center justify-center bg-secondary p-4">
+                  <span className="text-center font-serif text-lg text-secondary-foreground/70">
+                    {book.title}
+                  </span>
+                </div>
+              )}
+            </div>
+            <h3 className="book-card-title">{book.title}</h3>
+            <p className="book-card-author">{book.author}</p>
+            <div className="mt-2 flex flex-wrap gap-1">
+              <Badge variant="secondary" className="text-xs font-normal">
+                {book.category}
               </Badge>
-            )}
-            {isRecentlyUpdated && (
-              <Badge className="text-xs font-normal bg-primary/15 text-primary hover:bg-primary/15">
-                업데이트됨
-              </Badge>
-            )}
+              {book.status === "작성중" && (
+                <Badge variant="outline" className="text-xs font-normal">
+                  작성중
+                </Badge>
+              )}
+              {isRecentlyUpdated && (
+                <Badge className="text-xs font-normal bg-primary/15 text-primary hover:bg-primary/15">
+                  업데이트됨
+                </Badge>
+              )}
+            </div>
           </div>
         </div>
-      </div>
-    </Link>
+      </Link>
+    </article>
   );
 });

@@ -63,7 +63,7 @@ export async function fetchBookById(id: string): Promise<Book | null> {
 export async function upsertBookFromMd(
   userId: string,
   fileName: string,
-  rawMd: string
+  rawMd: string,
 ): Promise<Book> {
   const parsed = mdToBook(fileName, rawMd);
 
@@ -79,7 +79,9 @@ export async function upsertBookFromMd(
     // 변경된 항목 감지
     const { data: prev } = await supabase
       .from("books")
-      .select("title, status, category, tags, markdown, author, bookcover, read_date")
+      .select(
+        "title, status, category, tags, markdown, author, bookcover, read_date",
+      )
       .eq("id", existing.id)
       .maybeSingle();
 
@@ -108,8 +110,10 @@ export async function upsertBookFromMd(
       if (prev.status !== parsed.status) changes.push("상태 변경");
       if (prev.category !== parsed.category) changes.push("카테고리 변경");
       if (prev.author !== parsed.author) changes.push("작가 수정");
-      if ((prev.bookcover || "") !== (parsed.bookcover || "")) changes.push("표지 변경");
-      if ((prev.read_date || null) !== (parsed.readDate || null)) changes.push("읽은 날짜 변경");
+      if ((prev.bookcover || "") !== (parsed.bookcover || ""))
+        changes.push("표지 변경");
+      if ((prev.read_date || null) !== (parsed.readDate || null))
+        changes.push("읽은 날짜 변경");
       const prevTags = JSON.stringify((prev.tags || []).slice().sort());
       const newTags = JSON.stringify((parsed.tags || []).slice().sort());
       if (prevTags !== newTags) changes.push("태그 변경");
@@ -142,7 +146,10 @@ export async function upsertBookFromMd(
   }
 }
 
-export async function updateBookcover(id: string, bookcover: string): Promise<void> {
+export async function updateBookcover(
+  id: string,
+  bookcover: string,
+): Promise<void> {
   const { error } = await supabase
     .from("books")
     .update({ bookcover })
@@ -152,7 +159,7 @@ export async function updateBookcover(id: string, bookcover: string): Promise<vo
 
 export async function checkDuplicateFileNames(
   userId: string,
-  fileNames: string[]
+  fileNames: string[],
 ): Promise<string[]> {
   const { data, error } = await supabase
     .from("books")
@@ -166,12 +173,20 @@ export async function checkDuplicateFileNames(
 
 export async function updateBookFields(
   id: string,
-  fields: { category?: string; status?: string; author?: string; is_hidden?: boolean; read_date?: string | null }
+  fields: {
+    category?: string;
+    status?: string;
+    author?: string;
+    is_hidden?: boolean;
+    read_date?: string | null;
+  },
 ): Promise<void> {
   const { error } = await supabase
     .from("books")
     .update(fields)
-    .eq("id", id);
+    .eq("id", id)
+    .select("id")
+    .single();
   if (error) throw error;
 }
 

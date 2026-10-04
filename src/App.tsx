@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
+import { FavoritesProvider } from "@/contexts/FavoritesContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import { LibraryFooter } from "@/components/LibraryFooter";
@@ -27,20 +28,23 @@ const App = () => (
         <BrowserRouter>
           <ScrollToTop />
           <AuthProvider>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/book/:id" element={<BookDetail />} />
-              <Route path="/admin" element={<Admin />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/likes" element={<Likes />} />
-              <Route path="/mcp" element={<McpDocs />} />
-              <Route
-                path="/.lovable/oauth/consent"
-                element={<OAuthConsent />}
-              />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-            <LibraryFooter />
+            <FavoritesProvider>
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/book/:id" element={<BookDetail />} />
+                <Route path="/admin" element={<Admin />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/likes" element={<Likes />} />
+                <Route path="/favorites" element={<Likes />} />
+                <Route path="/mcp" element={<McpDocs />} />
+                <Route
+                  path="/.lovable/oauth/consent"
+                  element={<OAuthConsent />}
+                />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+              <LibraryFooter />
+            </FavoritesProvider>
           </AuthProvider>
         </BrowserRouter>
       </TooltipProvider>

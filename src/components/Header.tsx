@@ -1,15 +1,15 @@
 import { Link, useLocation } from "react-router-dom";
-import { Settings, Heart, LogOut, ArrowUpRight, BookOpen } from "lucide-react";
+import { Settings, Star, LogOut, ArrowUpRight, BookOpen } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
-import { isAdminEmail } from "@/lib/adminAuth";
+
 import ugenSymbol from "@/assets/ugen-symbol.png";
 
 export function Header() {
   const { pathname } = useLocation();
   const { user, signOut } = useAuth();
-  const isAdmin = isAdminEmail(user?.email);
+
   return (
     <>
       <a href="#main-content" className="skip-link">
@@ -30,15 +30,17 @@ export function Header() {
               <BookOpen size={15} />
               책장
             </Link>
-            {isAdmin && (
+            {
               <Link
-                to="/likes"
-                className={pathname === "/likes" ? "active" : ""}
+                to="/favorites"
+                className={
+                  ["/likes", "/favorites"].includes(pathname) ? "active" : ""
+                }
               >
-                <Heart size={15} />
-                좋아요
+                <Star size={15} />
+                즐겨찾기
               </Link>
-            )}
+            }
             <Link
               to="/admin"
               className={

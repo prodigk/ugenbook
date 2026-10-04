@@ -10,7 +10,6 @@ import {
   BookGridSkeleton,
 } from "@/components/skeletons/MainPageSkeleton";
 import { fetchBooks } from "@/lib/bookApi";
-import { fetchUserLikes } from "@/lib/likesApi";
 import { fetchLatestRevisionMap } from "@/lib/revisionsApi";
 import {
   fetchMainSortMode,
@@ -25,7 +24,6 @@ import type { Book, BookCategory, BookStatus, SortOption } from "@/types/book";
 const Index = () => {
   const { user } = useAuth();
   const [books, setBooks] = useState<Book[]>([]);
-  const [likedIds, setLikedIds] = useState<Set<string>>(new Set());
   const [revisionMap, setRevisionMap] = useState<Record<string, string>>({});
   const [mainSortMode, setMainSortMode] = useState<MainSortMode>(
     DEFAULT_MAIN_SORT_MODE,
@@ -79,10 +77,6 @@ const Index = () => {
         const allBooks = await fetchBooks();
         setBooks(allBooks);
         fetchMainSortMode().then(setMainSortMode).catch(console.error);
-        if (user && isAdminEmail(user.email)) {
-          const ids = await fetchUserLikes(user.id);
-          setLikedIds(new Set(ids));
-        }
         try {
           const map = await fetchLatestRevisionMap(allBooks.map((b) => b.id));
           setRevisionMap(map);
@@ -97,15 +91,6 @@ const Index = () => {
     };
     load();
   }, [user]);
-
-  const handleToggleLike = useCallback((bookId: string, newLiked: boolean) => {
-    setLikedIds((prev) => {
-      const next = new Set(prev);
-      if (newLiked) next.add(bookId);
-      else next.delete(bookId);
-      return next;
-    });
-  }, []);
 
   const visibleBooks = useMemo(() => {
     const isAdmin = user && isAdminEmail(user.email);
@@ -320,9 +305,8 @@ const Index = () => {
                                   key={book.id}
                                   book={book}
                                   index={idx}
-                                  liked={likedIds.has(book.id)}
+
                                   lastRevisionAt={revisionMap[book.id]}
-                                  onToggleLike={handleToggleLike}
                                 />
                               ))}
                             </div>
@@ -339,9 +323,8 @@ const Index = () => {
                       key={book.id}
                       book={book}
                       index={idx}
-                      liked={likedIds.has(book.id)}
+
                       lastRevisionAt={revisionMap[book.id]}
-                      onToggleLike={handleToggleLike}
                     />
                   ))}
                 </div>

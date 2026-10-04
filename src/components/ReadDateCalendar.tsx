@@ -4,13 +4,7 @@ import { DayPicker } from "react-day-picker";
 
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { ko } from "date-fns/locale";
 
 interface ReadDateCalendarProps {
   selected?: Date;
@@ -19,61 +13,87 @@ interface ReadDateCalendarProps {
 }
 
 const MONTHS_KO = [
-  "1월", "2월", "3월", "4월", "5월", "6월",
-  "7월", "8월", "9월", "10월", "11월", "12월",
+  "1월",
+  "2월",
+  "3월",
+  "4월",
+  "5월",
+  "6월",
+  "7월",
+  "8월",
+  "9월",
+  "10월",
+  "11월",
+  "12월",
 ];
 
-export function ReadDateCalendar({ selected, onSelect, className }: ReadDateCalendarProps) {
+export function ReadDateCalendar({
+  selected,
+  onSelect,
+  className,
+}: ReadDateCalendarProps) {
   const today = new Date();
   const [month, setMonth] = React.useState<Date>(selected ?? today);
 
+  const selectedTime = selected?.getTime();
+  React.useEffect(() => {
+    if (selectedTime !== undefined) {
+      const date = new Date(selectedTime);
+      setMonth(new Date(date.getFullYear(), date.getMonth(), 1));
+    }
+  }, [selectedTime]);
+
   const currentYear = today.getFullYear();
-  const fromYear = 1990;
-  const toYear = currentYear + 1;
+  const fromYear = Math.min(1900, selected?.getFullYear() ?? 1900);
+  const toYear = Math.max(currentYear + 1, selected?.getFullYear() ?? 0);
   const years: number[] = [];
   for (let y = toYear; y >= fromYear; y--) years.push(y);
 
-  const handleYearChange = (yearStr: string) => {
-    const newDate = new Date(month);
-    newDate.setFullYear(parseInt(yearStr, 10));
-    setMonth(newDate);
-  };
-
-  const handleMonthChange = (monthStr: string) => {
-    const newDate = new Date(month);
-    newDate.setMonth(parseInt(monthStr, 10));
-    setMonth(newDate);
-  };
+  const handleYearChange = (yearStr: string) =>
+    setMonth(new Date(Number(yearStr), month.getMonth(), 1));
+  const handleMonthChange = (monthStr: string) =>
+    setMonth(new Date(month.getFullYear(), Number(monthStr), 1));
 
   return (
     <div className={cn("p-3 pointer-events-auto", className)}>
-      <div className="mb-3 flex gap-2">
-        <Select value={String(month.getFullYear())} onValueChange={handleYearChange}>
-          <SelectTrigger className="h-8 flex-1 text-sm">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent className="max-h-60 bg-popover">
-            {years.map((y) => (
-              <SelectItem key={y} value={String(y)}>
-                {y}년
-              </SelectItem>
+      <div className="calendar-jump">
+        <label>
+          연도
+          <select
+            aria-label="읽은 연도"
+            value={month.getFullYear()}
+            onChange={(event) => handleYearChange(event.target.value)}
+          >
+            {years.map((year) => (
+              <option key={year} value={year}>
+                {year}년
+              </option>
             ))}
-          </SelectContent>
-        </Select>
-        <Select value={String(month.getMonth())} onValueChange={handleMonthChange}>
-          <SelectTrigger className="h-8 w-24 text-sm">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent className="bg-popover">
-            {MONTHS_KO.map((m, i) => (
-              <SelectItem key={i} value={String(i)}>
-                {m}
-              </SelectItem>
+          </select>
+        </label>
+        <label>
+          월
+          <select
+            aria-label="읽은 월"
+            value={month.getMonth()}
+            onChange={(event) => handleMonthChange(event.target.value)}
+          >
+            {MONTHS_KO.map((name, index) => (
+              <option key={index} value={index}>
+                {name}
+              </option>
             ))}
-          </SelectContent>
-        </Select>
+          </select>
+        </label>
       </div>
       <DayPicker
+        locale={ko}
+        labels={{
+          labelDay: (date) =>
+            `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일`,
+          labelPrevious: () => "이전 달",
+          labelNext: () => "다음 달",
+        }}
         mode="single"
         selected={selected}
         onSelect={onSelect}
@@ -94,10 +114,14 @@ export function ReadDateCalendar({ selected, onSelect, className }: ReadDateCale
           nav_button_next: "absolute right-1",
           table: "w-full border-collapse space-y-1",
           head_row: "flex",
-          head_cell: "text-muted-foreground rounded-md w-9 font-normal text-[0.8rem]",
+          head_cell:
+            "text-muted-foreground rounded-md w-9 font-normal text-[0.8rem]",
           row: "flex w-full mt-2",
           cell: "h-9 w-9 text-center text-sm p-0 relative [&:has([aria-selected])]:bg-accent first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
-          day: cn(buttonVariants({ variant: "ghost" }), "h-9 w-9 p-0 font-normal aria-selected:opacity-100"),
+          day: cn(
+            buttonVariants({ variant: "ghost" }),
+            "h-9 w-9 p-0 font-normal aria-selected:opacity-100",
+          ),
           day_selected:
             "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
           day_today: "bg-accent text-accent-foreground",
@@ -106,6 +130,13 @@ export function ReadDateCalendar({ selected, onSelect, className }: ReadDateCale
           day_hidden: "invisible",
         }}
         components={{
+          DayContent: ({ date }) => (
+            <span
+              aria-label={`${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일`}
+            >
+              {date.getDate()}
+            </span>
+          ),
           IconLeft: () => <ChevronLeft className="h-4 w-4" />,
           IconRight: () => <ChevronRight className="h-4 w-4" />,
         }}

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Heart, Trash2, EyeOff, Eye, Loader2 } from "lucide-react";
+import { Trash2, EyeOff, Eye, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
@@ -14,42 +14,18 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { deleteBookById, updateBookFields } from "@/lib/bookApi";
-import { toggleLike } from "@/lib/likesApi";
 import { toast } from "@/hooks/use-toast";
 import type { Book } from "@/types/book";
 
 interface Props {
   book: Book;
-  userId: string;
-  liked: boolean;
-  onLikeChange: (liked: boolean) => void;
   onBookChange: (book: Book) => void;
 }
 
-export function BookAdminActions({
-  book,
-  userId,
-  liked,
-  onLikeChange,
-  onBookChange,
-}: Props) {
+export function BookAdminActions({ book, onBookChange }: Props) {
   const navigate = useNavigate();
-  const [togglingLike, setTogglingLike] = useState(false);
   const [togglingHide, setTogglingHide] = useState(false);
   const [deleting, setDeleting] = useState(false);
-
-  const handleToggleLike = async () => {
-    if (togglingLike) return;
-    setTogglingLike(true);
-    try {
-      await toggleLike(userId, book.id, liked);
-      onLikeChange(!liked);
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setTogglingLike(false);
-    }
-  };
 
   const handleToggleHide = async () => {
     if (togglingHide) return;
@@ -90,24 +66,6 @@ export function BookAdminActions({
 
   return (
     <div className="book-admin-actions flex flex-wrap items-center gap-1.5">
-      {/* Like */}
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={handleToggleLike}
-        disabled={togglingLike}
-        className="gap-1.5"
-      >
-        <Heart
-          className={`h-4 w-4 transition-colors ${
-            liked
-              ? "fill-destructive text-destructive"
-              : "text-muted-foreground"
-          }`}
-        />
-        <span className="text-xs">{liked ? "좋아요 취소" : "좋아요"}</span>
-      </Button>
-
       {/* Hide/Show */}
       <Button
         variant="ghost"
