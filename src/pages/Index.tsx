@@ -218,7 +218,16 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <main id="main-content" className="container library-main">
+      {loading && (
+        <p role="status" className="sr-only">
+          책장을 불러오는 중입니다.
+        </p>
+      )}
+      <main
+        id="main-content"
+        className="container library-main"
+        aria-busy={loading}
+      >
         <section className="library-intro" aria-labelledby="library-title">
           <div>
             <p className="mono-label">UGEN’S PERSONAL LIBRARY</p>
@@ -236,11 +245,29 @@ const Index = () => {
             </p>
             <div className="library-stats">
               <div>
-                <strong>{loading ? "—" : visibleBooks.length}</strong>
+                <strong>
+                  {loading ? (
+                    <span
+                      className="library-stat-placeholder"
+                      aria-hidden="true"
+                    />
+                  ) : (
+                    visibleBooks.length
+                  )}
+                </strong>
                 <span>책장에 담은 책</span>
               </div>
               <div>
-                <strong>{loading ? "—" : statusCounts["완료"] || 0}</strong>
+                <strong>
+                  {loading ? (
+                    <span
+                      className="library-stat-placeholder"
+                      aria-hidden="true"
+                    />
+                  ) : (
+                    statusCounts["완료"] || 0
+                  )}
+                </strong>
                 <span>완성한 독서 기록</span>
               </div>
             </div>
@@ -251,7 +278,7 @@ const Index = () => {
           <>
             <FeaturedCarouselSkeleton />
             <SearchFilterSkeleton />
-            <BookGridSkeleton />
+            <BookGridSkeleton grouped={sortOption === "dateGroup"} />
           </>
         ) : (
           <>

@@ -7,6 +7,7 @@ import { MarkdownRenderer } from "@/components/MarkdownRenderer";
 import { BlogExportButtons } from "@/components/BlogExportButtons";
 import { BookReadingControls } from "@/components/BookReadingControls";
 import { ReadingAside } from "@/components/ReadingAside";
+import { BookDetailSkeleton } from "@/components/skeletons/BookDetailSkeleton";
 import { FavoriteButton } from "@/components/FavoriteButton";
 import { BookAdminActions } from "@/components/BookAdminActions";
 import { Badge } from "@/components/ui/badge";
@@ -165,9 +166,7 @@ const BookDetail = () => {
     return (
       <div className="min-h-screen bg-background">
         <Header />
-        <div className="container py-20 text-center text-muted-foreground">
-          불러오는 중...
-        </div>
+        <BookDetailSkeleton />
       </div>
     );
   }
