@@ -29,4 +29,11 @@ describe("getDisplayTags", () => {
       "소설",
     ]);
   });
+
+  it("shows a category and its matching tag only once", () => {
+    expect(getDisplayTags(["철학", "#철학", "자기계발"], "철학")).toEqual([
+      "자기계발",
+    ]);
+    expect(getDisplayTags(["인문학", "#인문"], "인문")).toEqual([]);
+  });
 });

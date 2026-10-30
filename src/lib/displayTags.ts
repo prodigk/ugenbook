@@ -4,20 +4,23 @@ const TAG_ALIASES: Record<string, string> = {
   인문: "인문학",
 };
 
-export function getDisplayTags(tags: string[]): string[] {
+function canonicalTagName(tag: string): string {
+  const name = tag.trim().normalize("NFC").replace(/^#+/, "").trim();
+  return TAG_ALIASES[name.toLowerCase()] ?? name;
+}
+
+export function getDisplayTags(tags: string[], category?: string): string[] {
   const unique = new Map<string, { label: string; hasHash: boolean }>();
+  const categoryKey = category ? canonicalTagName(category).toLowerCase() : "";
 
   for (const tag of tags) {
-    const trimmed = tag.trim().normalize("NFC");
-    const hasHash = trimmed.startsWith("#");
-    const name = trimmed.replace(/^#+/, "").trim();
-    if (!name) continue;
+    const canonical = canonicalTagName(tag);
+    if (!canonical) continue;
 
-    const key = name.toLowerCase();
-    if (key === "book") continue;
-
-    const canonical = TAG_ALIASES[key] ?? name;
     const canonicalKey = canonical.toLowerCase();
+    if (canonicalKey === "book" || canonicalKey === categoryKey) continue;
+
+    const hasHash = tag.trim().startsWith("#");
     const existing = unique.get(canonicalKey);
     if (existing) {
       existing.hasHash ||= hasHash;

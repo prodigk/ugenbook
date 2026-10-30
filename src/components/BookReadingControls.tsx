@@ -85,7 +85,7 @@ export function BookReadingControls({
     >
       <div className="detail-tags">
         <Badge>{book.category}</Badge>
-        {getDisplayTags(book.tags).map((tag) => (
+        {getDisplayTags(book.tags, book.category).map((tag) => (
           <Badge key={tag} variant="secondary">
             {tag}
           </Badge>

@@ -143,3 +143,18 @@ it("hides book tags in existing records and newly uploaded markdown", () => {
   expect(screen.getAllByText("#심리학")).toHaveLength(1);
   expect(screen.getByText("새 태그")).toBeVisible();
 });
+it("does not repeat the category as a tag on the book detail page", () => {
+  render(
+    <MemoryRouter>
+      <BookReadingControls
+        book={{ ...initial, category: "철학", tags: ["철학", "#철학", "자기계발"] }}
+        canEdit={false}
+        onChange={vi.fn()}
+      />
+    </MemoryRouter>,
+  );
+
+  expect(screen.getAllByText("철학")).toHaveLength(1);
+  expect(screen.queryByText("#철학")).not.toBeInTheDocument();
+  expect(screen.getByText("자기계발")).toBeVisible();
+});
