@@ -774,6 +774,10 @@
     line-height: 1.95;
     overflow-wrap: anywhere;
   }
+  .reading-paper .prose strong,
+  .reading-paper .prose b {
+    font-weight: 700;
+  }
   .reading-paper .prose h1,
   .reading-paper .prose h2,
   .reading-paper .prose h3 {
