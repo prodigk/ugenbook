@@ -18,6 +18,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { updateBookFields } from "@/lib/bookApi";
+import { getDisplayTags } from "@/lib/displayTags";
 import type { Book, BookStatus } from "@/types/book";
 
 function localDate(date: Date) {
@@ -84,7 +85,7 @@ export function BookReadingControls({
     >
       <div className="detail-tags">
         <Badge>{book.category}</Badge>
-        {book.tags.map((tag) => (
+        {getDisplayTags(book.tags).map((tag) => (
           <Badge key={tag} variant="secondary">
             {tag}
           </Badge>

@@ -10,6 +10,7 @@ import { MemoryRouter } from "react-router-dom";
 import { afterEach, beforeEach, it, expect, vi } from "vitest";
 import { BookReadingControls } from "./BookReadingControls";
 import { updateBookFields } from "@/lib/bookApi";
+import { mdToBook } from "@/lib/frontmatter";
 import type { Book } from "@/types/book";
 vi.mock("@/lib/bookApi", () => ({ updateBookFields: vi.fn() }));
 const initial: Book = {
@@ -111,4 +112,34 @@ it("shows visitors plain metadata without edit controls", () => {
     screen.queryByRole("button", { name: "읽은 날짜 변경" }),
   ).not.toBeInTheDocument();
   expect(updateBookFields).not.toHaveBeenCalled();
+});
+it("hides book tags in existing records and newly uploaded markdown", () => {
+  const existing = {
+    ...initial,
+    tags: ["book", "#book", "#심리", "#심리학", "독서", "ebook"],
+  };
+  const { rerender } = render(
+    <MemoryRouter>
+      <BookReadingControls book={existing} canEdit={false} onChange={vi.fn()} />
+    </MemoryRouter>,
+  );
+  expect(screen.queryByText(/^#?book$/i)).not.toBeInTheDocument();
+  expect(screen.queryByText("#심리")).not.toBeInTheDocument();
+  expect(screen.getAllByText("#심리학")).toHaveLength(1);
+  expect(screen.getByText("독서")).toBeVisible();
+  expect(screen.getByText("ebook")).toBeVisible();
+
+  const uploaded = mdToBook(
+    "new.md",
+    "---\ntags:\n  - book\n  - '#book'\n  - '#심리'\n  - '#심리학'\n  - 새 태그\n---\n내용",
+  );
+  rerender(
+    <MemoryRouter>
+      <BookReadingControls book={uploaded} canEdit={false} onChange={vi.fn()} />
+    </MemoryRouter>,
+  );
+  expect(screen.queryByText(/^#?book$/i)).not.toBeInTheDocument();
+  expect(screen.queryByText("#심리")).not.toBeInTheDocument();
+  expect(screen.getAllByText("#심리학")).toHaveLength(1);
+  expect(screen.getByText("새 태그")).toBeVisible();
 });
