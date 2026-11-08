@@ -23,7 +23,7 @@ describe("book share links", () => {
     }, `https://ugenbook.vercel.app/s/${bookIdToShortCode(id)}`);
 
     expect(html).toContain('property="og:title" content="A &quot;book&quot; &amp; &lt;more&gt;"');
-    expect(html).toContain('property="og:description" content="작가 홍길동 · 카테고리 문학"');
+    expect(html).toContain('property="og:description" content="작가 홍길동 · 분야 문학"');
     expect(html).toContain('property="og:image" content="https://example.com/cover.jpg"');
     expect(html).toContain('name="twitter:card" content="summary_large_image"');
     expect(html).not.toContain("<!-- BOOK_META -->");

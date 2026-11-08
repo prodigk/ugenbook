@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Trash2, EyeOff, Eye, Loader2, MoreHorizontal } from "lucide-react";
+import { Trash2, EyeOff, Eye, Loader2, MoreHorizontal, Link2 } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -21,18 +21,30 @@ import {
 } from "@/components/ui/alert-dialog";
 import { deleteBookById, updateBookFields } from "@/lib/bookApi";
 import { toast } from "@/hooks/use-toast";
+import { bookIdToShortCode } from "@/lib/shareLink";
 import type { Book } from "@/types/book";
 
 interface Props {
   book: Book;
   onBookChange: (book: Book) => void;
+  canManage: boolean;
 }
 
-export function BookAdminActions({ book, onBookChange }: Props) {
+export function BookActions({ book, onBookChange, canManage }: Props) {
   const navigate = useNavigate();
   const [togglingHide, setTogglingHide] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
+
+  const handleCopyShareLink = async () => {
+    const url = new URL(`/s/${bookIdToShortCode(book.id)}`, window.location.origin).href;
+    try {
+      await navigator.clipboard.writeText(url);
+      toast({ title: "공유 링크를 복사했습니다." });
+    } catch {
+      toast({ title: "링크를 복사하지 못했습니다.", variant: "destructive" });
+    }
+  };
 
   const handleToggleHide = async () => {
     if (togglingHide) return;
@@ -79,31 +91,39 @@ export function BookAdminActions({ book, onBookChange }: Props) {
             variant="ghost"
             size="icon"
             className="detail-icon-action"
-            aria-label="도서 관리"
-            title="도서 관리"
+            aria-label="도서 메뉴"
+            title="도서 메뉴"
           >
             <MoreHorizontal className="h-5 w-5" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuItem
-            onSelect={() => void handleToggleHide()}
-            disabled={togglingHide}
-          >
-            {book.isHidden ? (
-              <Eye className="mr-2 h-4 w-4" />
-            ) : (
-              <EyeOff className="mr-2 h-4 w-4" />
-            )}
-            {book.isHidden ? "도서 공개" : "도서 감추기"}
+          <DropdownMenuItem onSelect={() => void handleCopyShareLink()}>
+            <Link2 className="mr-2 h-4 w-4" /> 공유 링크 복사
           </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem
-            className="text-destructive focus:text-destructive"
-            onSelect={() => setDeleteOpen(true)}
-          >
-            <Trash2 className="mr-2 h-4 w-4" /> 도서 삭제
-          </DropdownMenuItem>
+          {canManage && (
+            <>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onSelect={() => void handleToggleHide()}
+                disabled={togglingHide}
+              >
+                {book.isHidden ? (
+                  <Eye className="mr-2 h-4 w-4" />
+                ) : (
+                  <EyeOff className="mr-2 h-4 w-4" />
+                )}
+                {book.isHidden ? "도서 공개" : "도서 감추기"}
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                className="text-destructive focus:text-destructive"
+                onSelect={() => setDeleteOpen(true)}
+              >
+                <Trash2 className="mr-2 h-4 w-4" /> 도서 삭제
+              </DropdownMenuItem>
+            </>
+          )}
         </DropdownMenuContent>
       </DropdownMenu>
       <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>

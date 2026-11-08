@@ -29,7 +29,7 @@ function publicImageUrl(value: string | null): string | null {
 export function renderBookMetaHtml(template: string, book: PreviewBook, pageUrl: string): string {
   const title = escapeHtml(book.title);
   const description = escapeHtml(
-    [book.author && `작가 ${book.author}`, book.category && `카테고리 ${book.category}`]
+    [book.author && `작가 ${book.author}`, book.category && `분야 ${book.category}`]
       .filter(Boolean)
       .join(" · ") || "UGENs 책장",
   );

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { ArrowLeft, Check, X, Pencil, Sparkles, Loader2, Link2 } from "lucide-react";
+import { ArrowLeft, Check, X, Pencil, Sparkles, Loader2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { Header } from "@/components/Header";
 import { MarkdownRenderer } from "@/components/MarkdownRenderer";
@@ -9,7 +9,7 @@ import { BookReadingControls } from "@/components/BookReadingControls";
 import { ReadingAside } from "@/components/ReadingAside";
 import { BookDetailSkeleton } from "@/components/skeletons/BookDetailSkeleton";
 import { FavoriteButton } from "@/components/FavoriteButton";
-import { BookAdminActions } from "@/components/BookAdminActions";
+import { BookActions } from "@/components/BookActions";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,7 +17,7 @@ import { fetchBookById, updateBookFields } from "@/lib/bookApi";
 import { useAuth } from "@/contexts/AuthContext";
 import { isAdminEmail } from "@/lib/adminAuth";
 import { toast } from "@/hooks/use-toast";
-import { bookIdToShortCode, shortCodeToBookId } from "@/lib/shareLink";
+import { shortCodeToBookId } from "@/lib/shareLink";
 import type { Book } from "@/types/book";
 
 const SUMMARIZE_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/summarize-book`;
@@ -168,17 +168,6 @@ const BookDetail = () => {
     }
   };
 
-  const handleCopyShareLink = async () => {
-    if (!book) return;
-    const url = new URL(`/s/${bookIdToShortCode(book.id)}`, window.location.origin).href;
-    try {
-      await navigator.clipboard.writeText(url);
-      toast({ title: "공유 링크를 복사했습니다." });
-    } catch {
-      toast({ title: "링크를 복사하지 못했습니다.", variant: "destructive" });
-    }
-  };
-
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
@@ -241,9 +230,11 @@ const BookDetail = () => {
               <h1 className="detail-title">{book.title}</h1>
               <div className="detail-heading-actions">
                 <FavoriteButton bookId={book.id} title={book.title} subtle />
-                {isAdminEmail(user?.email) && (
-                  <BookAdminActions book={book} onBookChange={setBook} />
-                )}
+                <BookActions
+                  book={book}
+                  onBookChange={setBook}
+                  canManage={isAdminEmail(user?.email)}
+                />
               </div>
             </div>
             {book.isHidden && (
@@ -305,10 +296,6 @@ const BookDetail = () => {
               }
             />
             <div className="detail-tools">
-              <Button onClick={handleCopyShareLink} variant="outline" size="sm">
-                <Link2 className="mr-1.5 h-4 w-4" />
-                공유 링크 복사
-              </Button>
               <BlogExportButtons book={book} />
               <Button
                 onClick={handleSummarize}
