@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { ArrowLeft, Check, X, Pencil, Sparkles, Loader2 } from "lucide-react";
+import { ArrowLeft, Check, X, Pencil, Sparkles, Loader2, Link2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { Header } from "@/components/Header";
 import { MarkdownRenderer } from "@/components/MarkdownRenderer";
@@ -17,6 +17,7 @@ import { fetchBookById, updateBookFields } from "@/lib/bookApi";
 import { useAuth } from "@/contexts/AuthContext";
 import { isAdminEmail } from "@/lib/adminAuth";
 import { toast } from "@/hooks/use-toast";
+import { bookIdToShortCode, shortCodeToBookId } from "@/lib/shareLink";
 import type { Book } from "@/types/book";
 
 const SUMMARIZE_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/summarize-book`;
@@ -81,7 +82,8 @@ async function streamSummary(
 
 const BookDetail = () => {
   const { user } = useAuth();
-  const { id } = useParams<{ id: string }>();
+  const { id: routeId, code } = useParams<{ id: string; code: string }>();
+  const id = routeId ?? shortCodeToBookId(code ?? "");
   const [book, setBook] = useState<Book | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -95,7 +97,11 @@ const BookDetail = () => {
   const [savingAuthor, setSavingAuthor] = useState(false);
 
   useEffect(() => {
-    if (!id) return;
+    if (!id) {
+      setLoading(false);
+      setBook(null);
+      return;
+    }
     let cancelled = false;
     setLoading(true);
     setBook(null);
@@ -159,6 +165,17 @@ const BookDetail = () => {
         variant: "destructive",
       });
       setSummarizing(false);
+    }
+  };
+
+  const handleCopyShareLink = async () => {
+    if (!book) return;
+    const url = new URL(`/s/${bookIdToShortCode(book.id)}`, window.location.origin).href;
+    try {
+      await navigator.clipboard.writeText(url);
+      toast({ title: "공유 링크를 복사했습니다." });
+    } catch {
+      toast({ title: "링크를 복사하지 못했습니다.", variant: "destructive" });
     }
   };
 
@@ -288,6 +305,10 @@ const BookDetail = () => {
               }
             />
             <div className="detail-tools">
+              <Button onClick={handleCopyShareLink} variant="outline" size="sm">
+                <Link2 className="mr-1.5 h-4 w-4" />
+                공유 링크 복사
+              </Button>
               <BlogExportButtons book={book} />
               <Button
                 onClick={handleSummarize}
