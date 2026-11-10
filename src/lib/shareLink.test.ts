@@ -20,11 +20,11 @@ describe("book share links", () => {
       author: "홍길동",
       category: "문학",
       bookcover: "https://example.com/cover.jpg",
-    }, `https://ugenbook.vercel.app/s/${bookIdToShortCode(id)}`, `https://ugenbook.vercel.app/api/book-image?id=${id}`);
+    }, `https://ugenbook.vercel.app/s/${bookIdToShortCode(id)}`, `https://ugenbook.vercel.app/api/book-image?id=${id}&v=2`);
 
     expect(html).toContain('property="og:title" content="A &quot;book&quot; &amp; &lt;more&gt;"');
     expect(html).toContain('property="og:description" content="작가 홍길동 · 분야 문학"');
-    expect(html).toContain(`property="og:image" content="https://ugenbook.vercel.app/api/book-image?id=${id}"`);
+    expect(html).toContain(`property="og:image" content="https://ugenbook.vercel.app/api/book-image?id=${id}&amp;v=2"`);
     expect(html).toContain('property="og:image:width" content="1200"');
     expect(html).toContain('property="og:image:height" content="630"');
     expect(html).toContain('name="twitter:card" content="summary_large_image"');

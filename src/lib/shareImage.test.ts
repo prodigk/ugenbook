@@ -20,6 +20,8 @@ it("keeps the complete portrait cover on a light gray landscape card", async () 
   };
   const background = pixel(50, 315);
   expect(background.every((channel) => Math.abs(channel - 244) < 5)).toBe(true);
+  const shadow = pixel(455, 315);
+  expect(shadow.every((channel) => channel < background[0] - 4)).toBe(true);
   expect(pixel(600, 50)[0]).toBeGreaterThan(180);
   expect(pixel(600, 315)[1]).toBeGreaterThan(120);
   expect(pixel(600, 580)[2]).toBeGreaterThan(180);

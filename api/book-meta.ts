@@ -70,7 +70,7 @@ export default async function handler(request: Request, response: ServerResponse
     const host = request.headers.host;
     const safeHost = host && /^[a-z0-9.-]+(?::\d+)?$/i.test(host) ? host : "ugenbook.vercel.app";
     const path = code ? `/s/${code}` : `/book/${idParam ?? ""}`;
-    const imageUrl = book && publicImageUrl(book.bookcover) ? `https://${safeHost}/api/book-image?id=${id}` : null;
+    const imageUrl = book && publicImageUrl(book.bookcover) ? `https://${safeHost}/api/book-image?id=${id}&v=2` : null;
     const html = book ? renderBookMetaHtml(template, book, `https://${safeHost}${path}`, imageUrl) : template;
 
     response.statusCode = book ? 200 : 404;
