@@ -80,7 +80,7 @@ export function normalizeAuthor(value: unknown): string {
   // Split by comma, strip quotes/brackets per item, rejoin
   s = s
     .split(",")
-    .map((p) => p.trim().replace(/^["'\[\]]+|["'\[\]]+$/g, "").trim())
+    .map((p) => p.trim().replace(/^["'\[\]]+|["'\[\]]+$/g, "").trim().replace(/^-\s+/, ""))
     .filter(Boolean)
     .join(", ");
   return s;

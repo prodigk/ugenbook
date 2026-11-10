@@ -27,4 +27,8 @@ describe("normalizeAuthor", () => {
   it("returns plain author unchanged", () => {
     expect(normalizeAuthor("요한 하리")).toBe("요한 하리");
   });
+  it("removes list markers before author names", () => {
+    expect(normalizeAuthor("- 박웅현")).toBe("박웅현");
+    expect(normalizeAuthor(["- 박웅현", "- 김하나"])).toBe("박웅현, 김하나");
+  });
 });
