@@ -2,9 +2,9 @@ import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { shortCodeToBookId } from "../src/lib/shareLink.js";
+import { isValidBookId, loadBookPreview, publicImageUrl, type PreviewBook } from "../server/bookPreview.js";
 
 type Request = IncomingMessage & { query?: Record<string, string | string[] | undefined> };
-type PreviewBook = { title: string; author: string | null; category: string | null; bookcover: string | null };
 
 function first(value: string | string[] | undefined): string | undefined {
   return Array.isArray(value) ? value[0] : value;
@@ -16,26 +16,19 @@ function escapeHtml(value: string): string {
   })[char]!);
 }
 
-function publicImageUrl(value: string | null): string | null {
-  if (!value) return null;
-  try {
-    const url = new URL(value);
-    return url.protocol === "https:" || url.protocol === "http:" ? url.href : null;
-  } catch {
-    return null;
-  }
-}
-
-export function renderBookMetaHtml(template: string, book: PreviewBook, pageUrl: string): string {
+export function renderBookMetaHtml(template: string, book: PreviewBook, pageUrl: string, imageUrl: string | null): string {
   const title = escapeHtml(book.title);
   const description = escapeHtml(
     [book.author && `작가 ${book.author}`, book.category && `분야 ${book.category}`]
       .filter(Boolean)
       .join(" · ") || "UGENs 책장",
   );
-  const image = publicImageUrl(book.bookcover);
+  const image = publicImageUrl(imageUrl);
   const imageTags = image ? `
     <meta property="og:image" content="${escapeHtml(image)}" />
+    <meta property="og:image:type" content="image/jpeg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
     <meta property="og:image:alt" content="${title} 표지" />
     <meta name="twitter:image" content="${escapeHtml(image)}" />` : "";
   const tags = `<meta property="og:type" content="book" />
@@ -66,36 +59,19 @@ async function loadTemplate(): Promise<string> {
   }
 }
 
-async function loadBook(id: string): Promise<PreviewBook | null> {
-  const baseUrl = process.env.VITE_SUPABASE_URL;
-  const key = process.env.VITE_SUPABASE_PUBLISHABLE_KEY;
-  if (!baseUrl || !key) throw new Error("Supabase environment variables are missing");
-
-  const url = new URL("/rest/v1/books", baseUrl);
-  url.searchParams.set("select", "title,author,category,bookcover");
-  url.searchParams.set("id", `eq.${id}`);
-  url.searchParams.set("limit", "1");
-  const response = await fetch(url, {
-    headers: { apikey: key, Authorization: `Bearer ${key}` },
-  });
-  if (!response.ok) throw new Error(`Book lookup returned ${response.status}`);
-  const books = (await response.json()) as PreviewBook[];
-  return books[0] ?? null;
-}
-
 export default async function handler(request: Request, response: ServerResponse): Promise<void> {
   const idParam = first(request.query?.id);
   const code = first(request.query?.code);
   const id = code ? shortCodeToBookId(code) : idParam;
-  const validId = id && /^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i.test(id);
 
   try {
     const template = await loadTemplate();
-    const book = validId ? await loadBook(id) : null;
+    const book = isValidBookId(id) ? await loadBookPreview(id) : null;
     const host = request.headers.host;
     const safeHost = host && /^[a-z0-9.-]+(?::\d+)?$/i.test(host) ? host : "ugenbook.vercel.app";
     const path = code ? `/s/${code}` : `/book/${idParam ?? ""}`;
-    const html = book ? renderBookMetaHtml(template, book, `https://${safeHost}${path}`) : template;
+    const imageUrl = book && publicImageUrl(book.bookcover) ? `https://${safeHost}/api/book-image?id=${id}` : null;
+    const html = book ? renderBookMetaHtml(template, book, `https://${safeHost}${path}`, imageUrl) : template;
 
     response.statusCode = book ? 200 : 404;
     response.setHeader("Content-Type", "text/html; charset=utf-8");
