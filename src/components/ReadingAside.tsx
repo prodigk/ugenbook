@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 
-export function ReadingAside({ title }: { title: string }) {
+export function ReadingAside({ title, cover }: { title: string; cover?: string }) {
   const markerRef = useRef<HTMLSpanElement>(null);
   const asideRef = useRef<HTMLElement>(null);
   const [stuck, setStuck] = useState(false);
@@ -58,6 +58,16 @@ export function ReadingAside({ title }: { title: string }) {
             {title}
           </span>
         </h2>
+        {cover && (
+          <img
+            className="reading-aside-cover"
+            src={cover}
+            alt=""
+            aria-hidden="true"
+            loading="lazy"
+            decoding="async"
+          />
+        )}
         <p>
           읽으며 남긴 문장과 생각을
           <br />

@@ -753,6 +753,25 @@
   .reading-aside[data-stuck="true"] .reading-heading-book {
     opacity: 1;
   }
+  .reading-aside-cover {
+    display: block;
+    width: 70%;
+    height: auto;
+    max-height: 0;
+    margin-top: 0;
+    object-fit: contain;
+    object-position: left top;
+    opacity: 0;
+    transform: translateY(-8px);
+    filter: drop-shadow(3px 6px 6px #17171c1e);
+    transition: max-height 360ms ease, margin-top 360ms ease, opacity 360ms ease, transform 360ms ease;
+  }
+  .reading-aside[data-stuck="true"] .reading-aside-cover {
+    max-height: min(300px, 38vh);
+    margin-top: 20px;
+    opacity: 1;
+    transform: translateY(0);
+  }
   .reading-aside p {
     font-size: 13px;
     line-height: 1.8;
@@ -1352,6 +1371,9 @@
     display: none;
   }
   .reading-heading-book {
+    display: none;
+  }
+  .reading-aside-cover {
     display: none;
   }
   .reading-aside a {

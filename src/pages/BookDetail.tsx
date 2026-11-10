@@ -333,7 +333,7 @@ const BookDetail = () => {
           id="reading-notes"
           aria-labelledby="notes-heading"
         >
-          <ReadingAside key={book.id} title={book.title} />
+          <ReadingAside key={book.id} title={book.title} cover={book.bookcover} />
           <article className="reading-paper">
             <MarkdownRenderer content={book.markdown} />
           </article>
