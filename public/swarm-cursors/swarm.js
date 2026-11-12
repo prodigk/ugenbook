@@ -20,6 +20,8 @@
   window.__swarmAutoStart = false;
   const deferStart = window.__swarmDeferStart === true;
   window.__swarmDeferStart = false;
+  const webMode = window.__swarmWebMode === true;
+  window.__swarmWebMode = false;
 
   // ---------------------------------------------------------------- constants
 
@@ -36,7 +38,8 @@
   const BLUE = "#0D99FF";
   const RED = "#F24822";
   const RULER = 20;
-  const DEFAULT_AGENTS = 8;
+  const DEFAULT_AGENTS = webMode ? 10 : 8;
+  const WEB_FINALE_HOLD_MS = 3000;
   const MAX_AGENTS = 48;
   const MAX_ITEMS = 4000;
   const MAX_WORLD_H = 40000;
@@ -3745,9 +3748,17 @@
       v.root.querySelector('[data-a="tour"]').hidden = true;
       v.root.querySelector('[data-a="speed"]').hidden = true;
       this.tour = false;
+      if (webMode) {
+        // The last cursors flock briefly, then the existing Go live release
+        // animation fades the rebuild away and restores the page.
+        this.autoCloseTimer = setTimeout(() => {
+          if (app === this && !this.dead) stop(true);
+        }, WEB_FINALE_HOLD_MS);
+      }
     }
 
     destroy(reveal) {
+      clearTimeout(this.autoCloseTimer);
       unhidePage();
       if (this.sfx) {
         if (reveal) this.sfx.release();
@@ -3953,6 +3964,7 @@
     if (app) {
       const a = app;
       app = null;
+      clearTimeout(a.autoCloseTimer);
       a.dead = true;
       cancelAnimationFrame(a.raf);
       for (const u of a.unbinds || []) u();

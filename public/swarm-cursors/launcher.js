@@ -29,6 +29,7 @@ const mount = () => {
     try {
       if (!window.__swarmRebuild) {
         window.__swarmDeferStart = true;
+        window.__swarmWebMode = true;
         await import("./swarm.js");
       }
       window.__swarmRebuild.start();
