@@ -1636,7 +1636,7 @@
       const host = document.createElement("div");
       host.setAttribute("data-swarm-rebuild", "");
       host.style.cssText =
-        "all:initial !important;position:fixed !important;inset:0 !important;z-index:2147483647 !important;display:block !important;pointer-events:auto !important;contain:strict !important;opacity:1;transition:opacity .6s ease;";
+        `all:initial !important;position:fixed !important;inset:0 !important;z-index:${webMode ? 2147483646 : 2147483647} !important;display:block !important;pointer-events:auto !important;contain:strict !important;opacity:1;transition:opacity .6s ease;`;
       env.host = host;
       this.host = host;
       const root = host.attachShadow({ mode: "closed" });
@@ -3447,7 +3447,7 @@
       this.agentCount = agentCount;
       this.dead = false;
       this.t0 = performance.now();
-      this.tour = false;
+      this.tour = webMode;
       this.tourV = 0;
       this.tourAcc = 0;
       this.speeds = [1, 2, 3];
@@ -3493,8 +3493,10 @@
 
     async run() {
       this.env = detectEnv();
+      this.startScroll = this.env.geom();
       const shotP = this.loadShot();
       this.view = new View(this.env);
+      if (webMode) this.view.root.querySelector('[data-a="tour"]').hidden = true;
       this.engine = new Engine(this.view, this.agentCount);
       this.sfx = new Sound();
       this.sfx.init();
@@ -3768,6 +3770,7 @@
         // startup failed before the overlay existed
         this.dead = true;
         cancelAnimationFrame(this.raf);
+        notifyWebState(false);
         return;
       }
       const finish = () => {
@@ -3775,6 +3778,7 @@
         cancelAnimationFrame(this.raf);
         for (const u of this.unbinds || []) u();
         this.view.host.remove();
+        notifyWebState(false);
       };
       if (reveal) {
         this.engine.releasing = true;
@@ -3785,10 +3789,16 @@
         }
         this.view.hud.classList.remove("on");
         setTimeout(() => {
+          if (webMode && this.startScroll) this.env.scrollTo(this.startScroll.sy, this.startScroll.sx);
           this.view.host.style.setProperty("opacity", "0", "important");
         }, 450);
         setTimeout(finish, 1150);
       } else {
+        if (webMode) {
+          if (this.startScroll) this.env.scrollTo(this.startScroll.sy, this.startScroll.sx);
+          finish();
+          return;
+        }
         this.view.host.style.setProperty("transition", "opacity .25s ease", "important");
         this.view.host.style.setProperty("opacity", "0", "important");
         this.dead = true;
@@ -3820,6 +3830,10 @@
   let agentCount = DEFAULT_AGENTS;
   let lastShot = null;
 
+  function notifyWebState(active, closing = false) {
+    if (webMode) window.dispatchEvent(new CustomEvent("swarm-cursors:state", { detail: { active, closing } }));
+  }
+
   const validCount = (n) => Number.isInteger(n) && n >= 1 && n <= MAX_AGENTS;
   const WEB_COUNT_KEY = "swarm-cursors:agent-count";
   const extensionStorage = () => (typeof chrome !== "undefined" && chrome.storage?.local ? chrome.storage.local : null);
@@ -3846,6 +3860,7 @@
 
   async function chooseAgents(automatic) {
     const pending = (chooser = {});
+    notifyWebState(true);
     // The screenshot pass may have hidden the page's regular content. Restore it before
     // showing a chooser so the user can still see the page they are about to rebuild.
     if (!automatic) await unhidePage();
@@ -3860,7 +3875,7 @@
 
     const host = document.createElement("div");
     host.setAttribute("data-swarm-chooser", "");
-    host.style.cssText = "all:initial !important;position:fixed !important;inset:0 !important;z-index:2147483647 !important;display:flex !important;align-items:center !important;justify-content:center !important;background:rgba(17,20,28,.55) !important;backdrop-filter:blur(8px) !important;pointer-events:auto !important;";
+    host.style.cssText = `all:initial !important;position:fixed !important;inset:0 !important;z-index:${webMode ? 2147483646 : 2147483647} !important;display:flex !important;align-items:center !important;justify-content:center !important;background:rgba(17,20,28,.55) !important;backdrop-filter:blur(8px) !important;pointer-events:auto !important;`;
     const root = host.attachShadow({ mode: "closed" });
     root.innerHTML = `<style>
       *{box-sizing:border-box}
@@ -3948,6 +3963,7 @@
       lastShot = null;
       window.__swarmShot = null;
       unhidePage();
+      notifyWebState(false);
       return;
     }
     if (!app) return;
@@ -3957,6 +3973,7 @@
     // (or one a failed start never consumed). Replay goes through restart(), which keeps it.
     lastShot = null;
     window.__swarmShot = null;
+    if (reveal) notifyWebState(true, true);
     a.destroy(reveal);
   }
 
